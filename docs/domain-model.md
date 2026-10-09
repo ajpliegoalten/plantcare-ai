@@ -1,0 +1,32 @@
+# Modelo de dominio
+
+## Conceptos y relaciones
+
+- **Planta**: ejemplar local con identificador propio, nombre personalizado, foto principal, especie confirmada (nombre común/científico cuando estén disponibles), ubicación opcional y fecha de alta. Pertenece al único usuario local del dispositivo.
+- **Ficha de cuidados**: copia asociada a una planta; guarda consejos breves de la especie generados por IA. No existe catálogo global ni identidad «Species» compartida obligatoria entre plantas.
+- **Evento de cuidado**: pertenece a una planta; tipo `riego | abonado | poda | trasplante | otro`, fecha y nota opcional. El riego puede registrarse con valores por defecto para acelerar la interacción.
+- **Fotografía**: pertenece a una planta, con imagen local y fecha; puede ser la inicial, una añadida expresamente o la foto vinculada a un análisis guardado.
+- **Análisis guardado**: pertenece a una planta y referencia su foto; conserva fecha, observaciones, posibles causas y recomendaciones expresadas con cautela. Solo existe tras confirmación explícita.
+- **Pregunta contextual**: operación efímera de un turno; no es entidad persistente ni se incorpora al contexto futuro.
+
+El historial es una vista cronológica de eventos, fotos y análisis, **no** una segunda copia de los datos. Una fotografía de análisis guardado puede mostrarse en el mismo hito del historial para no contarla dos veces.
+
+## Ciclo de vida de una planta
+
+1. **Borrador no persistido**: foto capturada/seleccionada; la IA identifica y propone candidatas con incertidumbre visible. Se puede repetir la foto o elegir/introducir especie conocida.
+2. **Identidad confirmada**: el usuario confirma nombre común o científico; la IA genera la ficha orientativa y el usuario la revisa. Sin ficha generada por fallo de IA, no hay alta; se conserva la colección existente y se ofrece reintento.
+3. **Planta guardada**: nombre personalizado (sugerencia inicial basada en especie), foto inicial, fecha y ubicación opcional. Historial inicial con foto; desde aquí se pueden registrar cuidados, añadir fotos, analizar y consultar a la IA.
+4. **Mantenimiento**: se agregan eventos, fotos y análisis confirmados; se permite corregir nombre/ubicación y eliminar eventos incorrectos. El historial puede carecer todavía de cuidados.
+5. **Eliminación**: acción del usuario confirmada; se eliminan ficha, eventos, fotos y análisis locales de esa planta. Sin archivado, acceso compartido ni caducidad de cuenta.
+
+## Ciclo de vida del análisis
+
+Foto actual elegida → solicitud a IA con identidad/ficha y selección pertinente de historial textual reciente, sin fotos previas → resultado provisional con observaciones, posibilidades y comprobaciones prácticas → **guardar** foto y análisis juntos o **descartar** ambos. Si se cancela o falla la petición, no se guarda nada y se puede reintentar. Los análisis guardados pueden aportar contexto a otros futuros; el texto de IA nunca se transforma automáticamente en un evento de cuidado. No hacer preguntas de seguimiento dentro del análisis ni afirmar evolución visual comparativa sin comparar imágenes.
+
+## Reglas y casos límite
+
+- Identificación poco fiable: indicar incertidumbre, ofrecer alternativas u otra foto; permitir introducir especie conocida y generar cuidados antes de guardar. Ninguna propuesta se acepta automáticamente.
+- Sin red/API: leer y editar información local; no completar identificación, cuidados, análisis o pregunta contextual hasta poder reintentar. No se crean plantas nuevas sin ficha.
+- Primer uso de IA: avisar que foto y datos pertinentes de la planta salen hacia un proveedor externo; no enviar todo el almacenamiento por defecto. La foto inicial y las añadidas se conservan localmente; una foto descartada del análisis no entra en memoria.
+- Un evento de cuidado representa lo que **registró el usuario**, no una inferencia de IA. Fechas del historial no constituyen una pauta de riego.
+- Solo un usuario local: no hay roles, invitaciones, acceso remoto ni revocación entre personas; desinstalación o eliminación de planta suprime la copia local, sin garantía de recuperación o sincronización.
