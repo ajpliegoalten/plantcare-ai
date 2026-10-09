@@ -11,11 +11,22 @@
     "notes": "Bootstrap técnico iOS 17.0 aceptado; seguir DESIGN.md."
   },
   {
+    "id": "design-resources",
+    "area": "diseno-ios",
+    "title": "Centralizar colores, imágenes usadas y textos visibles",
+    "user_visible_behavior": "La pantalla inicial conserva su aspecto y textos en español usando recursos de color y localización preparados para las próximas pantallas.",
+    "depends_on": ["ios-bootstrap"],
+    "status": "accepted",
+    "verification": ["Comprobar que los colores utilizados están definidos en Assets.xcassets, que solo se reservan imágenes realmente usadas y que los textos visibles se resuelven desde Localizable.xcstrings; ejecutar gate estándar y revisar apertura en simulador."],
+    "evidence": ["2026-10-09 self-verification: plutil -lint project.pbxproj OK; python3 -m json.tool Localizable.xcstrings OK; Python inspection of assets: 8 exact DESIGN.md sRGB colorsets, 0 imagesets. ./init.sh on iPhone 17 Pro iOS 26.2 (00BBB7EC-8DF7-400C-A08A-9D3C8818D886): BUILD SUCCEEDED, TEST SUCCEEDED, 2/2 UI tests (Spanish launch and English fallback). Built app includes Assets.car and es.lproj/Localizable.strings with both Spanish strings, CFBundleDevelopmentRegion es. simctl install + launch Spanish PID 55856; screenshots inspected under DerivedData/design-resources-light.png and design-resources-dark-large.png (dark mode/accessibility-large): cream full-screen, legible Spanish title/body, no Add action. See PROGRESS.md.", "2026-10-09 independent validator acceptance: ./init.sh BUILD SUCCEEDED and TEST SUCCEEDED (2/2 UI tests); verified eight exact colors, two localized Spanish strings in bundled app, zero images, simulator launch and screenshot with legible cream background and no Add action; git diff --check OK; no secrets, network requests or scope violations."],
+    "notes": "Preparación de recursos según DESIGN.md sin implementar todavía el estado vacío ni añadir imágenes decorativas sin uso."
+  },
+  {
     "id": "empty-collection",
     "area": "coleccion",
     "title": "Mostrar Mis plantas vacía",
     "user_visible_behavior": "Al abrir sin ejemplares se ve «Mis plantas» con un estado vacío y acción Añadir.",
-    "depends_on": ["ios-bootstrap"],
+    "depends_on": ["design-resources"],
     "status": "not_started",
     "verification": ["Abrir instalación sin datos en simulador; comprobar encabezado, estado vacío y acción accesible, más gate estándar."],
     "evidence": [],
