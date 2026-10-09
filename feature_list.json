@@ -5,10 +5,10 @@
     "title": "Abrir y compilar la app iOS vacía",
     "user_visible_behavior": "La app iPhone abre en simulador con una pantalla inicial nativa; existe una comprobación repetible de compilación.",
     "depends_on": [],
-    "status": "not_started",
+    "status": "accepted",
     "verification": ["Crear proyecto iOS y ejecutar compilación y arranque en simulador; actualizar ./init.sh con comandos reales y destino disponible."],
-    "evidence": [],
-    "notes": "Bootstrap técnico permitido como primera funcionalidad; versión mínima de iOS por decidir. Seguir DESIGN.md."
+    "evidence": ["2026-10-09 Xcode 26.2 (17C52), iPhone 17 Pro iOS 26.2 UDID 00BBB7EC-8DF7-400C-A08A-9D3C8818D886: bash -n init.sh y plutil -lint project.pbxproj OK; ./init.sh desde raíz y cd docs && ../init.sh → xcodebuild build y test SUCCEEDED (UI test testLaunchShowsBootstrapWithoutAddAction 1/1); simctl install + launch org.plantcareai.prototype → PID 51681, captura visual inspeccionada en DerivedData/bootstrap-launch.png; DEVELOPER_DIR=/nonexistent ./init.sh → código 1 y diagnóstico de Xcode. Detalles en PROGRESS.md.", "2026-10-09 aceptación independiente del validador tras reparación de CONSTRAINTS.md: ./init.sh BUILD SUCCEEDED y TEST SUCCEEDED (1/1 UI test), simctl install + launch y captura visual correctos; bash -n, plutil -lint, JSON y git diff --check correctos; sin secretos ni desvíos de alcance."],
+    "notes": "Bootstrap técnico iOS 17.0 aceptado; seguir DESIGN.md."
   },
   {
     "id": "empty-collection",

@@ -2,7 +2,37 @@
 set -euo pipefail
 
 cd "$(dirname "$0")"
-echo "Repositorio: $(pwd)"
-echo "Estado: pre-bootstrap; todavía no existe proyecto Xcode ni aplicación verificable."
-echo "Siguiente paso: primera funcionalidad lista en feature_list.json (bootstrap iOS)."
-echo "Tras el bootstrap, documentar aquí los comandos reales de compilación, pruebas y ejecución con xcodebuild y un destino disponible."
+
+if ! command -v xcodebuild >/dev/null 2>&1 || ! xcodebuild -version >/dev/null 2>&1; then
+  echo "Error: instala Xcode y configúralo con xcode-select antes de ejecutar ./init.sh." >&2
+  exit 1
+fi
+if ! command -v xcrun >/dev/null 2>&1 || ! command -v python3 >/dev/null 2>&1; then
+  echo "Error: hacen falta xcrun (Xcode) y python3 para seleccionar un simulador iPhone." >&2
+  exit 1
+fi
+
+if ! devices=$(xcrun simctl list devices available --json); then
+  echo "Error: configura un runtime y simulador iPhone en Xcode (Settings > Platforms)." >&2
+  exit 1
+fi
+if ! udid=$(printf '%s' "$devices" | python3 -c '
+import json, sys
+devices = [d for group in json.load(sys.stdin)["devices"].values() for d in group
+           if d.get("isAvailable") and "iPhone" in d.get("deviceTypeIdentifier", "")]
+devices.sort(key=lambda d: d.get("state") != "Booted")
+if devices: print(devices[0]["udid"])
+'); then
+  echo "Error: no se pudo leer la lista de simuladores; comprueba Xcode y sus runtimes." >&2
+  exit 1
+fi
+if [[ -z "$udid" ]]; then
+  echo "Error: no hay simulador iPhone disponible; instala un runtime iOS y crea un iPhone en Xcode." >&2
+  exit 1
+fi
+
+echo "Destino iPhone Simulator: $udid"
+destination="platform=iOS Simulator,id=$udid"
+xcodebuild -project PlantCareAI.xcodeproj -scheme PlantCareAI -destination "$destination" -derivedDataPath "$PWD/DerivedData" build
+xcodebuild -project PlantCareAI.xcodeproj -scheme PlantCareAI -destination "$destination" -derivedDataPath "$PWD/DerivedData" -parallel-testing-enabled NO test
+echo "Build y tests correctos. Apertura visual: instalar DerivedData/Build/Products/Debug-iphonesimulator/PlantCareAI.app y lanzar org.plantcareai.prototype con simctl, o abrir PlantCareAI.xcodeproj en Xcode."

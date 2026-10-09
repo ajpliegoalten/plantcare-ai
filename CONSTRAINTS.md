@@ -1,0 +1,6 @@
+# Restricciones operativas
+
+- El target iPhone tiene despliegue mínimo iOS 17.0; cambios posteriores deben conservar compatibilidad o documentar explícitamente el cambio. Motivo: configuración de compilación reproducible del bootstrap.
+- La compilación de simulador usa `CODE_SIGNING_ALLOWED=NO`; si se prepara una demo en dispositivo real se necesitará configurar firma fuera del repositorio. Motivo: el gate local no exige equipo ni credenciales.
+- MUST: cuando se incorpore la API externa, su credencial y configuración sensible deben proporcionarse localmente por quien prepara la demo y mantenerse fuera de control de versiones; comprobar que cualquier archivo local elegido esté realmente ignorado antes de usarlo. Motivo: `.gitignore` ya cubre `*.env`, `*.local.xcconfig` y `Secrets.xcconfig`, pero no garantiza cobertura de otros nombres ni elimina archivos ya versionados.
+- MUST NOT: incluir claves o secretos en fuentes, proyecto Xcode, configuración versionada, ejemplos con valores reales ni registros de pruebas; tampoco añadir un mecanismo concreto de inyección de credenciales durante este bootstrap. Motivo: el mecanismo sigue abierto en `docs/risks-and-open-questions.md` y el prototipo sin backend no ofrece custodia apta para distribución pública.
