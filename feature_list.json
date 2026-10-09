@@ -27,9 +27,9 @@
     "title": "Mostrar Mis plantas vacía",
     "user_visible_behavior": "Al abrir sin ejemplares se ve «Mis plantas» con un estado vacío y acción Añadir.",
     "depends_on": ["design-resources"],
-    "status": "not_started",
+    "status": "accepted",
     "verification": ["Abrir instalación sin datos en simulador; comprobar encabezado, estado vacío y acción accesible, más gate estándar."],
-    "evidence": [],
+    "evidence": ["2026-10-09 self-verification: python3 -m json.tool Localizable.xcstrings and plutil -lint project.pbxproj OK; ./init.sh iPhone 17 Pro iOS 26.2 UDID 00BBB7EC-8DF7-400C-A08A-9D3C8818D886 BUILD SUCCEEDED, TEST SUCCEEDED (3/3 UI tests: clean Spanish empty collection and disabled buttons, English fallback, scrollable action). Focused UI test repeated at accessibility-extra-extra-extra-large: TEST SUCCEEDED, disabled CTA reachable by scrolling. Clean uninstall/install/launch Spanish PID 62720; inspected light normal and dark accessibility maximum screenshots in ignored DerivedData. VoiceOver actual reading, small display and physical device not verified; see PROGRESS.md.", "2026-10-09 independent validator acceptance after documentation repair: ./init.sh BUILD SUCCEEDED, TEST SUCCEEDED (3/3 UI tests); JSON, project lint, localization keys, six semantic colors and git diff --check passed. Inspected existing light and dark/maximum-text simulator screenshots: legible, scrollable empty collection. No photo flow, storage, permissions, network or secrets. Actual VoiceOver reading, smaller screen and physical iPhone not tested; see PROGRESS.md."],
     "notes": "Composición de una columna según DESIGN.md; sin pestaña Actividad."
   },
   {

@@ -6,11 +6,29 @@
 - Arranque estándar: `./init.sh` ejecuta compilación y UI tests con Xcode en un iPhone Simulator disponible.
 - Verificación estándar: build y test `xcodebuild` en el scheme compartido `PlantCareAI`; comprobar apertura visual con `simctl` aparte.
 - Funcionalidad `design-resources`: aceptada tras validación independiente.
-- Siguiente funcionalidad lista: `empty-collection` (no implementada).
+- Funcionalidad `empty-collection`: aceptada tras validación independiente.
 - Bloqueos: ninguno para bootstrap; se necesitarán API compatible con visión y credencial de demo fuera del repositorio para verificar funciones de IA en dispositivo.
-- Última comprobación: 2026-10-09; `ios-bootstrap` y `design-resources` aceptadas tras validación independiente.
+- Última comprobación: 2026-10-09; `empty-collection`, `ios-bootstrap` y `design-resources` aceptadas tras validación independiente.
 
 ## Registro de sesión
+
+### 2026-10-09 — Aceptación independiente `empty-collection`
+
+- Veredicto del validador: **accept** tras reparar la descripción de colores en `ARCHITECTURE.md`. Repitió `./init.sh` (**BUILD SUCCEEDED**, **TEST SUCCEEDED**, 3/3 UI tests), comprobó JSON, proyecto, claves de localización, los seis colores usados y `git diff --check`; inspeccionó las capturas locales existentes en claro y oscuro/texto máximo. Sin almacenamiento, fotos, permisos, llamadas de red ni secretos.
+- Limitaciones: el validador no tomó captura nueva ni probó lectura real con VoiceOver, pantalla más pequeña o dispositivo físico; queda pendiente comprobar esos escenarios cuando se disponga de ellos. Próximas funcionalidades listas por dependencias: `local-plant-storage` (primera en el orden de `feature_list.json`) y `choose-identification-photo`; no se inicia ninguna en esta sesión.
+
+### 2026-10-09 — Reparación documental `empty-collection` solicitada por validador
+
+- Corregida únicamente la descripción obsoleta de `ARCHITECTURE.md`: `ContentView` usa seis colores nombrados (`Background`, `Primary`, `PrimaryAction`, `TextPrimary`, `TextSecondary`, `Surface`), no tres. Cotejo con todas las llamadas `Color("…")` de `PlantCareAI/ContentView.swift`: conjunto exacto de seis, sin RGB inline.
+- Comprobaciones repetidas: `./init.sh` desde raíz → código 0, **BUILD SUCCEEDED**, **TEST SUCCEEDED**, 3/3 UI tests sin fallos; log ignorado `DerivedData/empty-collection-repair-gate-final.log`. `python3 -m json.tool PlantCareAI/Localizable.xcstrings >/dev/null`, `plutil -lint PlantCareAI.xcodeproj/project.pbxproj` y `git diff --check` → correctos. Un primer comando auxiliar de extracción del log falló porque `rg` no está instalado y un segundo por usar la variable reservada `status` de zsh; ninguno fue fallo del gate, que se repitió con salida 0 y resultados comprobados con `grep`.
+- Sin cambios de producto ni nueva inspección visual/VoiceOver en esta reparación documental; las limitaciones de la sesión de implementación permanecen. `empty-collection` sigue `passing` (autoverificada, no aceptada). Siguiente paso: repetir validación independiente.
+
+### 2026-10-09 — Implementación `empty-collection` (pendiente de validador independiente)
+
+- `ContentView` presenta «Mis plantas» y tarjeta vacía de una columna con SF Symbol vegetal, explicación, dos entradas de alta deshabilitadas y mensaje explícito «Disponible cuando puedas elegir una foto.» Sin navegación falsa, planta simulada, permisos, fotos, «Actividad» ni conexión. Textos españoles en `Localizable.xcstrings`; cabecera apilada con tamaños de accesibilidad y contenido desplazable. `ARCHITECTURE.md` refleja la nueva raíz.
+- Estática: `python3 -m json.tool PlantCareAI/Localizable.xcstrings >/dev/null` y `plutil -lint PlantCareAI.xcodeproj/project.pbxproj` correctos. `./init.sh` desde raíz: iPhone 17 Pro iOS 26.2 `00BBB7EC-8DF7-400C-A08A-9D3C8818D886`, **BUILD SUCCEEDED**, **TEST SUCCEEDED**, 3/3 UI tests (`testCleanLaunchShowsEmptyCollectionAndUnavailableAdd`, `testEmptyCollectionCanScrollToUnavailableAction`, `testEnglishPreferenceFallsBackToSpanishInsteadOfKeys`). Log ignorado: `DerivedData/empty-collection-gate-final.log`. Además, `xcodebuild ... '-only-testing:PlantCareAIUITests/PlantCareAIUITests/testEmptyCollectionCanScrollToUnavailableAction' test` con `simctl ui content_size accessibility-extra-extra-extra-large`: **TEST SUCCEEDED**, CTA alcanzable mediante desplazamiento y deshabilitada; log `DerivedData/empty-collection-ax-test.log`.
+- Apertura limpia: `xcrun simctl uninstall` (app de prueba), `simctl install` de `DerivedData/Build/Products/Debug-iphonesimulator/PlantCareAI.app` y `simctl launch ... -AppleLanguages '(es)' -AppleLocale es_ES` → PID 62720. Capturas ignoradas inspeccionadas: `DerivedData/empty-collection-light.png` (claro, texto normal; título, controles, mensaje y tarjeta completos), `DerivedData/empty-collection-dark-axxxxl.png` (oscuro, tamaño máximo de accesibilidad; cabecera apilada, tarjeta legible desplazable; paleta universal conserva fondo claro). Se restauró apariencia clara y tamaño large. VoiceOver no se activó manualmente: identificadores, etiquetas/hints, encabezados y símbolo decorativo se revisaron en código; test UI cubre elementos accesibles, pero la lectura/orden con VoiceOver real queda pendiente de validación independiente. No se probó pantalla menor ni dispositivo físico.
+- Próximo paso: validación independiente de `empty-collection`; después `choose-identification-photo` podrá conectar ambos accesos a una misma ruta real. La colección con datos depende además de `local-plant-storage` y `plant-cards`.
 
 ### 2026-10-09 — Aceptación independiente `design-resources`
 

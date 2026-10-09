@@ -1,6 +1,66 @@
 {
   "sourceLanguage" : "es",
   "strings" : {
+    "collection.add" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añadir"
+          }
+        }
+      }
+    },
+    "collection.add.unavailable" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disponible cuando puedas elegir una foto."
+          }
+        }
+      }
+    },
+    "collection.empty.add" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añadir mi primera planta"
+          }
+        }
+      }
+    },
+    "collection.empty.body" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guarda aquí tus plantas para tener sus cuidados a mano."
+          }
+        }
+      }
+    },
+    "collection.empty.title" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todavía no tienes plantas"
+          }
+        }
+      }
+    },
+    "collection.title" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mis plantas"
+          }
+        }
+      }
+    },
     "bootstrap.subtitle" : {
       "localizations" : {
         "es" : {
