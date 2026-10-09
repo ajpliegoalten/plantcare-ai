@@ -9,7 +9,7 @@ Organizar el código **por funcionalidad**, y dentro de cada funcionalidad separ
 - **Data**: implementaciones de los protocolos del dominio (almacenamiento local o adaptadores futuros). Ningún tipo de `Data` se importa en `Domain` o en las vistas.
 - **Composición**: `PlantCareAIApp.swift` elige las implementaciones concretas e inyecta el caso de uso en el ViewModel. `ContentView` solo delega en la vista raíz de la funcionalidad; no alberga la pantalla «Mis plantas». Las dependencias apuntan `Presentation → Domain ← Data` y la composición conecta las capas.
 
-La separación no autoriza a adelantar comportamiento: cada feature conserva su alcance y sus pruebas. En particular, no existe aún persistencia real, cámara ni navegación; el contrato síncrono de lectura se revisará si la persistencia futura exige errores/asíncronía, sin presentar un fallo de almacenamiento como colección vacía. Las tarjetas para colecciones no vacías pertenecen a `plant-cards`.
+La separación no autoriza a adelantar comportamiento: existe persistencia local, pero no cámara, alta desde UI ni navegación. Los contratos son asíncronos y propagadores de errores; un fallo no representa una colección vacía. Las tarjetas pertenecen a `plant-cards`.
 
 ## Implementación actual: `PlantList`
 
@@ -23,17 +23,27 @@ PlantCareAI/
       EmptyPlantView.swift             # tarjeta visual sin lógica de datos
       PlantListViewModel.swift         # estado observado, caso de uso inyectado
     Domain/
-      Plant.swift                      # identidad mínima del ejemplar, sin instancias ficticias
-      PlantRepository.swift            # contrato de lectura
+      Plant.swift, CareSheet.swift      # ejemplar confirmado y copia de seis cuidados
+      PlantRepository.swift            # lectura, creación y foto bajo demanda; errores tipados
       LoadPlantsUseCase.swift          # contrato y caso de uso de consulta
+      SavePlantUseCase.swift            # validación de campos obligatorios y foto no vacía
+      LoadInitialPlantPhotoUseCase.swift # foto por UUID, sin rutas en Domain
     Data/
-      EmptyPlantRepository.swift       # adaptador temporal que devuelve []
+      LocalPlantRepository.swift       # actor: SwiftData + archivos JPEG independientes
+      PersistedPlant.swift             # entidad interna y mapeo explícito
+      StorageTestFixture.swift         # solo Debug Simulator, almacén aislado por argumento
 ```
 
-`PlantCareAIApp` crea `EmptyPlantRepository → LoadPlants → PlantListViewModel`, con ciclo de vida `@StateObject`; `PlantListView` lo observa. El repositorio vacío **no guarda ni recupera datos**: es una sustitución temporal explícita hasta `local-plant-storage`, que deberá reemplazarlo por un adaptador local verificable. Solo el caso vacío es visible hoy; la renderización de plantas guardadas llega con `plant-cards`. Los dos botones de alta permanecen deshabilitados y explican su indisponibilidad hasta `choose-identification-photo`.
+`PlantCareAIApp` crea `LocalPlantRepository → LoadPlants → PlantListViewModel`, con ciclo de vida `@StateObject`; `PlantListView` lo observa y solicita carga con `.task`. Expone carga, vacío, datos guardados pendientes de visualización y error local. Los botones de alta permanecen deshabilitados hasta `choose-identification-photo`.
+
+El actor crea perezosamente `ModelContainer` y su `ModelContext` fuera del MainActor; todas las operaciones están serializadas, sin suspensiones entre comprobar duplicado y confirmar. Hay una sola instancia por almacén en producción; no se admiten escritores simultáneos de otros procesos/repositorios sobre el mismo directorio. Metadatos en `Application Support/PlantStore/Plants.store`, ficha embebida por ejemplar, referencia interna UUID.jpg; bytes únicamente en `Photos/UUID.jpg`. Listar no lee fotos. Domain recibe un UUID opaco, no una ruta ni binarios precargados.
+
+Publicación: validar JPEG completo, escribir/verificar temporal, mover sin sobrescribir, insertar metadatos y guardar explícitamente (autosave desactivado). Un fallo revierte contexto y elimina los archivos nuevos. Tras interrupción de proceso, la próxima apertura primero lee/valida todos los metadatos y solo entonces elimina `.pending` y `.jpg` no referenciados. Si el almacén falla no hay limpieza ni fallback vacío/en memoria. Una foto referenciada ausente/corrupta produce error al solicitarla, no se elimina su planta ni se sustituye por otra. No es una transacción distribuida ni recuperación garantizada ante daño de disco; véase ADR 001.
+
+JPEG es el formato aceptado de este fundamento, no un pipeline de importación. `save-plant` debe definir orientación, resolución, límite de bytes, compresión y memoria antes de aceptar fotografías reales; `add-plant-photo` reutilizará ese pipeline. No hay miniaturas ni reescalado en esta feature.
 
 ## Recursos y comprobación
 
 - `PlantCareAI/Assets.xcassets`: ocho colores semánticos sRGB de `DESIGN.md`, sin imágenes. Las vistas usan `Background`, `Primary`, `PrimaryAction`, `TextPrimary`, `TextSecondary` y `Surface` por nombre.
 - `PlantCareAI/Localizable.xcstrings`: solo claves usadas por la pantalla actual, textos españoles con fallback español; las claves obsoletas de bootstrap se retiraron.
-- `./init.sh` elige un iPhone Simulator disponible y ejecuta build y UI tests; no sustituye a la inspección visual. Artefactos locales en `DerivedData/` ignorado. No hay cuentas, backend, proveedor de IA ni almacenamiento en esta funcionalidad.
+- `./init.sh` elige un iPhone Simulator disponible y ejecuta build, XCTest de repositorio y UI tests; no sustituye a la inspección visual. Artefactos locales en `DerivedData/` ignorado. No hay cuentas, backend ni proveedor de IA.

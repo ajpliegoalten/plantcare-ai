@@ -1,6 +1,12 @@
 {
   "sourceLanguage" : "es",
   "strings" : {
+    "collection.stored" : {
+      "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Tus ejemplares están guardados en este dispositivo. Su visualización estará disponible próximamente." } } }
+    },
+    "collection.storageError" : {
+      "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudieron leer tus plantas locales. Cierra y vuelve a abrir la app para intentarlo de nuevo." } } }
+    },
     "collection.add" : {
       "localizations" : {
         "es" : {

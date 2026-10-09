@@ -1,11 +1,11 @@
-protocol LoadPlantsUseCase {
-    func execute() -> [Plant]
+protocol LoadPlantsUseCase: Sendable {
+    func execute() async throws -> [Plant]
 }
 
 struct LoadPlants: LoadPlantsUseCase {
     let repository: any PlantRepository
 
-    func execute() -> [Plant] {
-        repository.loadPlants()
+    func execute() async throws -> [Plant] {
+        try await repository.loadPlants()
     }
 }

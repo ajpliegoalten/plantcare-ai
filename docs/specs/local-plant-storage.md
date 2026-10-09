@@ -112,12 +112,12 @@ Then no muestra el estado «Todavía no tienes plantas» ni simula tarjetas/deta
 
 ## Implementation Tasks
 
-- [ ] Definir `Plant`/`CareSheet`, invariantes, `SavePlant`, contrato de repositorio y propagación de errores a `LoadPlants`/ViewModel.
-- [ ] Implementar lectura/escritura de metadatos en SwiftData y foto en archivo por UUID, sin precargar imágenes al listar, con publicación consistente y compensación ante fallos, aislable en tests y sin sobreescritura silenciosa.
-- [ ] Sustituir `EmptyPlantRepository` en app; conservar el estado vacío y añadir mensajes accesibles para no vacío/error.
-- [ ] Registrar archivos y target XCTest en `project.pbxproj`; pruebas de dos plantas con imágenes independientes, persistencia al recrear contexto/repositorio SwiftData, validación/duplicado, foto ausente/fallo del almacén e interrupción entre imagen y metadatos.
-- [ ] Añadir cobertura de relanzamiento en UI test sin fixture persistente en producto; mantener los tres UI tests de vacío y evitar contaminación entre pruebas.
-- [ ] Ejecutar verificación, revisar diff/capas, actualizar docs durables y evidencia según resultados reales.
+- [x] Definir `Plant`/`CareSheet`, invariantes, `SavePlant`, contrato de repositorio y propagación de errores a `LoadPlants`/ViewModel.
+- [x] Implementar lectura/escritura de metadatos en SwiftData y foto en archivo por UUID, sin precargar imágenes al listar, con publicación consistente y compensación ante fallos, aislable en tests y sin sobreescritura silenciosa.
+- [x] Sustituir `EmptyPlantRepository` en app; conservar el estado vacío y añadir mensajes accesibles para no vacío/error.
+- [x] Registrar archivos y target XCTest en `project.pbxproj`; pruebas de dos plantas con imágenes independientes, persistencia al recrear contexto/repositorio SwiftData, validación/duplicado, foto ausente/fallo del almacén e interrupción entre imagen y metadatos.
+- [x] Añadir cobertura de relanzamiento en UI test sin fixture persistente en producto; mantener los tres UI tests de vacío y evitar contaminación entre pruebas.
+- [x] Ejecutar verificación, revisar diff/capas, actualizar docs durables y evidencia según resultados reales.
 
 ## Verification Plan
 
