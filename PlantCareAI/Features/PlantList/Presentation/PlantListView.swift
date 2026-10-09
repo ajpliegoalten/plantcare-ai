@@ -12,8 +12,15 @@ struct PlantListView: View {
 
                     Spacer(minLength: 32)
 
-                    if viewModel.plants.isEmpty {
+                    switch viewModel.state {
+                    case .loading:
+                        ProgressView()
+                    case .loaded(let plants) where plants.isEmpty:
                         EmptyPlantView()
+                    case .loaded:
+                        statusMessage("collection.stored", identifier: "storedCollectionMessage")
+                    case .failed:
+                        statusMessage("collection.storageError", identifier: "storageErrorMessage")
                     }
 
                     Spacer(minLength: 32)
@@ -24,6 +31,18 @@ struct PlantListView: View {
             }
         }
         .background(Color("Background").ignoresSafeArea())
+        .task { await viewModel.load() }
+    }
+
+    private func statusMessage(_ key: LocalizedStringKey, identifier: String) -> some View {
+        Text(key)
+            .font(.body)
+            .foregroundStyle(Color("TextSecondary"))
+            .multilineTextAlignment(.center)
+            .padding(16)
+            .frame(maxWidth: .infinity)
+            .background(Color("Surface"), in: RoundedRectangle(cornerRadius: 22))
+            .accessibilityIdentifier(identifier)
     }
 
     private var header: some View {

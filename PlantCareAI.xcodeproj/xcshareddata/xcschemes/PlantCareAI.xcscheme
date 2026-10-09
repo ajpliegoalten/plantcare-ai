@@ -10,6 +10,9 @@
   <TestAction buildConfiguration="Debug" selectedDebuggerIdentifier="Xcode.DebuggerFoundation.Debugger.LLDB" selectedLauncherIdentifier="Xcode.IDEFoundation.Launcher.Posix" shouldUseLaunchSchemeArgsEnv="YES">
     <Testables>
       <TestableReference skipped="NO">
+        <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="CC0000000000000000000006" BuildableName="PlantCareAITests.xctest" BlueprintName="PlantCareAITests" ReferencedContainer="container:PlantCareAI.xcodeproj"/>
+      </TestableReference>
+      <TestableReference skipped="NO">
         <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="AA0000000000000000000020" BuildableName="PlantCareAIUITests.xctest" BlueprintName="PlantCareAIUITests" ReferencedContainer="container:PlantCareAI.xcodeproj"/>
       </TestableReference>
     </Testables>

@@ -2,9 +2,17 @@ import Foundation
 
 @MainActor
 final class PlantListViewModel: ObservableObject {
-    @Published private(set) var plants: [Plant]
+    enum State { case loading, loaded([Plant]), failed }
+    @Published private(set) var state: State = .loading
+    private let loadPlants: any LoadPlantsUseCase
 
     init(loadPlants: any LoadPlantsUseCase) {
-        plants = loadPlants.execute()
+        self.loadPlants = loadPlants
+    }
+
+    func load() async {
+        state = .loading
+        do { state = .loaded(try await loadPlants.execute()) }
+        catch { state = .failed }
     }
 }
