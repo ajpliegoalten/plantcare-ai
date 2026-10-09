@@ -12,6 +12,11 @@
 
 ## Registro de sesión
 
+### 2026-10-09 — Skill de trabajo iOS Clean + MVVM
+
+- Añadida `.agents/skills/ios-clean-mvvm/SKILL.md` y enlace en `AGENTS.md` para que planner, implementer y validator apliquen las reglas transversales al trabajar en Swift/SwiftUI. `ARCHITECTURE.md` conserva la decisión normativa; la skill explica cómo mapear, inyectar, comprobar y documentar cada feature y cuándo considerar un ADR, sin inventar persistencia ni añadir funcionalidades.
+- Cambio solo de instrucciones de agentes, sin producto ni nuevo estado en `feature_list.json`; siguiente producto listo por orden: `local-plant-storage`. Verificación: frontmatter (`name`/`description`), secciones y referencias obligatorias correctas en lectura estática, `git diff --check` correcto. No se repite `./init.sh` porque no cambia código iOS (el último gate del refactor fue 3/3 UI tests). La consulta `opencode api get /api/skill` usó ubicación `/Users/antonio.pliego`, no este worktree, y no verifica descubrimiento aquí; se confirmará al activar la skill en una sesión situada en el worktree.
+
 ### 2026-10-09 — Refactor arquitectónico de `empty-collection` (pendiente de revisión independiente)
 
 - Decisión del usuario: Clean Architecture + MVVM estricta desde ahora; misma rama `feature/empty-collection`; adaptador temporal que devuelve una colección vacía, sin adelantar almacenamiento. `ARCHITECTURE.md` documenta las capas, dirección de dependencias y sustitución prevista en `local-plant-storage`; `AGENTS.md` exige respetarlas en nuevas specs/implementaciones/validaciones.
