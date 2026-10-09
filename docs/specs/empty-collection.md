@@ -1,5 +1,7 @@
 # Feature Implementation Spec: Mostrar Mis plantas vacía
 
+> Especificación histórica de la primera implementación. El refactor de arquitectura aprobado posteriormente conserva sus escenarios funcionales y se documenta en `ARCHITECTURE.md` y `PROGRESS.md`; el cambio de archivos esperados de esta spec no reescribe los criterios originales.
+
 ## Source Feature
 
 - `id`: `empty-collection`; `area`: `coleccion`; `title`: Mostrar Mis plantas vacía.

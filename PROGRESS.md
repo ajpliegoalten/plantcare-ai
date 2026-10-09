@@ -12,6 +12,14 @@
 
 ## Registro de sesión
 
+### 2026-10-09 — Refactor arquitectónico de `empty-collection` (pendiente de revisión independiente)
+
+- Decisión del usuario: Clean Architecture + MVVM estricta desde ahora; misma rama `feature/empty-collection`; adaptador temporal que devuelve una colección vacía, sin adelantar almacenamiento. `ARCHITECTURE.md` documenta las capas, dirección de dependencias y sustitución prevista en `local-plant-storage`; `AGENTS.md` exige respetarlas en nuevas specs/implementaciones/validaciones.
+- La pantalla original se dividió en `Features/PlantList/Presentation/PlantListView.swift`, `EmptyPlantView.swift` y `PlantListViewModel.swift`; `Domain` define identidad mínima, contrato de repositorio y caso de uso, `Data/EmptyPlantRepository.swift` implementa `[]`. `PlantCareAIApp` compone e inyecta dependencias; `ContentView` solo delega. Nuevas fuentes añadidas al target Xcode. Sin nuevos textos, permisos, almacenamiento, API ni tarjetas de plantas.
+- Línea base antes de editar: `./init.sh` → **BUILD SUCCEEDED**, **TEST SUCCEEDED**, 3/3 UI tests. Tras el refactor: mismo gate → **BUILD SUCCEEDED**, **TEST SUCCEEDED**, 3/3 UI tests; logs locales fuera del repositorio en `/private/var/folders/37/wtqvl6dn10gbsp6tt0k3dbd40000gp/T/opencode/empty-collection-architecture-baseline.log` y `empty-collection-clean-mvvm-gate.log`. `plutil -lint project.pbxproj`, JSON de `feature_list.json` y `git diff --check` correctos. El estado `accepted` original no se modificó durante la autoverificación.
+- **Revisión independiente del refactor: accept.** El validador cotejó los dos logs de build/test (no repitió `./init.sh`), las siete fuentes nuevas compiladas y registradas en el target, la dirección de dependencias, la composición y los tres tests UI conservados. Verificó por su cuenta `plutil -lint`, JSON del catálogo y feature list, `git diff --check 54ebd13` y ausencia de almacenamiento, fotos, permisos, red y secretos. Queda pendiente prueba manual nueva de VoiceOver/pantalla pequeña; la aceptación inicial incluía capturas de simulador en claro/oscuro.
+- Existía antes de iniciar el refactor una modificación ajena en `PlantCareAI/Localizable.xcstrings` (reordenación y marcas `stale`); se conserva intacta y se excluirá del commit. Riesgo siguiente: el adaptador vacío oculta todas las plantas hasta que `local-plant-storage` lo sustituya; no usarlo como persistencia real. Las tarjetas pertenecen a `plant-cards`.
+
 ### 2026-10-09 — Aceptación independiente `empty-collection`
 
 - Veredicto del validador: **accept** tras reparar la descripción de colores en `ARCHITECTURE.md`. Repitió `./init.sh` (**BUILD SUCCEEDED**, **TEST SUCCEEDED**, 3/3 UI tests), comprobó JSON, proyecto, claves de localización, los seis colores usados y `git diff --check`; inspeccionó las capturas locales existentes en claro y oscuro/texto máximo. Sin almacenamiento, fotos, permisos, llamadas de red ni secretos.
