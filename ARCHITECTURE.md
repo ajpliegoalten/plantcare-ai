@@ -35,5 +35,5 @@ PlantCareAI/
 ## Recursos y comprobación
 
 - `PlantCareAI/Assets.xcassets`: ocho colores semánticos sRGB de `DESIGN.md`, sin imágenes. Las vistas usan `Background`, `Primary`, `PrimaryAction`, `TextPrimary`, `TextSecondary` y `Surface` por nombre.
-- `PlantCareAI/Localizable.xcstrings`: textos españoles con fallback español; las claves antiguas de bootstrap siguen sin uso.
+- `PlantCareAI/Localizable.xcstrings`: solo claves usadas por la pantalla actual, textos españoles con fallback español; las claves obsoletas de bootstrap se retiraron.
 - `./init.sh` elige un iPhone Simulator disponible y ejecuta build y UI tests; no sustituye a la inspección visual. Artefactos locales en `DerivedData/` ignorado. No hay cuentas, backend, proveedor de IA ni almacenamiento en esta funcionalidad.

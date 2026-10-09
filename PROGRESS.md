@@ -12,6 +12,11 @@
 
 ## Registro de sesión
 
+### 2026-10-09 — Retirada de cadenas de bootstrap sin uso
+
+- Eliminadas de `PlantCareAI/Localizable.xcstrings` únicamente `bootstrap.title` y `bootstrap.subtitle`: no hay referencias de producto; se conservan las seis claves `collection.*`, incluida `collection.add` usada por `PlantListView` aunque Xcode la hubiera marcado `stale`. `ARCHITECTURE.md` refleja que no se mantienen cadenas antiguas.
+- `./init.sh` desde el worktree: **BUILD SUCCEEDED**, **TEST SUCCEEDED**, 3/3 UI tests (estado vacío español, fallback al inglés y desplazamiento); log local `/private/var/folders/37/wtqvl6dn10gbsp6tt0k3dbd40000gp/T/opencode/empty-collection-localization-cleanup.log`. JSON válido y catálogo resultante con seis claves. Sin cambio de comportamiento ni revalidación independiente nueva; aceptación original de `empty-collection` permanece. Siguiente funcionalidad de producto: `local-plant-storage`.
+
 ### 2026-10-09 — Skill de trabajo iOS Clean + MVVM
 
 - Añadida `.agents/skills/ios-clean-mvvm/SKILL.md` y enlace en `AGENTS.md` para que planner, implementer y validator apliquen las reglas transversales al trabajar en Swift/SwiftUI. `ARCHITECTURE.md` conserva la decisión normativa; la skill explica cómo mapear, inyectar, comprobar y documentar cada feature y cuándo considerar un ADR, sin inventar persistencia ni añadir funcionalidades.

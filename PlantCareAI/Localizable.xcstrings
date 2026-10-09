@@ -60,26 +60,6 @@
           }
         }
       }
-    },
-    "bootstrap.subtitle" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Preparando tu espacio para cuidar plantas."
-          }
-        }
-      }
-    },
-    "bootstrap.title" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PlantCare AI"
-          }
-        }
-      }
     }
   },
   "version" : "1.0"
