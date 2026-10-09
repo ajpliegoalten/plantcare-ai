@@ -5,11 +5,25 @@
 - Raíz: repositorio `plantcare-ai`.
 - Arranque estándar: `./init.sh` ejecuta compilación y UI tests con Xcode en un iPhone Simulator disponible.
 - Verificación estándar: build y test `xcodebuild` en el scheme compartido `PlantCareAI`; comprobar apertura visual con `simctl` aparte.
-- Siguiente funcionalidad lista: `empty-collection`.
+- Funcionalidad `design-resources`: aceptada tras validación independiente.
+- Siguiente funcionalidad lista: `empty-collection` (no implementada).
 - Bloqueos: ninguno para bootstrap; se necesitarán API compatible con visión y credencial de demo fuera del repositorio para verificar funciones de IA en dispositivo.
-- Última comprobación: 2026-10-09; `ios-bootstrap` aceptada tras verificación independiente de compilación, prueba UI y apertura en simulador.
+- Última comprobación: 2026-10-09; `ios-bootstrap` y `design-resources` aceptadas tras validación independiente.
 
 ## Registro de sesión
+
+### 2026-10-09 — Aceptación independiente `design-resources`
+
+- Veredicto del validador: **accept**. Repitió `./init.sh` (build correcto, 2/2 UI tests), verificó ocho colores exactos, dos cadenas españolas empaquetadas y cero imágenes; instaló y abrió en simulador y comprobó en captura fondo crema, textos legibles y ausencia de «Añadir». `git diff --check` correcto; sin secretos, solicitudes de red ni desvíos de alcance. No se probó dispositivo físico.
+- Siguiente paso: planificar `empty-collection` sobre los recursos ya aceptados.
+
+### 2026-10-09 — Implementación `design-resources` (pendiente de validador independiente)
+
+- Ocho colorsets sRGB universales con los hex exactos de `DESIGN.md` (Background `F8FAF2`, Surface `FFFFFF`, SurfaceMuted `F2F4ED`, Primary `264D3C`, PrimaryAction `3E6553`, TextPrimary `191C18`, TextSecondary `414844`, Outline `C1C8C2`), cero imagesets. `ContentView` usa los tres colores de pantalla por nombre; sin cambios de layout ni funcionalidades. Catálogo `Localizable.xcstrings` con `bootstrap.title`/`bootstrap.subtitle` en español; idioma de desarrollo `es` y fallback español.
+- Verificación estática: `plutil -lint PlantCareAI.xcodeproj/project.pbxproj` → OK; `python3 -m json.tool PlantCareAI/Localizable.xcstrings >/dev/null` → 0; script Python de cotejo de ocho componentes RGB/idioma universal y conteo de imágenes → 8 colorsets exactos, 0 imagesets. En producto compilado: `Assets.car`, `es.lproj/Localizable.strings` con ambas cadenas españolas (`plutil -p`) y `CFBundleDevelopmentRegion=es`; log de compilación confirma `CompileXCStrings`/`CompileAssetCatalogVariant` del target app.
+- `./init.sh` desde raíz → **BUILD SUCCEEDED**, **TEST SUCCEEDED** en iPhone 17 Pro iOS 26.2 `00BBB7EC-8DF7-400C-A08A-9D3C8818D886`; UI tests 2/2: lanzamiento español con título/subtítulo resueltos y sin «Añadir», y preferencia inglesa con fallback español sin claves crudas. Log ignorado: `DerivedData/design-resources-gate-final.log`. La primera redirección del gate falló porque no existía aún `DerivedData/`; se creó el directorio ignorado y se ejecutó el gate correctamente, sin cambiar `init.sh`.
+- Apertura manual: `xcrun simctl install 00BBB7EC-8DF7-400C-A08A-9D3C8818D886 DerivedData/Build/Products/Debug-iphonesimulator/PlantCareAI.app`; `xcrun simctl launch 00BBB7EC-8DF7-400C-A08A-9D3C8818D886 org.plantcareai.prototype -AppleLanguages '(es)' -AppleLocale es_ES` → PID 55856. Capturas inspeccionadas: `DerivedData/design-resources-light.png` (apariencia clara, tamaño large) y `DerivedData/design-resources-dark-large.png` (apariencia oscura, Dynamic Type accessibility-large). Ambas muestran fondo crema a bordes, título verde oscuro, cuerpo negro legible, textos españoles, sin acción Añadir ni truncamiento; colores universales conservan el mismo aspecto en oscuro. Se restauraron apariencia clara y tamaño large.
+- Sin imágenes, cuentas, datos ni secretos. No se probó dispositivo físico ni otros tamaños de pantalla; la paleta restante se validará visualmente cuando tenga consumidores. Siguiente paso: validación independiente de `design-resources`; después planificar/implementar `empty-collection`.
 
 ### 2026-10-09 — Aceptación independiente `ios-bootstrap`
 
