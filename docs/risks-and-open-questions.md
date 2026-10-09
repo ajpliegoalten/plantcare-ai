@@ -7,7 +7,7 @@ Ninguno identificado para definir las funcionalidades y comenzar una fase poster
 ## Decisiones durante implementación
 
 - Modelo/API compatible con OpenAI con soporte real de imágenes, formato de salida y límites de coste; mecanismo concreto de configuración local de credencial fuera del repositorio. No incluir la credencial en código fuente ni publicar el prototipo con ella expuesta.
-- Versión mínima de iOS, persistencia nativa (SwiftData es candidata), formato/tamaño local de fotografías y límites prácticos del contexto reciente para controlar latencia, coste y privacidad.
+- Persistencia nativa (SwiftData es candidata), formato/tamaño local de fotografías y límites prácticos del contexto reciente para controlar latencia, coste y privacidad. La versión mínima del proyecto se fijó en iOS 17.0 durante `ios-bootstrap` (Xcode 26.2); revisar solo si nuevas capacidades lo requieren.
 - Representación legible de confianza cuando el proveedor no entregue probabilidades calibradas: evitar porcentajes inventados. Diseño de reintentos/cancelación y comprobaciones automáticas de persistencia y errores.
 - Stitch: la pantalla HTML «Mis plantas» compartida en la conversación ya se ha traducido a `DESIGN.md` como referencia visual aceptada, no como código fuente; si se dispone después de capturas/archivo, incorporarlos para preservar la referencia original. Comprobar contraste y tamaños con Dynamic Type al aplicar los tokens orientativos.
 
