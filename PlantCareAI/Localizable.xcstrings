@@ -1,8 +1,23 @@
 {
   "sourceLanguage" : "es",
   "strings" : {
-    "collection.stored" : {
-      "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Tus ejemplares están guardados en este dispositivo. Su visualización estará disponible próximamente." } } }
+    "collection.photo.error" : {
+      "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudo cargar la foto" } } }
+    },
+    "collection.photo.retry" : {
+      "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Reintentar foto" } } }
+    },
+    "collection.photo.loading" : {
+      "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Cargando foto" } } }
+    },
+    "collection.photo.loaded" : {
+      "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Foto cargada" } } }
+    },
+    "collection.select.hint" : {
+      "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Seleccionar planta; detalle próximamente" } } }
+    },
+    "collection.selection.pending" : {
+      "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "El detalle de esta planta estará disponible próximamente." } } }
     },
     "collection.storageError" : {
       "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudieron leer tus plantas locales. Cierra y vuelve a abrir la app para intentarlo de nuevo." } } }

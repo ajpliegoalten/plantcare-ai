@@ -5,25 +5,40 @@ import UIKit
 // Simulator Debug only. Separate store, explicitly selected by test arguments; never production seed data.
 enum StorageTestFixture {
     static func plant(_ index: Int) -> Plant {
-        Plant(id: UUID(uuidString: "00000000-0000-0000-0000-00000000000\(index)")!,
-              name: "Fixture \(index)", confirmedSpecies: "Monstera deliciosa",
+        let longText = ProcessInfo.processInfo.arguments.contains("--storage-long-text")
+        return Plant(id: UUID(uuidString: "00000000-0000-0000-0000-00000000000\(index)")!,
+              name: longText ? "Fixture \(index): mi planta junto a la ventana del salón" : "Fixture \(index)",
+              confirmedSpecies: longText ? "Monstera deliciosa — especie confirmada de este ejemplar" : "Monstera deliciosa",
               createdAt: Date(timeIntervalSince1970: Double(index) * 1000),
-              location: index == 1 ? "Ventana" : nil,
+              location: index == 1 ? (longText ? "Ventana del salón junto a la estantería de libros" : "Ventana") : nil,
               careSheet: CareSheet(light: "Luz \(index)", watering: "Riego \(index)",
                                    humidity: "Humedad \(index)", temperature: "Temperatura \(index)",
                                    substrate: "Sustrato \(index)", fertilizer: "Abono \(index)"))
     }
 
     static func photo(_ index: Int) -> Data {
-        UIGraphicsImageRenderer(size: CGSize(width: 4, height: 4)).image { context in
-            (index == 1 ? UIColor.red : UIColor.green).setFill()
-            context.fill(CGRect(x: 0, y: 0, width: 4, height: 4))
+        // Locally drawn test motif, not stock photography or production seed data.
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        return UIGraphicsImageRenderer(size: CGSize(width: 640, height: 480), format: format).image { context in
+            (index == 1 ? UIColor(red: 0.85, green: 0.45, blue: 0.55, alpha: 1) : UIColor(red: 0.25, green: 0.65, blue: 0.7, alpha: 1)).setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 640, height: 480))
+            UIColor.brown.setFill()
+            context.fill(CGRect(x: 240, y: 320, width: 160, height: 120))
+            UIColor.darkGray.setStroke()
+            context.cgContext.setLineWidth(12)
+            context.cgContext.move(to: CGPoint(x: 320, y: 330))
+            context.cgContext.addLine(to: CGPoint(x: index == 1 ? 260 : 380, y: 100))
+            context.cgContext.strokePath()
+            UIColor.green.setFill()
+            context.cgContext.fillEllipse(in: CGRect(x: index == 1 ? 160 : 300, y: 110, width: 180, height: 90))
         }.jpegData(compressionQuality: 0.9)!
     }
 }
 
 struct StorageFixtureLoad: LoadPlantsUseCase {
     let root: URL
+    let repository: LocalPlantRepository
     let seed: Bool
     let corrupt: Bool
 
@@ -33,7 +48,6 @@ struct StorageFixtureLoad: LoadPlantsUseCase {
             return []
         }
         if seed || corrupt { try? FileManager.default.removeItem(at: root) }
-        let repository = LocalPlantRepository(root: root)
         if corrupt {
             try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
             try Data("invalid store".utf8).write(to: root.appendingPathComponent("Plants.store"))
@@ -50,6 +64,9 @@ struct StorageFixtureLoad: LoadPlantsUseCase {
                 let bytes = try await repository.loadInitialPhoto(for: StorageTestFixture.plant(index).id)
                 guard bytes == StorageTestFixture.photo(index) else { throw PlantStorageError.photoCorrupt }
             }
+        }
+        if ProcessInfo.processInfo.arguments.contains("--storage-photo-missing") {
+            try? FileManager.default.removeItem(at: root.appendingPathComponent("Photos").appendingPathComponent("\(StorageTestFixture.plant(1).id).jpg"))
         }
         return plants
     }

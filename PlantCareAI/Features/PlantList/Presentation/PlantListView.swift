@@ -5,33 +5,45 @@ struct PlantListView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        GeometryReader { geometry in
-            ScrollView {
-                VStack(spacing: 24) {
-                    header
+        NavigationStack {
+            GeometryReader { geometry in
+                ScrollView {
+                    VStack(spacing: 24) {
+                        header
 
-                    Spacer(minLength: 32)
-
-                    switch viewModel.state {
-                    case .loading:
-                        ProgressView()
-                    case .loaded(let plants) where plants.isEmpty:
-                        EmptyPlantView()
-                    case .loaded:
-                        statusMessage("collection.stored", identifier: "storedCollectionMessage")
-                    case .failed:
-                        statusMessage("collection.storageError", identifier: "storageErrorMessage")
+                        switch viewModel.state {
+                        case .loading:
+                            ProgressView()
+                        case .loaded(let plants) where plants.isEmpty:
+                            Spacer(minLength: 32)
+                            EmptyPlantView()
+                            Spacer(minLength: 32)
+                        case .loaded:
+                            LazyVStack(spacing: 24) {
+                                ForEach(viewModel.cards) { card in
+                                    PlantCardView(viewModel: card)
+                                }
+                            }
+                        case .failed:
+                            Spacer(minLength: 32)
+                            statusMessage("collection.storageError", identifier: "storageErrorMessage")
+                            Spacer(minLength: 32)
+                        }
                     }
-
-                    Spacer(minLength: 32)
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: geometry.size.height, alignment: .top)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 20)
                 }
-                .frame(maxWidth: .infinity)
-                .frame(minHeight: geometry.size.height)
-                .padding(.horizontal, 20)
+            }
+            .background(Color("Background").ignoresSafeArea())
+            .task { await viewModel.load() }
+            .navigationDestination(for: UUID.self) { id in
+                if let plant = viewModel.selectedPlant(id: id) {
+                    PlantSelectionDestinationView(plant: plant)
+                }
             }
         }
-        .background(Color("Background").ignoresSafeArea())
-        .task { await viewModel.load() }
     }
 
     private func statusMessage(_ key: LocalizedStringKey, identifier: String) -> some View {
