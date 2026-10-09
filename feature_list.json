@@ -50,10 +50,16 @@
     "title": "Ver tarjetas de ejemplares guardados",
     "user_visible_behavior": "Mis plantas muestra una tarjeta fotográfica por ejemplar con nombre, especie y acceso al detalle.",
     "depends_on": ["empty-collection", "local-plant-storage"],
-    "status": "not_started",
+    "status": "accepted",
     "verification": ["Mostrar dos ejemplares locales; comprobar tarjetas separadas y apertura del ejemplar correcto; gate estándar."],
-    "evidence": [],
-    "notes": "Ubicación opcional si cabe; no inventar último riego ni estado de salud."
+    "evidence": [
+      "2026-10-09: ./init.sh final BUILD SUCCEEDED / TEST SUCCEEDED, 14 unit + 8 UI sin fallos; DerivedData/evidence/cards-gate-final-pass.log, xcresult Test-PlantCareAI-2026.10.09_23-03-18-+0200.",
+      "Focalizadas xcodebuild: PlantCardViewModelTests 6/6, PlantListViewModelTests 2/2 y PlantCareAIUITests 8/8 en iPhone SE 3 iOS 26.2 oscuro, Dynamic Type máximo; cards-small-dark-max-final-pass.log, xcresult 23-03-17 en DerivedData/SmallCheck/Logs/Test.",
+      "Persistencia con modelos/bytes completos, dos fotos propias y selección UUID por foto/contenido + Atrás, fallo/reintento aislado sin navegación y textos largos. Capturas finales exportadas/inspeccionadas en cards-gate-final-pass-attachments y cards-small-dark-max-final-pass-attachments; foto fallida estable y especie sin elipsis en cards-verified-error-max-dark.png.",
+      "Release BUILD SUCCEEDED, sin argumentos/símbolos de fixture (cards-release-verified.log); plutil/JSON/git diff --check correctos (cards-static.log). Baseline 6 unit + 5 UI correcto. Fallo intermedio de gesto de prueba AX y reparación visual registrados en PROGRESS.md."
+    ],
+    "validator_evidence": ["2026-10-09 independent validator verdict accept: ./init.sh BUILD SUCCEEDED / TEST SUCCEEDED, 14 unit + 8 UI tests; fresh Release build with fixture symbols/arguments absent; project/JSON/bash lint and git diff --check passed. Existing iPhone SE dark/max Dynamic Type xcresult 16/16 and screenshots inspected, not rerun by validator. No blocking findings; VoiceOver real and physical iPhone untested. Logs DerivedData/evidence/cards-validator-gate.log and cards-validator-release.log. See PROGRESS.md."],
+    "notes": "Aceptada tras validación independiente. Ubicación opcional literal; sin riego/salud. Acceso UUID a pantalla temporal con nombre, no ficha plant-detail. VoiceOver real/dispositivo físico no probados; importación de fotos reales pendiente de save-plant."
   },
   {
     "id": "plant-detail",
