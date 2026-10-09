@@ -9,9 +9,9 @@ Organizar el código **por funcionalidad**, y dentro de cada funcionalidad separ
 - **Data**: implementaciones de los protocolos del dominio (almacenamiento local o adaptadores futuros). Ningún tipo de `Data` se importa en `Domain` o en las vistas.
 - **Composición**: `PlantCareAIApp.swift` elige las implementaciones concretas e inyecta el caso de uso en el ViewModel. `ContentView` solo delega en la vista raíz de la funcionalidad; no alberga la pantalla «Mis plantas». Las dependencias apuntan `Presentation → Domain ← Data` y la composición conecta las capas.
 
-La separación no autoriza a adelantar comportamiento: existe persistencia local y selección por UUID desde tarjetas, pero no cámara, alta desde UI ni ficha de detalle. Los contratos son asíncronos y propagadores de errores; un fallo no representa una colección vacía.
+La separación no autoriza a adelantar comportamiento: existe persistencia local y consulta de ficha por UUID desde tarjetas, pero no cámara, alta desde UI, edición ni historial. Los contratos son asíncronos y propagadores de errores; un fallo no representa una colección vacía.
 
-## Implementación actual: `PlantList`
+## Implementación actual: `PlantList` y `PlantDetail`
 
 ```
 PlantCareAI/
@@ -24,7 +24,6 @@ PlantCareAI/
       PlantListViewModel.swift         # estado observado, caso de uso inyectado
       PlantCardView.swift              # foto 4:3, identidad y acceso; reintento separado
       PlantCardViewModel.swift         # foto por demanda, cache de imagen acotada y generación
-      PlantSelectionDestinationView.swift # shell temporal con nombre; plant-detail lo reemplaza
     Domain/
       Plant.swift, CareSheet.swift      # ejemplar confirmado y copia de seis cuidados
       PlantRepository.swift            # lectura, creación y foto bajo demanda; errores tipados
@@ -35,11 +34,19 @@ PlantCareAI/
       LocalPlantRepository.swift       # actor: SwiftData + archivos JPEG independientes
       PersistedPlant.swift             # entidad interna y mapeo explícito
       StorageTestFixture.swift         # solo Debug Simulator, almacén aislado por argumento
+  Features/PlantDetail/
+    Presentation/
+      PlantDetailView.swift            # foto, identidad, fecha y seis cuidados desplazables
+      PlantDetailViewModel.swift       # metadata/foto independientes, cancelación y reintento
+    Domain/
+      LoadPlantDetailUseCase.swift     # relectura metadata + filtro UUID, nil distinto de error
 ```
 
 `PlantCareAIApp` crea una misma instancia de `LocalPlantRepository` para `LoadPlants` y `LoadInitialPlantPhoto`, inyectados en `PlantListViewModel` con ciclo de vida `@StateObject`. El listado conserva modelos de tarjeta por UUID; no inicia fotos. Cada tarjeta solicita su foto con `.task` mediante `PlantCardViewModel → LoadInitialPlantPhoto → PlantRepository`, prepara un thumbnail ImageIO de máximo 1600 px fuera del MainActor y conserva solo la imagen. Cancelación/generaciones impiden que respuestas antiguas sustituyan el estado nuevo. No hay miniaturas en disco; Data sigue leyendo/validando el original completo. Vacío y error global siguen separados de errores por foto. El fixture Debug usa la misma instancia/raíz para ambos flujos. Los botones de alta permanecen deshabilitados hasta `choose-identification-photo`.
 
-`PlantListView` contiene `NavigationStack` y rutas UUID resueltas contra la colección cargada, sin lectura/escritura al seleccionar. `PlantSelectionDestinationView` muestra solo el nombre y el aviso provisional: **no es la ficha de detalle**. `plant-detail` sustituirá este shell conservando la identidad. No se muestran riegos, salud ni eventos sin contratos reales.
+`PlantListView` contiene el único `NavigationStack` y rutas UUID. Para todo UUID construye un destino con VM propio `@StateObject`, sin IO en fábrica/init. `PlantDetailView → PlantDetailViewModel → LoadPlantDetail → PlantRepository ← LocalPlantRepository` relee metadata al abrir y filtra por UUID (coste O(n) para este prototipo), nunca reutiliza el snapshot de tarjeta como fallback. Reutiliza los modelos/contratos Domain de PlantList y su adaptador Data; no hay repositorio ni esquema nuevo. La composición inyecta detalle y foto sobre la misma instancia elegida después del override Debug, sin volver a seed/verify.
+
+Metadata loading/loaded/notFound/failed y foto idle/loading/loaded/failed son independientes. Los seis cuidados aparecen antes de completar IO/decode de foto; un reintento solo solicita la foto propia. ImageIO prepara máximo 1600 px fuera del MainActor, sin cache global ni Data retenida con UIImage; cada destino conserva solo su imagen mientras vive. Generaciones y cancelación invalidan respuestas tardías al desaparecer. Ubicación blanca/ausente se omite, especie se muestra literal y fecha larga española deriva de `createdAt` persistido. No hay escrituras ni red en la consulta, ni riegos, salud, edición o eventos sin contratos reales.
 
 El actor crea perezosamente `ModelContainer` y su `ModelContext` fuera del MainActor; todas las operaciones están serializadas, sin suspensiones entre comprobar duplicado y confirmar. Hay una sola instancia por almacén en producción; no se admiten escritores simultáneos de otros procesos/repositorios sobre el mismo directorio. Metadatos en `Application Support/PlantStore/Plants.store`, ficha embebida por ejemplar, referencia interna UUID.jpg; bytes únicamente en `Photos/UUID.jpg`. Listar no lee fotos. Domain recibe un UUID opaco, no una ruta ni binarios precargados.
 

@@ -39,9 +39,7 @@ struct PlantListView: View {
             .background(Color("Background").ignoresSafeArea())
             .task { await viewModel.load() }
             .navigationDestination(for: UUID.self) { id in
-                if let plant = viewModel.selectedPlant(id: id) {
-                    PlantSelectionDestinationView(plant: plant)
-                }
+                PlantDetailView(viewModel: viewModel.detailViewModel(id: id)).id(id)
             }
         }
     }

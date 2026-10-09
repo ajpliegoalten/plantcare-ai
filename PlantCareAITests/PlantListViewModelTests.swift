@@ -11,7 +11,7 @@ final class PlantListViewModelTests: XCTestCase {
     func testListDoesNotReadPhotosAndPreservesStableUUIDModels() async {
         let repository = CardPhotoRepository()
         let plants = (1...2).map(StorageTestFixture.plant)
-        let model = PlantListViewModel(loadPlants: ListResult(result: .success(plants)), loadPhoto: LoadInitialPlantPhoto(repository: repository))
+        let model = PlantListViewModel(loadPlants: ListResult(result: .success(plants)), loadPhoto: LoadInitialPlantPhoto(repository: repository), loadDetail: LoadPlantDetail(repository: repository))
         await model.load()
         let ids = await repository.ids()
         XCTAssertTrue(ids.isEmpty)
@@ -25,12 +25,13 @@ final class PlantListViewModelTests: XCTestCase {
 
     func testEmptyAndStorageFailureRemainDistinct() async {
         let photo = LoadInitialPlantPhoto(repository: CardPhotoRepository())
-        let empty = PlantListViewModel(loadPlants: ListResult(result: .success([])), loadPhoto: photo)
+        let detail = LoadPlantDetail(repository: CardPhotoRepository())
+        let empty = PlantListViewModel(loadPlants: ListResult(result: .success([])), loadPhoto: photo, loadDetail: detail)
         await empty.load()
         guard case .loaded(let plants) = empty.state else { return XCTFail("Not empty") }
         XCTAssertTrue(plants.isEmpty)
         XCTAssertTrue(empty.cards.isEmpty)
-        let failed = PlantListViewModel(loadPlants: ListResult(result: .failure(PlantStorageError.storage)), loadPhoto: photo)
+        let failed = PlantListViewModel(loadPlants: ListResult(result: .failure(PlantStorageError.storage)), loadPhoto: photo, loadDetail: detail)
         await failed.load()
         guard case .failed = failed.state else { return XCTFail("Failure hidden") }
         XCTAssertTrue(failed.cards.isEmpty)
