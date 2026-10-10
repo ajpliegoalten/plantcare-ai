@@ -2,6 +2,8 @@
 
 ## Estado verificado
 
+- Política vigente desde 2026-10-10: verificación habitual en un único iPhone Simulator estándar con texto normal y una apariencia; `./init.sh`, unitarias/UI funcionales e inspección visual básica se mantienen. SE/pantallas pequeñas, Dynamic Type aumentado/máximo, VoiceOver/Accessibility Inspector y matrices adicionales de apariencia solo por petición expresa. Las evidencias y hashes previos que siguen abajo son históricos, no obligaciones de repetir esas variantes ni aprobación de comprobaciones nuevas.
+
 - `edit-plant`: **accepted tras validación independiente** en rama `feature/edit-plant`. Baseline limpia 33/33; gate implementer e independiente 43/43; ambos escenarios finales SE oscuro/AX máximo 2/2; Release y análisis independientes correctos. Spec aprobada conservada SHA256 `5989ccc4503e172495b7ee047067261f5b42c216803d340976408a00f981a5e5`. Entrega mediante commit local; sin push/PR/merge.
 
 - Raíz: repositorio `plantcare-ai`.
@@ -16,6 +18,13 @@
 - Última comprobación: 2026-10-10, aceptación independiente de `edit-plant`; las dependencias previas conservan su aceptación independiente.
 
 ## Registro de sesión
+
+### 2026-10-10 — Simplificación de la política de verificación
+
+- Ajuste documental solicitado por el usuario en el mismo worktree `edit-plant`: AGENTS, CONSTRAINTS, skill local ios-clean-mvvm, DESIGN, specs vigentes (incluida edit-plant aprobada), guía de pruebas y riesgo visual. Autorización limitada a validación: no cambia alcance funcional, código ni soporte de accesibilidad; `init.sh`, tests y aserciones permanecen intactos. No se modifican skills globales ni otros worktrees.
+- La sesión activa es esta misma sesión; implementer y validator de edit-plant ya finalizaron. Comprobación de procesos sin xcodebuild/caffeinate/opencode run activos; no se lanzan builds/tests, matrices o subagentes nuevos ni ejecuciones duplicadas.
+- Verificación de este cambio solo documental: revisión del diff y `git diff --check`. No hay evidencia funcional nueva ni declaración de éxito de comprobaciones ampliadas. Fuera de la rutina: SE/pantallas pequeñas, texto aumentado/máximo, VoiceOver/Accessibility Inspector y apariencias adicionales; solo bajo petición expresa.
+- Evidencias históricas conservadas sin reescritura. La spec edit-plant se ajusta únicamente en obligaciones de validación por autorización expresa posterior; el hash aceptado anteriormente describe su versión histórica, no el documento actualizado. El estado accepted de la funcionalidad no representa una nueva validación de código.
 
 ### 2026-10-10 — Aceptación persistida `edit-plant`
 

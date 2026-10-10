@@ -1,5 +1,7 @@
 # Restricciones operativas
 
+- MUST: aplicar la política de verificación de `AGENTS.md`: un único iPhone Simulator estándar con texto normal, sin matrices adicionales de apariencia. Mantener `./init.sh`, pruebas unitarias/UI funcionales e inspección visual básica. SE/pantallas pequeñas, Dynamic Type aumentado/máximo y VoiceOver/Accessibility Inspector solo bajo petición expresa del usuario; no retirar soporte de accesibilidad ni debilitar tests.
+
 - MUST: mantener el host despierto y la tapa del portátil abierta durante XCUITest local. `caffeinate -dius ./init.sh` evita suspensión por inactividad, pero no garantiza evitar `Clamshell Sleep` al cerrar la tapa en batería. Motivo: se comprobaron pausas de 903–904 s en `pmset` coincidentes con timeouts de eventos/capturas del simulador; no interpretar una ejecución interrumpida por suspensión como evidencia funcional.
 
 - El target iPhone tiene despliegue mínimo iOS 17.0; cambios posteriores deben conservar compatibilidad o documentar explícitamente el cambio. Motivo: configuración de compilación reproducible del bootstrap.

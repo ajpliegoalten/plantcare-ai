@@ -2,6 +2,8 @@
 
 ## Source Feature
 
+> Política de verificación vigente: `AGENTS.md`. Un único iPhone Simulator estándar con texto normal y una apariencia, `./init.sh`, pruebas unitarias/UI funcionales e inspección visual básica. SE/pantallas pequeñas, Dynamic Type aumentado/máximo, VoiceOver/Accessibility Inspector y matrices adicionales de apariencia solo si el usuario lo solicita expresamente. Se conserva soporte de accesibilidad y todas las aserciones funcionales; no declarar superadas comprobaciones no ejecutadas. Este ajuste sustituye únicamente obligaciones de verificación ampliada, no alcance ni evidencias históricas.
+
 - `id`: `plant-cards`; `area`: `coleccion`.
 - `title`: Ver tarjetas de ejemplares guardados.
 - `user_visible_behavior`: Mis plantas muestra una tarjeta fotográfica por ejemplar con nombre, especie y acceso al detalle.
@@ -60,7 +62,7 @@ Then se conserva respectivamente el vacío aceptado con sus dos acciones deshabi
 
 ### 5. Reapertura y accesibilidad
 Given los dos ejemplares persistidos en un almacén de prueba aislado,
-When se termina/reabre sin desinstalar ni resembrar, o se usa Dynamic Type máximo,
+When se termina/reabre sin desinstalar ni resembrar en el simulador estándar con texto normal,
 Then siguen las dos identidades, fotos y datos correctos, sin recorte horizontal; contenido y segunda tarjeta son alcanzables desplazándose; VoiceOver identifica nombre, especie, ubicación si existe y acción de apertura.
 
 ## Repository Research
@@ -168,7 +170,7 @@ Las fotos son locales y pueden faltar o fallar aun si se pudieron leer los metad
 - [ ] Preparar imagen fuera del MainActor y aislar carga/error por tarjeta; evitar precarga/lecturas duplicadas.
 - [ ] Implementar una columna de tarjetas, navegación UUID y shell; preservar Añadir deshabilitado y estados previos.
 - [ ] Añadir tests unitarios y UI concretos; no quitar comprobación de modelos/bytes ni aislamiento/cleanup existentes.
-- [ ] Comprobar Dynamic Type/VoiceOver, fotos representativas y ausencia de affordances falsas; actualizar docs/evidencia de implementación.
+- [ ] Inspección visual básica con texto normal, fotos representativas y ausencia de affordances falsas; actualizar docs/evidencia. Dynamic Type aumentado/máximo y VoiceOver solo por petición expresa.
 
 ## Verification Plan (para implementador/validador; no ejecutado por planner)
 
@@ -191,9 +193,9 @@ python3 -m json.tool PlantCareAI/Localizable.xcstrings >/dev/null
 git diff --check
 ```
 
-- Manual con fixture aislado según `docs/testing-local-plant-storage.md`: screenshots claro/oscuro, pantalla pequeña, tamaño normal y `xcrun simctl ui "$UDID" content_size accessibility-extra-extra-extra-large`; comprobar segunda tarjeta por scroll, nombres/especie/ubicación largos, foto 4:3, Atrás y Añadir deshabilitado; restaurar `content_size large`.
+- Manual con fixture aislado según `docs/testing-local-plant-storage.md`: inspección visual básica en un único simulador estándar con texto normal y una apariencia; comprobar segunda tarjeta por scroll, nombres/especie/ubicación largos, foto 4:3, Atrás y Añadir deshabilitado. Pantallas pequeñas/SE, texto aumentado/máximo y apariencias adicionales solo bajo petición expresa.
 - Usar fotos propias/de prueba locales diferenciables con motivo visible para revisión de recorte; jamás descargar fotos remotas o sembrar PlantStore. Los cuadrados de color solo prueban aislamiento de bytes.
-- Revisar VoiceOver real/Accessibility Inspector: orden, etiqueta de selección y reintento separado; registrar si no disponible. Comprobar Release compilado sin flags/símbolos de fixture según patrón de evidencia de almacenamiento.
+- VoiceOver real/Accessibility Inspector: solo por petición expresa, fuera de la verificación habitual; no declarar superado si no se ejecutó. Comprobar Release compilado sin flags/símbolos de fixture según patrón de evidencia de almacenamiento.
 
 ## Risks / Decisions / Open Questions
 

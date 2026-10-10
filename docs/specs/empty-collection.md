@@ -4,6 +4,8 @@
 
 ## Source Feature
 
+> Política de verificación vigente: `AGENTS.md`. Un único iPhone Simulator estándar con texto normal y una apariencia, `./init.sh`, pruebas unitarias/UI funcionales e inspección visual básica. SE/pantallas pequeñas, Dynamic Type aumentado/máximo, VoiceOver/Accessibility Inspector y matrices adicionales de apariencia solo si el usuario lo solicita expresamente. Se conserva soporte de accesibilidad y todas las aserciones funcionales; no declarar superadas comprobaciones no ejecutadas. Este ajuste sustituye únicamente obligaciones de verificación ampliada, no alcance ni evidencias históricas.
+
 - `id`: `empty-collection`; `area`: `coleccion`; `title`: Mostrar Mis plantas vacía.
 - `user_visible_behavior`: Al abrir sin ejemplares se ve «Mis plantas» con un estado vacío y acción Añadir.
 - `depends_on`: [`design-resources`] (`accepted`); `status` al planificar: `not_started`.
@@ -46,7 +48,7 @@ Then se reconocen sus etiquetas y se comunica accesiblemente que el alta todaví
 
 ### Scenario 3: adaptabilidad
 
-Given un iPhone con texto de accesibilidad grande o VoiceOver activado
+Given un iPhone Simulator estándar con tamaño de texto normal
 When se consulta la pantalla vacía
 Then título, mensaje y controles siguen legibles y ordenados, no se cortan ni solapan; controles e información tienen nombres/hints comprensibles y área táctil de al menos 44 × 44 pt cuando estén activos. La superficie permanece legible en apariencia clara y oscura.
 
@@ -93,7 +95,7 @@ Usar tipografía escalable (`.largeTitle`/`.title`/`.body` o estilos métricos),
 
 - UI involucrada: sí, pantalla raíz «Mis plantas» vacía. Fuente: `DESIGN.md`, `docs/build-brief.md` y descripción de la referencia Stitch revisada; no existe archivo/captura reutilizable.
 - Crema `#F8FAF2`, título grande, botón de encabezado y tarjeta blanca de radio aproximado 22 pt, elevación muy suave opcional, SF Symbol vegetal, CTA sobrio verde `#3E6553`. Márgenes ~20 pt, padding de tarjeta ~16 pt; ajustar con Dynamic Type/espacio seguro. Sin pestaña «Actividad» ni footer inventado; footer nativo solo si aporta navegación real.
-- Estados comprobables: vacío normal, texto grande, VoiceOver, apariencia oscura (tokens universales actuales). No diseñar todavía la tarjeta con fotografía 4:3 para una planta guardada.
+- Estado de verificación habitual: vacío en simulador estándar con texto normal y una apariencia. Texto aumentado/máximo, VoiceOver y apariencias adicionales solo por petición expresa; conservar su soporte. No diseñar todavía la tarjeta con fotografía 4:3 para una planta guardada.
 - Nuevo artefacto de diseño: no; guía escrita suficiente, no generar imagen nueva ni recrear Stitch como web.
 
 ## Durable Documentation Impact
@@ -109,7 +111,7 @@ Usar tipografía escalable (`.largeTitle`/`.title`/`.body` o estilos métricos),
 1. Confirmar raíz/estado y gate de línea base; conservar recursos aceptados y fijar textos/hints españoles.
 2. Cambiar la vista raíz a colección vacía adaptable y accesible, con dos puntos de entrada honestamente no operativos hasta el flujo de foto; sin estado ni persistencia ficticia.
 3. Añadir claves locales y actualizar UI tests para nuevo contrato observable y fallback, eliminando expectativas de bootstrap.
-4. Ejecutar gate y abrir una instalación limpia en simulador, revisar Dynamic Type, VoiceOver y apariencia; registrar resultados y actualizar arquitectura/estado.
+4. Ejecutar gate y abrir una instalación limpia en el único simulador estándar con texto normal; inspección visual básica, registrar resultados y actualizar arquitectura/estado. Dynamic Type aumentado/máximo, VoiceOver y otras apariencias solo por petición expresa.
 
 ## Implementation Tasks
 
@@ -124,11 +126,11 @@ Usar tipografía escalable (`.largeTitle`/`.title`/`.body` o estilos métricos),
 - `python3 -m json.tool PlantCareAI/Localizable.xcstrings >/dev/null` y `plutil -lint PlantCareAI.xcodeproj/project.pbxproj`; inspeccionar que todas las cadenas nuevas se resuelven por clave y no se añadieron assets de imagen ni permisos.
 - `./init.sh` desde raíz: ejecuta build + UI tests no bloqueantes en iPhone Simulator disponible (no solo imprime instrucciones, no inicia servidores). Actualizar tests persistentes XCTest para `Mis plantas`, título/mensaje vacío, ambos botones por identifier y estado disabled/hint, ausencia de bootstrap/«Actividad»; segunda prueba de preferencia inglesa verifica fallback español. UI test es el E2E persistente del repo; no existe `pnpm test:e2e` ni se necesita otro harness.
 - Para apertura sin datos usar simulador limpio o `xcrun simctl uninstall <UDID> org.plantcareai.prototype` (solo dispositivo de prueba) antes de `xcrun simctl install <UDID> DerivedData/Build/Products/Debug-iphonesimulator/PlantCareAI.app` y `xcrun simctl launch <UDID> org.plantcareai.prototype -AppleLanguages '(es)' -AppleLocale es_ES`; revisar visualmente la pantalla, sin aceptar sólo build/UI test como validación visual.
-- Comprobar manualmente texto de accesibilidad grande y VoiceOver (orden, etiquetas y explicación de CTA no disponible), pantalla pequeña si se dispone y modo oscuro; sin recortes ni contraste pobre. `git diff --check`; revisar ausencia de navegación ficticia, datos de planta y secretos.
+- Inspección visual básica con texto normal en el único simulador estándar y una apariencia, sin recortes ni contraste pobre. Texto aumentado/máximo, VoiceOver/Accessibility Inspector, pantallas pequeñas/SE y otras apariencias solo bajo petición expresa. `git diff --check`; revisar ausencia de navegación ficticia, datos de planta y secretos.
 
 ## Evidence To Capture
 
-- En `PROGRESS.md`/`feature_list.json`: fecha, modelo/UDID/runtime, `./init.sh` build/test y nombres/resultados de UI tests, apertura real sin datos, captura local ignorada en `DerivedData/` si se obtiene, inspección de texto grande/VoiceOver/modo oscuro y limitaciones. No declarar `passing` sin pruebas ejecutadas ni `accepted` sin validador independiente.
+- En `PROGRESS.md`/`feature_list.json`: fecha, modelo/UDID/runtime, `./init.sh` build/test y nombres/resultados de UI tests, apertura real sin datos, captura local ignorada en `DerivedData/` si se obtiene e inspección visual básica. Comprobaciones ampliadas solo si solicitadas; fuera de la rutina no declararlas aprobadas ni pendientes obligatorios. No declarar `passing` sin pruebas ejecutadas ni `accepted` sin validador independiente.
 
 ## Validator Checklist
 

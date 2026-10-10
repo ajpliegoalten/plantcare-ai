@@ -2,6 +2,8 @@
 
 ## Source Feature
 
+> Política de validación actualizada por autorización del usuario (2026-10-10): aplicar `AGENTS.md`. Un único iPhone Simulator estándar, texto normal y una sola apariencia; mantener `./init.sh`, pruebas unitarias/UI funcionales e inspección visual básica. SE/pantallas pequeñas, Dynamic Type aumentado/máximo, VoiceOver/Accessibility Inspector y matrices adicionales de apariencia solo bajo petición expresa. No exigir ni declarar superadas esas comprobaciones fuera de la rutina. Conservar soporte de accesibilidad, alcance y aserciones funcionales. El ajuste posterior no reescribe evidencias ni el hash histórico de la spec aceptada.
+
 - `id`: `edit-plant`; `area`: `detalle`; `title`: Editar nombre y ubicación.
 - `user_visible_behavior`: El usuario modifica el nombre personalizado y la ubicación opcional sin alterar la especie ni otra planta.
 - `depends_on`: `plant-detail`, comprobada `accepted` en `feature_list.json` y `PROGRESS.md`.
@@ -74,7 +76,7 @@ Then la operación informa ausencia explícita y no inserta ni modifica otra pla
 Given A editada y B intacta,
 When se termina y relanza el proceso sin desinstalar/resembrar,
 Then tarjeta y detalle de A conservan cambios y B todos sus valores originales, incluidas fichas/fotos; no se necesita API/red.
-Given iPhone pequeño, texto máximo, teclado visible o VoiceOver,
+Given un iPhone Simulator estándar con texto normal y teclado visible,
 Then etiquetas, validación, errores y acciones son alcanzables y comprensibles, controles >=44×44 pt; no claves de localización crudas, recorte horizontal ni campos extras.
 
 ## Repository Research
@@ -191,7 +193,7 @@ git diff --check
 ```
 
 - init.sh intacto: ejecuta build/unit/UI y termina, no solo guía ni procesos largos. Release sin símbolos/argumentos nuevos de fixtures.
-- Manual: claro/oscuro, pantalla pequeña, Dynamic Type máximo, teclado y VoiceOver/orden/errores, Cancelar/gesto y Atrás, offline sin API; restaurar configuración y limpiar solo fixture. Registrar límites reales, no equiparar XCTest con lectura VoiceOver o prueba física de disco.
+- Manual habitual: inspección visual básica en un único iPhone Simulator estándar con texto normal y una apariencia; teclado, Cancelar/gesto, Atrás y comportamiento local sin API; limpiar solo fixture. Pantallas pequeñas/SE, Dynamic Type aumentado/máximo, VoiceOver/Accessibility Inspector y otras apariencias solo bajo petición expresa. Registrar lo realmente ejecutado, sin equiparar XCTest con lectura VoiceOver o prueba física de disco.
 
 ## Risks / Decisions / Open Questions For Human Review
 
@@ -204,7 +206,7 @@ git diff --check
 
 ## Evidence To Capture / Validator Checklist
 
-- Futuro: logs/xcresult con entorno/UDID, modelos+bytes antes/después/reapertura, tests rollback, capturas modal/validación/error y detalle/colección editados/texto máximo; limitaciones manuales en PROGRESS/feature list, sin logs sensibles.
+- Futuro: logs/xcresult con entorno/UDID, modelos+bytes antes/después/reapertura, tests rollback y capturas básicas de modal/validación/error y detalle/colección editados con texto normal. Capturas de texto aumentado/máximo u otras variantes solo si el usuario solicita esas comprobaciones; resultados reales en PROGRESS/feature list, sin logs sensibles.
 - [ ] Solo dos campos; acceso visible desde detalle, modal nativo y ninguna edición directa desde tarjetas.
 - [ ] Cancel/descarte sin escrituras, validación Domain/Data y save/error honestos; propuestas aprobadas antes de implementación.
 - [ ] Commit por UUID modifica solo name/location, sin upsert/fotos/esquema/red; aislamiento completo y rollback comprobados.

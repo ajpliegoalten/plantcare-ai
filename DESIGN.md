@@ -58,6 +58,8 @@ No crear pantalla independiente de actividad en el MVP. El detalle puede mostrar
 
 ## Componentes, estados y accesibilidad
 
+El soporte de accesibilidad y diseño adaptable descrito aquí se conserva. Su verificación habitual sigue `AGENTS.md`: un único iPhone Simulator estándar, texto normal, una apariencia e inspección visual básica. Pruebas específicas de pantallas pequeñas/iPhone SE, Dynamic Type aumentado/máximo, VoiceOver/Accessibility Inspector y matrices adicionales de apariencia solo se ejecutan por petición expresa del usuario; fuera de esa petición no se declaran superadas ni se exigen para aceptar una feature.
+
 Botones primarios claramente distinguibles, tarjetas suaves, fotografías con recorte predecible y cronología legible. Estados vacío, sin historial, analizando, baja confianza, error recuperable y sin conexión deben explicar la siguiente acción. Evitar que el color sea la única señal de confianza o estado; dar texto claro, contraste comprobado (también para texto sobre verde), soporte para Dynamic Type y VoiceOver, objetivos táctiles de al menos 44 × 44 pt y permisos de cámara/galería comprensibles. Las microetiquetas de 11 px y los botones de 36 px del HTML no son objetivos de accesibilidad. Confirmar eliminaciones y avisar del envío externo de datos antes del primer uso de IA.
 
 Evitar degradados llamativos, estética futurista de IA, exceso de verde, aspecto infantil, dashboards empresariales, densidad excesiva o apariencia de web adaptada. No usar porcentajes de confianza sin base calibrada ni estética de diagnóstico médico.
