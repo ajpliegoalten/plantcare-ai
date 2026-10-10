@@ -1,6 +1,13 @@
 {
   "sourceLanguage" : "es",
   "strings" : {
+    "externalAIConsent.title" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Antes de usar IA externa" } } } },
+    "externalAIConsent.body" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Para identificar plantas y ofrecer orientación, las funciones de IA enviarán al proveedor externo configurado para esta demo la foto que elijas para IA o el texto necesario de tu planta (especie, cuidados, historial pertinente y tu pregunta, según la función). No se envía toda tu colección ni fotos antiguas para analizar una foto actual. Puedes cancelar antes de continuar. Recordaremos tu aceptación en este dispositivo para futuras solicitudes de IA que tú inicies." } } } },
+    "externalAIConsent.notAvailable" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "La identificación todavía no está disponible; aceptar este aviso no enviará tu foto ahora." } } } },
+    "externalAIConsent.accept" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Aceptar y continuar" } } } },
+    "externalAIConsent.unavailable" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "La identificación todavía no está disponible. No se ha enviado ninguna foto." } } } },
+    "externalAIConsent.error" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudo comprobar o guardar tu aceptación. No se ha enviado ninguna foto. Pulsa Identificar para reintentar." } } } },
+    "externalAIConsent.checking" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Comprobando autorización…" } } } },
     "identificationPhoto.cameraChecking" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Comprobando acceso a la cámara…" } } } },
     "identificationPhoto.title" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Foto de tu planta" } } } },
     "identificationPhoto.placeholder" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Elige una foto de tu planta" } } } },
@@ -9,7 +16,7 @@
     "identificationPhoto.camera" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Tomar foto" } } } },
     "identificationPhoto.cancel" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Cancelar" } } } },
     "identificationPhoto.identify" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Identificar" } } } },
-    "identificationPhoto.future" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "La identificación estará disponible próximamente." } } } },
+    "identificationPhoto.future" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Identificar permite revisar el aviso de IA externa. La identificación todavía no está disponible." } } } },
     "identificationPhoto.loading" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Preparando foto…" } } } },
     "identificationPhoto.error" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudo preparar esta foto. Elige otra imagen o inténtalo de nuevo." } } } },
     "identificationPhoto.tooLarge" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Esta foto supera los límites de tamaño. Elige una imagen más pequeña." } } } },

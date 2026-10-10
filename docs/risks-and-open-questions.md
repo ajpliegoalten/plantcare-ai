@@ -17,6 +17,8 @@ Fuentes botánicas verificadas y recuperación/RAG; comparación visual de imág
 
 ## Riesgos y mitigación mínima
 
+- **Consentimiento externo** (ADR 003): proveedor real pendiente; el destinatario provisional exige renovación antes de conectar red. UserDefaults no garantiza durabilidad ante apagado abrupto; registro perdido vuelve a pedir confirmación. Los tests instrumentados prueban la barrera, no un transporte, retención externa ni cumplimiento legal. Cada futura feature de red debe verificar que su transporte no la elude.
+
 - **Importación efímera** (`choose-identification-photo`): ImageIO normaliza orientación, alfa y metadata para preview con entrada ≤30 MiB/80 MP y JPEG ≤2048 px/5 MiB, sin guardar. PhotosPicker puede materializar los bytes antes del límite y cámara entrega UIImage completa; no es una garantía de memoria constante. El pipeline definitivo de alta sigue pendiente de `save-plant`. Cámara física, permisos en dispositivo y descargas iCloud requieren evidencia separada del simulador; no confundir dobles con captura real.
 
 - **Alucinación o exceso de confianza**: exigir confirmación humana de especie y persistencia, cuidados etiquetados como orientación y análisis con causas posibles y comprobaciones; probar casos inciertos.

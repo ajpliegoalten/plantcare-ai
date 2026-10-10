@@ -20,7 +20,7 @@ final class IdentificationPhotoViewModelTests: XCTestCase {
         XCTFail("State did not settle")
     }
     private func make(_ preparer: ControlledPhotoPreparer) -> IdentificationPhotoViewModel {
-        IdentificationPhotoViewModel(prepare: PrepareIdentificationPhoto(preparer: preparer), camera: CheckCameraAccess(access: PhotoCameraDouble()))
+        IdentificationPhotoViewModel(prepare: PrepareIdentificationPhoto(preparer: preparer), camera: CheckCameraAccess(access: PhotoCameraDouble()), authorize: AuthorizeExternalAIOperation(repository: ConsentDouble()))
     }
     private func photo() -> IdentificationPhoto { IdentificationPhoto(id: UUID(), jpeg: Data([1]), width: 2, height: 1) }
 
@@ -72,13 +72,14 @@ final class IdentificationPhotoViewModelTests: XCTestCase {
         let preparer = ControlledPhotoPreparer()
         let camera = PhotoCameraDouble()
         await camera.configure(available: false, status: .notDetermined)
-        let vm = IdentificationPhotoViewModel(prepare: PrepareIdentificationPhoto(preparer: preparer), camera: CheckCameraAccess(access: camera))
+        let vm = IdentificationPhotoViewModel(prepare: PrepareIdentificationPhoto(preparer: preparer), camera: CheckCameraAccess(access: camera), authorize: AuthorizeExternalAIOperation(repository: ConsentDouble()))
         let a = photo()
         vm.select { Data([1]) }
         await wait { await preparer.count == 1 }
         await preparer.complete(.success(a))
         await wait { !vm.isLoading }
         vm.takePhoto()
+        XCTAssertFalse(vm.canIdentify)
         await wait { !vm.isCheckingCamera }
         XCTAssertEqual(vm.cameraIssue, .unavailable)
         XCTAssertEqual(vm.photo, a)

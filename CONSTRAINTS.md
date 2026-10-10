@@ -1,5 +1,7 @@
 # Restricciones operativas
 
+- MUST: invocar todo transporte externo de IA dentro de `AuthorizeExternalAIOperation`, nunca usando solo una bandera UI. Antes de conectar un proveedor real, sustituir el destinatario provisional, actualizar aviso y renovar alcance; renovar también ante cambios materiales de destinatario, datos o finalidades. Motivo: la aceptación actual no autoriza silenciosamente un proveedor aún desconocido (ADR 003).
+
 - MUST: no editar `init.sh` mientras haya una ejecución activa del mismo; esperar su terminación antes de cambiar el arnés. Motivo: una edición en curso desalineó la lectura de Bash y produjo `r: command not found`/exit 127 después de build y tests correctos en `choose-identification-photo`; un resultado parcial no equivale a gate aprobado.
 
 - MUST: aplicar la política de verificación de `AGENTS.md`: un único iPhone Simulator estándar con texto normal, sin matrices adicionales de apariencia. Mantener `./init.sh`, pruebas unitarias/UI funcionales e inspección visual básica. SE/pantallas pequeñas, Dynamic Type aumentado/máximo y VoiceOver/Accessibility Inspector solo bajo petición expresa del usuario; no retirar soporte de accesibilidad ni debilitar tests.

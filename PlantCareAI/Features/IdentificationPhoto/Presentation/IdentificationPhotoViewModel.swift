@@ -6,7 +6,16 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
     @Published private(set) var photo: IdentificationPhoto?
     @Published private(set) var isLoading = false
     @Published private(set) var isCheckingCamera = false
-    var isBusy: Bool { isLoading || isCheckingCamera }
+    enum AuthorizationState { case idle, checkingAuthorization, awaitingConfirmation, continuing, failed, unavailable }
+    @Published private(set) var authorizationState: AuthorizationState = .idle
+    var isAuthorizing: Bool { [.checkingAuthorization, .awaitingConfirmation, .continuing].contains(authorizationState) }
+    var isBusy: Bool { isLoading || isCheckingCamera || isAuthorizing }
+    var canIdentify: Bool { photo != nil && !isBusy && !presentsCamera && !closed }
+    private let authorize: AuthorizeExternalAIOperation
+    private let identify: (IdentificationPhoto) async throws -> IdentificationContinuationResult
+    private var authorizationTask: Task<Void, Never>?
+    private var authorizationGeneration = 0
+    private var pendingPhotoID: UUID?
     @Published private(set) var error: IdentificationPhotoError?
     @Published private(set) var cameraIssue: CameraAccessResult?
     @Published var presentsCamera = false
@@ -17,14 +26,71 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
     private var closed = false
     #if DEBUG && targetEnvironment(simulator)
     var testSelections: [String: Data] = [:]
+    var testInvocationCount: (() -> Int)? { didSet { invocationCount = testInvocationCount?() ?? 0 } }
+    @Published private(set) var invocationCount = 0
     #endif
 
-    init(prepare: PrepareIdentificationPhoto, camera: CheckCameraAccess) {
+    init(prepare: PrepareIdentificationPhoto, camera: CheckCameraAccess, authorize: AuthorizeExternalAIOperation, identify: @escaping (IdentificationPhoto) async throws -> IdentificationContinuationResult = { _ in .unavailable }) {
         self.prepare = prepare
         self.camera = camera
+        self.authorize = authorize
+        self.identify = identify
     }
 
-    deinit { task?.cancel() }
+    deinit { task?.cancel(); authorizationTask?.cancel() }
+
+    func identifyPhoto() {
+        guard canIdentify, let photo else { return }
+        pendingPhotoID = photo.id
+        continueAuthorization(confirmed: false)
+    }
+
+    func confirmAuthorization() {
+        guard authorizationState == .awaitingConfirmation, !closed, photo?.id == pendingPhotoID else { return }
+        continueAuthorization(confirmed: true)
+    }
+
+    func cancelAuthorization() {
+        authorizationGeneration += 1
+        authorizationTask?.cancel()
+        authorizationTask = nil
+        pendingPhotoID = nil
+        authorizationState = .idle
+    }
+
+    private func continueAuthorization(confirmed: Bool) {
+        guard let snapshot = photo, snapshot.id == pendingPhotoID else { return }
+        authorizationGeneration += 1
+        let request = authorizationGeneration
+        authorizationState = confirmed ? .continuing : .checkingAuthorization
+        authorizationTask = Task { [weak self, identify, authorize] in
+            do {
+                let result = try await authorize.execute(confirmed: confirmed) { [weak self] in
+                    guard let self, !self.closed, self.authorizationGeneration == request,
+                          self.photo?.id == snapshot.id else { throw CancellationError() }
+                    try Task.checkCancellation()
+                    self.authorizationState = .continuing
+                    return try await identify(snapshot)
+                }
+                guard let self, !self.closed, self.authorizationGeneration == request, !Task.isCancelled else { return }
+                self.authorizationTask = nil
+                switch result {
+                case .requiresConfirmation: self.authorizationState = .awaitingConfirmation
+                case .completed:
+                    self.pendingPhotoID = nil
+                    self.authorizationState = .unavailable
+                }
+                #if DEBUG && targetEnvironment(simulator)
+                self.invocationCount = self.testInvocationCount?() ?? 0
+                #endif
+            } catch {
+                guard let self, !self.closed, self.authorizationGeneration == request, !Task.isCancelled else { return }
+                self.authorizationTask = nil
+                self.pendingPhotoID = nil
+                self.authorizationState = .failed
+            }
+        }
+    }
 
     /// Transfer closure belongs to Presentation; neither PhotosPickerItem nor UIImage crosses Domain.
     func select(load: @escaping @Sendable () async throws -> Data?) {
@@ -40,6 +106,7 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
                 let prepared = try await prepare.execute(data)
                 guard let self, !self.closed, self.generation == request, !Task.isCancelled else { return }
                 self.photo = prepared
+                self.authorizationState = .idle
                 self.isLoading = false
                 self.task = nil
             } catch {
@@ -70,6 +137,7 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
     }
 
     func close() {
+        cancelAuthorization()
         closed = true
         generation += 1
         task?.cancel()

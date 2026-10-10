@@ -25,6 +25,8 @@ Foto actual elegida → solicitud a IA con identidad/ficha y selección pertinen
 
 ## Reglas y casos límite
 
+- Consentimiento externo por instalación, no por ejemplar: aceptación explícita de destinatario/versión recordada localmente; rechazos no persistidos. Preparar foto no autoriza ni envía. Cancelar aviso abandona solo la intención, conserva foto y no ejecuta operación; cerrar borrador libera foto. Aceptar habilita futuras intenciones explícitas, nunca envíos automáticos. La implementación actual sigue sin identificación/red.
+
 - Identificación poco fiable: indicar incertidumbre, ofrecer alternativas u otra foto; permitir introducir especie conocida y generar cuidados antes de guardar. Ninguna propuesta se acepta automáticamente.
 - Sin red/API: leer y editar información local; no completar identificación, cuidados, análisis o pregunta contextual hasta poder reintentar. No se crean plantas nuevas sin ficha.
 - Primer uso de IA: avisar que foto y datos pertinentes de la planta salen hacia un proveedor externo; no enviar todo el almacenamiento por defecto. La foto inicial y las añadidas se conservan localmente; una foto descartada del análisis no entra en memoria.

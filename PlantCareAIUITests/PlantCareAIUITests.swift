@@ -122,13 +122,138 @@ final class PlantCareAIUITests: XCTestCase {
     override func tearDownWithError() throws {
         for id in storageIDs {
             let app = XCUIApplication()
-            app.launchArguments = ["--storage-test-id", id, "--storage-cleanup"]
+            app.launchArguments = ["--storage-test-id", id, "--storage-cleanup", "--consent-test-id", id, "--consent-cleanup"]
             app.launch()
             XCTAssertTrue(app.staticTexts["emptyCollectionTitle"].waitForExistence(timeout: 10))
             app.terminate()
         }
         storageIDs.removeAll()
     }
+    private func prepareConsentPhoto(_ app: XCUIApplication) {
+        app.buttons["addPlantHeader"].tap()
+        XCTAssertTrue(app.navigationBars["Foto de tu planta"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["identifyPhoto"].isEnabled)
+        XCTAssertFalse(app.navigationBars["Antes de usar IA externa"].exists)
+        let a = app.buttons["fixture-photo-A"]
+        reveal(a, in: app); a.tap()
+        XCTAssertTrue(app.images["identificationPhotoPreview"].waitForExistence(timeout: 10))
+        XCTAssertEqual(app.images["identificationPhotoPreview"].value as? String, "120 × 80")
+    }
+
+    private func requestConsent(_ app: XCUIApplication) {
+        let identify = app.buttons["identifyPhoto"]
+        reveal(identify, in: app); XCTAssertTrue(identify.isEnabled); identify.tap()
+        XCTAssertTrue(app.navigationBars["Antes de usar IA externa"].waitForExistence(timeout: 5))
+    }
+
+    private func assertInvocations(_ count: Int, app: XCUIApplication) {
+        let text = app.staticTexts["externalAIInvocationCount"]
+        XCTAssertTrue(text.waitForExistence(timeout: 5))
+        expectation(for: NSPredicate(format: "label == %@", "Instrumented invocations: \(count)"), evaluatedWith: text)
+        waitForExpectations(timeout: 5)
+    }
+
+    func testExternalConsentCancelGestureAcceptRememberAndRelaunch() {
+        let app = XCUIApplication()
+        let id = isolatedID()
+        app.launchArguments = ["--storage-test-id", id, "--consent-test-id", id, "--consent-spy", "--identification-photo-fixture", "-AppleLanguages", "(es)"]
+        app.launch()
+        prepareConsentPhoto(app); assertInvocations(0, app: app)
+        requestConsent(app)
+        capture("consent-first-notice", app: app)
+        let body = app.staticTexts["externalAIConsentBody"]
+        XCTAssertTrue(body.label.contains("proveedor externo"))
+        XCTAssertTrue(body.label.contains("especie, cuidados, historial pertinente y tu pregunta"))
+        XCTAssertTrue(body.label.contains("No se envía toda tu colección ni fotos antiguas"))
+        XCTAssertTrue(body.label.contains("Recordaremos tu aceptación en este dispositivo"))
+        XCTAssertFalse(body.label.contains("externalAIConsent."))
+        let accept = app.buttons["acceptExternalAIConsent"]
+        reveal(accept, in: app)
+        XCTAssertEqual(accept.label, "Aceptar y continuar")
+        XCTAssertGreaterThanOrEqual(accept.frame.height, 44)
+        capture("consent-full-notice-actions", app: app)
+        app.buttons["cancelExternalAIConsent"].tap()
+        XCTAssertTrue(app.navigationBars["Antes de usar IA externa"].waitForNonExistence(timeout: 5))
+        assertInvocations(0, app: app)
+        XCTAssertEqual(app.images["identificationPhotoPreview"].value as? String, "120 × 80")
+        requestConsent(app)
+        let bar = app.navigationBars["Antes de usar IA externa"]
+        let origin = bar.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.5))
+        let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.95))
+        origin.press(forDuration: 0.05, thenDragTo: end)
+        XCTAssertTrue(bar.waitForNonExistence(timeout: 5))
+        assertInvocations(0, app: app)
+        XCTAssertEqual(app.images["identificationPhotoPreview"].value as? String, "120 × 80")
+        requestConsent(app)
+        // Terminating while confirmation is pending must not persist acceptance.
+        app.terminate(); app.launch()
+        prepareConsentPhoto(app); assertInvocations(0, app: app)
+        requestConsent(app)
+        reveal(accept, in: app); accept.tap()
+        XCTAssertTrue(bar.waitForNonExistence(timeout: 5))
+        assertInvocations(1, app: app)
+        let identify = app.buttons["identifyPhoto"]
+        reveal(identify, in: app); identify.tap()
+        assertInvocations(2, app: app)
+        XCTAssertFalse(bar.exists)
+        app.buttons["cancelIdentificationPhoto"].tap()
+        prepareConsentPhoto(app); assertInvocations(2, app: app)
+        reveal(identify, in: app); identify.tap(); assertInvocations(3, app: app)
+        app.terminate(); app.launch()
+        prepareConsentPhoto(app); assertInvocations(0, app: app)
+        reveal(identify, in: app); identify.tap(); assertInvocations(1, app: app)
+        XCTAssertFalse(bar.exists)
+        capture("consent-remembered-after-relaunch", app: app)
+        app.terminate()
+        let fresh = isolatedID()
+        app.launchArguments = ["--storage-test-id", fresh, "--consent-test-id", fresh, "--consent-spy", "--identification-photo-fixture"]
+        app.launch(); prepareConsentPhoto(app); requestConsent(app)
+        app.buttons["cancelExternalAIConsent"].tap(); assertInvocations(0, app: app)
+    }
+
+    func testExternalConsentUnavailableAndBothPlantsUnchanged() {
+        let app = XCUIApplication()
+        let id = isolatedID()
+        // Real production continuation (no spy) with isolated preference and local storage.
+        app.launchArguments = ["--storage-test-id", id, "--storage-seed", "--consent-test-id", id, "--identification-photo-fixture", "-AppleLanguages", "(en)"]
+        app.launch(); assertCards(app)
+        for _ in 0..<5 { app.swipeDown() }
+        prepareConsentPhoto(app); requestConsent(app)
+        app.buttons["cancelExternalAIConsent"].tap()
+        requestConsent(app)
+        let accept = app.buttons["acceptExternalAIConsent"]
+        reveal(accept, in: app); accept.tap()
+        let unavailable = app.staticTexts["externalAIUnavailable"]
+        XCTAssertTrue(unavailable.waitForExistence(timeout: 5))
+        reveal(unavailable, in: app)
+        XCTAssertEqual(unavailable.label, "La identificación todavía no está disponible. No se ha enviado ninguna foto.")
+        XCTAssertFalse(app.staticTexts["externalAIInvocationCount"].exists)
+        XCTAssertEqual(app.images["identificationPhotoPreview"].value as? String, "120 × 80")
+        capture("consent-production-unavailable", app: app)
+        app.buttons["cancelIdentificationPhoto"].tap()
+        app.terminate()
+        app.launchArguments.removeAll { $0 == "--storage-seed" }
+        app.launchArguments += ["--storage-verify"]
+        app.launch(); assertCards(app); openAndCheckBothDetails(app)
+    }
+
+    func testExternalConsentReadErrorPreservesPhotoAndAllowsRetry() {
+        let app = XCUIApplication()
+        let id = isolatedID()
+        app.launchArguments = ["--storage-test-id", id, "--consent-test-id", id, "--consent-fail-read", "--consent-spy", "--identification-photo-fixture"]
+        app.launch(); prepareConsentPhoto(app)
+        let identify = app.buttons["identifyPhoto"]
+        reveal(identify, in: app); identify.tap()
+        let error = app.staticTexts["externalAIConsentError"]
+        XCTAssertTrue(error.waitForExistence(timeout: 5)); reveal(error, in: app)
+        XCTAssertTrue(error.label.contains("No se ha enviado ninguna foto."))
+        assertInvocations(0, app: app)
+        XCTAssertEqual(app.images["identificationPhotoPreview"].value as? String, "120 × 80")
+        capture("consent-read-error", app: app)
+        reveal(identify, in: app); XCTAssertTrue(identify.isEnabled); identify.tap()
+        XCTAssertTrue(error.waitForExistence(timeout: 5)); assertInvocations(0, app: app)
+    }
+
     func testStoredCollectionSurvivesProcessRelaunch() {
         let app = XCUIApplication()
         let id = isolatedID()
@@ -389,7 +514,7 @@ final class PlantCareAIUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Foto de tu planta"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.descendants(matching: .any)["identificationPhotoPlaceholder"].firstMatch.exists)
         XCTAssertFalse(app.buttons["identifyPhoto"].isEnabled)
-        XCTAssertEqual(app.staticTexts["identificationUnavailable"].label, "La identificación estará disponible próximamente.")
+        XCTAssertEqual(app.staticTexts["identificationUnavailable"].label, "Identificar permite revisar el aviso de IA externa. La identificación todavía no está disponible.")
         capture("photo-empty", app: app)
         app.buttons["takePlantPhoto"].tap()
         XCTAssertTrue(app.staticTexts["cameraIssue"].waitForExistence(timeout: 5))
@@ -514,7 +639,9 @@ final class PlantCareAIUITests: XCTestCase {
         capture("photo-real-replacement", app: app)
         select(1) // same asset after PhotosPickerItem reset
         XCTAssertTrue(preview.waitForExistence(timeout: 10))
-        XCTAssertFalse(app.buttons["identifyPhoto"].isEnabled)
+        expectation(for: NSPredicate(format: "enabled == true"), evaluatedWith: app.buttons["identifyPhoto"])
+        waitForExpectations(timeout: 10)
+        XCTAssertTrue(app.buttons["identifyPhoto"].isEnabled)
         app.buttons["cancelIdentificationPhoto"].tap()
         XCTAssertTrue(app.staticTexts["emptyCollectionTitle"].waitForExistence(timeout: 5))
     }
