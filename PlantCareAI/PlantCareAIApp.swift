@@ -34,19 +34,54 @@ struct PlantCareAIApp: App {
             if arguments.contains("--consent-spy") { consentFixture = ExternalAIConsentTestFixture() }
         }
         #endif
-        let authorization = AuthorizeExternalAIOperation(repository: consentRepository)
+        #if DEBUG && targetEnvironment(simulator)
+        var candidatesFixture: IdentificationCandidatesTestFixture?
+        if let position = arguments.firstIndex(of: "--identification-candidates-fixture"), arguments.indices.contains(position + 1) {
+            candidatesFixture = IdentificationCandidatesTestFixture(mode: arguments[position + 1])
+        }
+        #endif
         viewModel.makeIdentificationPhoto = {
-            let draft = IdentificationPhotoViewModel(prepare: PrepareIdentificationPhoto(preparer: LocalIdentificationPhotoPreparer()), camera: CheckCameraAccess(access: SystemCameraAccess()), authorize: authorization, identify: { _ in
+            // Snapshot once per draft; recheck the same configuration before acceptance and transport.
+            let configuration = IdentificationAPIConfiguration.localDemo()
+            var scope = configuration?.scope ?? ExternalAIConsent(recipient: "unconfigured-identification", noticeVersion: 3)
+            var destinationNotice = configuration?.notice
+            var available = configuration != nil
+            var realRecipient = true
+            #if DEBUG && targetEnvironment(simulator)
+            if consentFixture != nil {
+                scope = .current; available = true; realRecipient = false; destinationNotice = nil
+            } else if candidatesFixture != nil {
+                let second = arguments.contains("--identification-second-destination")
+                let fixtureConfiguration = try! IdentificationAPIConfiguration(
+                    baseURL: second ? "https://vision-two.invalid/api" : "https://vision-one.invalid/v1",
+                    model: second ? "vision-test-b" : "vision-test-a", key: nil)
+                scope = fixtureConfiguration.scope
+                destinationNotice = fixtureConfiguration.notice
+                available = true
+            }
+            // Tests that explicitly exercise absent configuration must be deterministic even with a demo key.
+            if arguments.contains("--identification-no-configuration") { available = false }
+            #endif
+            let authorization = AuthorizeExternalAIOperation(repository: consentRepository, scope: scope)
+            let identify = configuration.map { IdentifyCandidates(repository: OpenAICompatibleSpeciesIdentificationRepository(configuration: $0)) }
+            let draft = IdentificationPhotoViewModel(prepare: PrepareIdentificationPhoto(preparer: LocalIdentificationPhotoPreparer()), camera: CheckCameraAccess(access: SystemCameraAccess()), authorize: authorization, usesRealRecipient: realRecipient, destinationNotice: destinationNotice, identificationAvailable: available, configurationIsCurrent: {
+                #if DEBUG && targetEnvironment(simulator)
+                if consentFixture != nil || candidatesFixture != nil { return true }
+                #endif
+                return configuration == IdentificationAPIConfiguration.localDemo()
+            }, identify: { photo in
                 #if DEBUG && targetEnvironment(simulator)
                 if let consentFixture { return consentFixture.invoke() }
+                if let candidatesFixture { return try await candidatesFixture.identify(photo) }
                 #endif
-                // No provider/transport exists until identify-candidates. Never simulate success.
-                return .unavailable
+                guard let identify else { return .unavailable }
+                return .completed(try await identify.execute(photo: photo))
             })
             #if DEBUG && targetEnvironment(simulator)
             if let consentFixture {
                 draft.testInvocationCount = { consentFixture.invocations }
             }
+            if let candidatesFixture { draft.testInvocationCount = { candidatesFixture.invocations } }
             if arguments.contains("--identification-photo-fixture") {
                 draft.testSelections = IdentificationPhotoTestFixture.selections()
             }

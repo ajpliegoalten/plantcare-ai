@@ -14,7 +14,7 @@ Prototipo iOS personal para identificar plantas, guardar cuidados e historial lo
 
 1. Confirmar la raíz del repositorio con `pwd` y consultar `PROGRESS.md`.
 2. Elegir la primera funcionalidad no completada cuyas dependencias estén completadas, según el orden de `feature_list.json`.
-3. Ejecutar `./init.sh`: exige Xcode, selecciona un iPhone Simulator disponible y ejecuta `xcodebuild build` y `test` (pruebas unitarias y UI funcionales). No comprueba visualmente la pantalla fuera de la prueba UI.
+3. Antes del gate, si no existe `Config/IdentificationSecrets.xcconfig`, copiar `Config/IdentificationSecrets.xcconfig.example` (clave vacía suficiente para tests); nunca sobrescribir un fichero real existente ni versionarlo. Debug exige ese fichero; Release no lo usa. Ejecutar `./init.sh`: exige Xcode, selecciona un iPhone Simulator disponible y ejecuta `xcodebuild build` y `test` (pruebas unitarias y UI funcionales). No comprueba visualmente la pantalla fuera de la prueba UI.
 4. Para apertura visual, abrir `PlantCareAI.xcodeproj` o instalar `DerivedData/Build/Products/Debug-iphonesimulator/PlantCareAI.app` con `xcrun simctl install <UDID> ...` y lanzar `xcrun simctl launch <UDID> org.plantcareai.prototype`. Si falla la línea base, corregirla antes de ampliar la funcionalidad.
 
 ## Reglas de trabajo

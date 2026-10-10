@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct ExternalAIConsentView: View {
+    var usesRealRecipient = false
+    var destination: ExternalAIDestinationNotice?
     let accept: () -> Void
     let cancel: () -> Void
 
@@ -8,8 +10,18 @@ struct ExternalAIConsentView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    Text("externalAIConsent.body").accessibilityIdentifier("externalAIConsentBody")
-                    Text("externalAIConsent.notAvailable").font(.callout)
+                    Text(usesRealRecipient ? "identifyCandidates.consentBody" : "externalAIConsent.body").accessibilityIdentifier("externalAIConsentBody")
+                    if usesRealRecipient, let destination {
+                        Text("identifyCandidates.destination").font(.headline)
+                        Text(verbatim: destination.destination)
+                            .multilineTextAlignment(.leading)
+                            .accessibilityIdentifier("externalAIActualDestination")
+                        Text("identifyCandidates.model").font(.headline)
+                        Text(verbatim: destination.model).accessibilityIdentifier("externalAIActualModel")
+                        Text("identifyCandidates.unknownOperator").font(.callout)
+                            .accessibilityIdentifier("externalAIUnknownOperator")
+                    }
+                    Text(usesRealRecipient ? "identifyCandidates.cancellationLimit" : "externalAIConsent.notAvailable").font(.callout)
                         .accessibilityIdentifier("externalAIConsentCurrentLimit")
                     Button(action: accept) {
                         Text("externalAIConsent.accept")
