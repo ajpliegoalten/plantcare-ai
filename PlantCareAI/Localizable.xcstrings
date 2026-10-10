@@ -14,11 +14,26 @@
       "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Foto cargada" } } }
     },
     "collection.select.hint" : {
-      "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Seleccionar planta; detalle próximamente" } } }
+      "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Consultar la ficha de esta planta" } } }
     },
-    "collection.selection.pending" : {
-      "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "El detalle de esta planta estará disponible próximamente." } } }
-    },
+    "detail.title": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Detalle de planta" } } } },
+    "detail.notFound": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "No se encontró esta planta en el dispositivo." } } } },
+    "detail.storageError": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "No se pudieron leer los datos locales de esta planta. Vuelve a Mis plantas e inténtalo de nuevo." } } } },
+    "detail.createdAt %@": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Guardada el %@" } } } },
+    "detail.care.title": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Ficha de cuidados" } } } },
+    "detail.care.subtitle": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Guía orientativa guardada para este ejemplar" } } } },
+    "detail.care.disclaimer": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Estos cuidados son orientativos y no constituyen un diagnóstico." } } } },
+    "detail.care.light": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Luz" } } } },
+    "detail.care.watering": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Riego" } } } },
+    "detail.care.humidity": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Humedad" } } } },
+    "detail.care.temperature": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Temperatura" } } } },
+    "detail.care.substrate": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Sustrato" } } } },
+    "detail.care.fertilizer": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Abonado" } } } },
+    "detail.photo.loading": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Cargando fotografía local" } } } },
+    "detail.photo.initial": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Fotografía inicial de este ejemplar" } } } },
+    "detail.photo.error": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "No se pudo cargar la fotografía" } } } },
+    "detail.photo.explanation": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "La fotografía se lee desde este dispositivo. Puedes reintentar la carga local." } } } },
+    "detail.photo.retry": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Reintentar carga" } } } },
     "collection.storageError" : {
       "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudieron leer tus plantas locales. Cierra y vuelve a abrir la app para intentarlo de nuevo." } } }
     },

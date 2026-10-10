@@ -6,12 +6,14 @@ final class PlantListViewModel: ObservableObject {
     @Published private(set) var state: State = .loading
     private let loadPlants: any LoadPlantsUseCase
     private let loadPhoto: LoadInitialPlantPhoto
+    private let loadDetail: LoadPlantDetail
     @Published private(set) var cards: [PlantCardViewModel] = []
     private var hasLoaded = false
 
-    init(loadPlants: any LoadPlantsUseCase, loadPhoto: LoadInitialPlantPhoto) {
+    init(loadPlants: any LoadPlantsUseCase, loadPhoto: LoadInitialPlantPhoto, loadDetail: LoadPlantDetail) {
         self.loadPlants = loadPlants
         self.loadPhoto = loadPhoto
+        self.loadDetail = loadDetail
     }
 
     func load() async {
@@ -28,5 +30,9 @@ final class PlantListViewModel: ObservableObject {
 
     func selectedPlant(id: UUID) -> Plant? {
         cards.first { $0.id == id }?.plant
+    }
+
+    func detailViewModel(id: UUID) -> PlantDetailViewModel {
+        PlantDetailViewModel(id: id, loadDetail: loadDetail, loadPhoto: loadPhoto)
     }
 }

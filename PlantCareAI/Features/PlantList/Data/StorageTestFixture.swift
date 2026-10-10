@@ -6,14 +6,18 @@ import UIKit
 enum StorageTestFixture {
     static func plant(_ index: Int) -> Plant {
         let longText = ProcessInfo.processInfo.arguments.contains("--storage-long-text")
+        let longCare = ProcessInfo.processInfo.arguments.contains("--storage-long-care")
+        func care(_ label: String) -> String {
+            "\(label) \(index)" + (longCare ? ": orientación guardada únicamente para este ejemplar. Comprueba sus condiciones antes de actuar y adapta los cuidados con prudencia, sin interpretar esta ficha como un diagnóstico." : "")
+        }
         return Plant(id: UUID(uuidString: "00000000-0000-0000-0000-00000000000\(index)")!,
               name: longText ? "Fixture \(index): mi planta junto a la ventana del salón" : "Fixture \(index)",
               confirmedSpecies: longText ? "Monstera deliciosa — especie confirmada de este ejemplar" : "Monstera deliciosa",
               createdAt: Date(timeIntervalSince1970: Double(index) * 1000),
               location: index == 1 ? (longText ? "Ventana del salón junto a la estantería de libros" : "Ventana") : nil,
-              careSheet: CareSheet(light: "Luz \(index)", watering: "Riego \(index)",
-                                   humidity: "Humedad \(index)", temperature: "Temperatura \(index)",
-                                   substrate: "Sustrato \(index)", fertilizer: "Abono \(index)"))
+              careSheet: CareSheet(light: care("Luz"), watering: care("Riego"),
+                                   humidity: care("Humedad"), temperature: care("Temperatura"),
+                                   substrate: care("Sustrato"), fertilizer: care("Abono")))
     }
 
     static func photo(_ index: Int) -> Data {
