@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct EmptyPlantView: View {
+    let onAdd: () -> Void
     var body: some View {
         VStack(spacing: 16) {
             Image(systemName: "leaf")
@@ -20,7 +21,7 @@ struct EmptyPlantView: View {
                 .foregroundStyle(Color("TextSecondary"))
                 .multilineTextAlignment(.center)
 
-            Button(action: {}) {
+            Button(action: onAdd) {
                 Text("collection.empty.add")
                     .font(.body.weight(.semibold))
                     .frame(maxWidth: .infinity, minHeight: 44)
@@ -28,14 +29,7 @@ struct EmptyPlantView: View {
             }
             .foregroundStyle(Color("Surface"))
             .background(Color("PrimaryAction"), in: RoundedRectangle(cornerRadius: 12))
-            .disabled(true)
-            .accessibilityHint(Text("collection.add.unavailable"))
             .accessibilityIdentifier("addFirstPlant")
-
-            Text("collection.add.unavailable")
-                .font(.footnote)
-                .foregroundStyle(Color("TextSecondary"))
-                .multilineTextAlignment(.center)
         }
         .padding(16)
         .frame(maxWidth: .infinity)

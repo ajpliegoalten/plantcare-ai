@@ -17,6 +17,8 @@ Fuentes botánicas verificadas y recuperación/RAG; comparación visual de imág
 
 ## Riesgos y mitigación mínima
 
+- **Importación efímera** (`choose-identification-photo`): ImageIO normaliza orientación, alfa y metadata para preview con entrada ≤30 MiB/80 MP y JPEG ≤2048 px/5 MiB, sin guardar. PhotosPicker puede materializar los bytes antes del límite y cámara entrega UIImage completa; no es una garantía de memoria constante. El pipeline definitivo de alta sigue pendiente de `save-plant`. Cámara física, permisos en dispositivo y descargas iCloud requieren evidencia separada del simulador; no confundir dobles con captura real.
+
 - **Alucinación o exceso de confianza**: exigir confirmación humana de especie y persistencia, cuidados etiquetados como orientación y análisis con causas posibles y comprobaciones; probar casos inciertos.
 - **Privacidad y credencial de demo**: aviso previo al envío externo; enviar solo foto actual y contexto pertinente; clave fuera del repositorio. Sin backend no hay seguridad apropiada para distribución comercial.
 - **Latencia, coste y dependencia de la API**: respuestas con espera/cancelación o reintento; lectura local disponible sin red; limitar contexto y llamadas innecesarias.

@@ -1,6 +1,22 @@
 {
   "sourceLanguage" : "es",
   "strings" : {
+    "identificationPhoto.cameraChecking" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Comprobando acceso a la cámara…" } } } },
+    "identificationPhoto.title" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Foto de tu planta" } } } },
+    "identificationPhoto.placeholder" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Elige una foto de tu planta" } } } },
+    "identificationPhoto.preview" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Foto seleccionada para identificar" } } } },
+    "identificationPhoto.gallery" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Elegir de galería" } } } },
+    "identificationPhoto.camera" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Tomar foto" } } } },
+    "identificationPhoto.cancel" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Cancelar" } } } },
+    "identificationPhoto.identify" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Identificar" } } } },
+    "identificationPhoto.future" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "La identificación estará disponible próximamente." } } } },
+    "identificationPhoto.loading" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Preparando foto…" } } } },
+    "identificationPhoto.error" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudo preparar esta foto. Elige otra imagen o inténtalo de nuevo." } } } },
+    "identificationPhoto.tooLarge" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Esta foto supera los límites de tamaño. Elige una imagen más pequeña." } } } },
+    "identificationPhoto.cameraUnavailable" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "La cámara no está disponible en este dispositivo." } } } },
+    "identificationPhoto.cameraDenied" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No has permitido el acceso a la cámara. Puedes abrir Ajustes o elegir una foto de galería." } } } },
+    "identificationPhoto.cameraRestricted" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "El acceso a la cámara está restringido en este dispositivo. Puedes elegir una foto de galería." } } } },
+    "identificationPhoto.settings" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Abrir Ajustes" } } } },
     "edit.keyboard.done" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Listo" } } } },
     "edit.open" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Editar" } } } },
     "edit.title" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Editar planta" } } } },
@@ -54,16 +70,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Añadir"
-          }
-        }
-      }
-    },
-    "collection.add.unavailable" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Disponible cuando puedas elegir una foto."
           }
         }
       }
