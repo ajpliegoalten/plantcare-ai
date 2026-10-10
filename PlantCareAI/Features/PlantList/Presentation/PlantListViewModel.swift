@@ -9,23 +9,28 @@ final class PlantListViewModel: ObservableObject {
     private let loadDetail: LoadPlantDetail
     @Published private(set) var cards: [PlantCardViewModel] = []
     private var hasLoaded = false
+    private let update: UpdatePlant
+    private var metadataGeneration = 0
 
-    init(loadPlants: any LoadPlantsUseCase, loadPhoto: LoadInitialPlantPhoto, loadDetail: LoadPlantDetail) {
+    init(loadPlants: any LoadPlantsUseCase, loadPhoto: LoadInitialPlantPhoto, loadDetail: LoadPlantDetail, update: UpdatePlant) {
         self.loadPlants = loadPlants
         self.loadPhoto = loadPhoto
         self.loadDetail = loadDetail
+        self.update = update
     }
 
     func load() async {
         guard !hasLoaded else { return }
         hasLoaded = true
         state = .loading
+        let request = metadataGeneration
         do {
             let plants = try await loadPlants.execute()
+            guard request == metadataGeneration else { return }
             cards = plants.map { PlantCardViewModel(plant: $0, loadPhoto: loadPhoto) }
             state = .loaded(plants)
         }
-        catch { state = .failed }
+        catch { if request == metadataGeneration { state = .failed } }
     }
 
     func selectedPlant(id: UUID) -> Plant? {
@@ -33,6 +38,15 @@ final class PlantListViewModel: ObservableObject {
     }
 
     func detailViewModel(id: UUID) -> PlantDetailViewModel {
-        PlantDetailViewModel(id: id, loadDetail: loadDetail, loadPhoto: loadPhoto)
+        PlantDetailViewModel(id: id, loadDetail: loadDetail, loadPhoto: loadPhoto, update: update) { [weak self] plant in
+            self?.applyUpdatedPlant(plant)
+        }
+    }
+
+    func applyUpdatedPlant(_ plant: Plant) {
+        guard case .loaded(let plants) = state, plants.contains(where: { $0.id == plant.id }) else { return }
+        metadataGeneration += 1
+        cards.first { $0.id == plant.id }?.applyUpdatedPlant(plant)
+        state = .loaded(plants.map { $0.id == plant.id ? plant : $0 })
     }
 }

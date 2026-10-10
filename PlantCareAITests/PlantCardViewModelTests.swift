@@ -3,6 +3,7 @@ import UIKit
 @testable import PlantCareAI
 
 actor CardPhotoRepository: PlantRepository {
+    func updatePlant(id: UUID, name: String, location: String?) async throws -> Plant { throw PlantStorageError.storage }
     private var requests: [(UUID, CheckedContinuation<Data, Error>)] = []
     private var waiters: [(Int, CheckedContinuation<Void, Never>)] = []
     func loadPlants() async throws -> [Plant] { [] }
@@ -50,6 +51,15 @@ final class PlantCardViewModelTests: XCTestCase {
               case .loaded(let image2) = second.photoState else { return XCTFail("Images not loaded") }
         XCTAssertNotEqual(image1.pngData(), image2.pngData())
         XCTAssertEqual(image1.size.width / image1.size.height, 4 / 3, accuracy: 0.01)
+        let plant = first.plant
+        let updated = Plant(id: plant.id, name: "Mi monstera", confirmedSpecies: plant.confirmedSpecies, createdAt: plant.createdAt, location: "Salón", careSheet: plant.careSheet)
+        first.applyUpdatedPlant(updated)
+        first.applyUpdatedPlant(second.plant) // Never replace another UUID.
+        await first.load()
+        XCTAssertEqual(first.plant, updated)
+        guard case .loaded(let retained) = first.photoState else { return XCTFail("Cache lost") }
+        XCTAssertTrue(retained === image1)
+        let afterEdit = await repository.ids(); XCTAssertEqual(afterEdit, ids)
     }
 
     func testFailureAndRetryAreIsolated() async {

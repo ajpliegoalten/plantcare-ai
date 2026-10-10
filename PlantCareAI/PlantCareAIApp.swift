@@ -17,7 +17,7 @@ struct PlantCareAIApp: App {
             load = StorageFixtureLoad(root: testRoot, repository: repository, seed: arguments.contains("--storage-seed"), corrupt: arguments.contains("--storage-corrupt"))
         }
         #endif
-        _plantListViewModel = StateObject(wrappedValue: PlantListViewModel(loadPlants: load, loadPhoto: LoadInitialPlantPhoto(repository: repository), loadDetail: LoadPlantDetail(repository: repository)))
+        _plantListViewModel = StateObject(wrappedValue: PlantListViewModel(loadPlants: load, loadPhoto: LoadInitialPlantPhoto(repository: repository), loadDetail: LoadPlantDetail(repository: repository), update: UpdatePlant(repository: repository)))
     }
 
     var body: some Scene {

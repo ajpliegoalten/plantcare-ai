@@ -5,6 +5,10 @@ final class PlantCareAIUITests: XCTestCase {
 
     private func plantID(_ index: Int) -> String { "00000000-0000-0000-0000-00000000000\(index)" }
 
+    private func back(_ app: XCUIApplication) {
+        app.navigationBars.buttons.matching(NSPredicate(format: "identifier == 'Back' OR label == 'Atrás' OR label == 'Back'")).firstMatch.tap()
+    }
+
     private func capture(_ name: String, app: XCUIApplication) {
         let attachment = XCTAttachment(screenshot: app.screenshot())
         attachment.name = name
@@ -91,7 +95,7 @@ final class PlantCareAIUITests: XCTestCase {
             reveal(card, in: app)
             card.tap()
             assertDetail(index, app: app)
-            app.navigationBars.buttons.firstMatch.tap()
+            back(app)
         }
     }
 
@@ -122,6 +126,130 @@ final class PlantCareAIUITests: XCTestCase {
         XCTAssertFalse(app.buttons["addPlantHeader"].isEnabled)
     }
 
+    private func openEditor(_ index: Int, app: XCUIApplication) {
+        let card = app.buttons["plantCard-\(plantID(index))"]
+        XCTAssertTrue(card.waitForExistence(timeout: 10))
+        for _ in 0..<15 where !card.isHittable { app.swipeDown() }
+        reveal(card, in: app); card.tap()
+        let edit = app.buttons["editPlant-\(plantID(index))"]
+        XCTAssertTrue(edit.waitForExistence(timeout: 10)); edit.tap()
+        XCTAssertTrue(app.navigationBars["Editar planta"].waitForExistence(timeout: 10))
+    }
+
+    private func replace(_ id: String, with value: String, app: XCUIApplication) {
+        let field = app.textViews[id].exists ? app.textViews[id] : app.textFields[id]
+        XCTAssertTrue(field.waitForExistence(timeout: 10))
+        // A field can report hittable while its center is under the sticky bar.
+        // Move the form itself, not the sheet's drag handle, back into view.
+        for _ in 0..<6 where field.frame.midY < app.navigationBars["Editar planta"].frame.maxY + 44 {
+            app.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.4))
+                .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.75)))
+        }
+        field.tap() // XCTest scrolls the native field into view, including from above.
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5))
+        let old = field.value as? String ?? ""
+        if !old.isEmpty {
+            // Native triple tap selects the fixture's single text paragraph.
+            field.tap(withNumberOfTaps: 3, numberOfTouches: 1)
+            field.typeText(value.isEmpty ? XCUIKeyboardKey.delete.rawValue : value)
+        } else { field.typeText(value) }
+        XCTAssertEqual(field.value as? String, value)
+    }
+
+    private func saveEditor(_ app: XCUIApplication) {
+        app.buttons["saveEditPlant"].tap()
+        XCTAssertTrue(app.navigationBars["Editar planta"].waitForNonExistence(timeout: 10))
+    }
+
+    private func finishTyping(_ app: XCUIApplication) {
+        app.buttons["dismissEditPlantKeyboard"].tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 5))
+    }
+
+    func testEditPersistsAndRefreshesOnlySelectedPlant() {
+        let app = XCUIApplication(), id = isolatedID()
+        app.launchArguments = ["--storage-test-id", id, "--storage-seed", "-AppleLanguages", "(es)"]
+        app.launch()
+        openEditor(1, app: app)
+        XCTAssertTrue(app.staticTexts["Nombre personalizado"].exists)
+        XCTAssertTrue(app.staticTexts["Ubicación (opcional)"].exists)
+        capture("edit-form", app: app)
+        replace("editPlantName", with: "Mi monstera", app: app)
+        replace("editPlantLocation", with: "Salón", app: app)
+        saveEditor(app)
+        let name = app.staticTexts["selectedPlant-\(plantID(1))"]
+        XCTAssertTrue(name.waitForExistence(timeout: 10)); reveal(name, in: app)
+        XCTAssertEqual(name.label, "Mi monstera")
+        let location = app.descendants(matching: .any)["detailLocation-\(plantID(1))"].firstMatch
+        XCTAssertTrue(location.label.contains("Salón"))
+        capture("edit-confirmed-detail", app: app)
+        back(app)
+        XCTAssertEqual(app.buttons["plantCard-\(plantID(1))"].label, "Mi monstera, Monstera deliciosa, Salón")
+        XCTAssertEqual(app.buttons["plantCard-\(plantID(2))"].label, "Fixture 2, Monstera deliciosa")
+        openEditor(1, app: app)
+        let reopenedName = app.textViews["editPlantName"].exists ? app.textViews["editPlantName"] : app.textFields["editPlantName"]
+        XCTAssertEqual(reopenedName.value as? String, "Mi monstera")
+        app.buttons["cancelEditPlant"].tap(); back(app)
+        let untouched = app.buttons["plantCard-\(plantID(2))"]; reveal(untouched, in: app); untouched.tap()
+        assertDetail(2, app: app); back(app)
+        app.terminate()
+        app.launchArguments = ["--storage-test-id", id, "--storage-verify-edited", "-AppleLanguages", "(es)"]
+        app.launch()
+        XCTAssertTrue(app.buttons["plantCard-\(plantID(1))"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.staticTexts["storageErrorMessage"].exists)
+        openEditor(1, app: app)
+        let field = app.textViews["editPlantName"].exists ? app.textViews["editPlantName"] : app.textFields["editPlantName"]
+        XCTAssertEqual(field.value as? String, "Mi monstera")
+        app.buttons["cancelEditPlant"].tap(); back(app)
+        let second = app.buttons["plantCard-\(plantID(2))"]; reveal(second, in: app); second.tap()
+        assertDetail(2, app: app)
+    }
+
+    func testCancelGestureValidationAndOptionalLocationWithMissingPhoto() {
+        let app = XCUIApplication(), id = isolatedID()
+        app.launchArguments = ["--storage-test-id", id, "--storage-seed", "--storage-photo-missing", "-AppleLanguages", "(es)"]
+        app.launch(); openEditor(1, app: app)
+        replace("editPlantName", with: "Descartar", app: app)
+        app.buttons["cancelEditPlant"].tap()
+        app.buttons["editPlant-\(plantID(1))"].tap()
+        let field = app.textViews["editPlantName"].exists ? app.textViews["editPlantName"] : app.textFields["editPlantName"]
+        XCTAssertEqual(field.value as? String, "Fixture 1")
+        replace("editPlantLocation", with: "No guardar", app: app)
+        finishTyping(app)
+        // Drag the sheet's top edge, not the scrolling form or keyboard.
+        for _ in 0..<3 where app.navigationBars["Editar planta"].exists {
+            app.navigationBars["Editar planta"].coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0)).withOffset(CGVector(dx: 0, dy: -8)).press(forDuration: 0.1, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.95)), withVelocity: .slow, thenHoldForDuration: 0)
+        }
+        XCTAssertTrue(app.navigationBars["Editar planta"].waitForNonExistence(timeout: 10))
+        app.buttons["editPlant-\(plantID(1))"].tap()
+        let originalLocation = app.textViews["editPlantLocation"].exists ? app.textViews["editPlantLocation"] : app.textFields["editPlantLocation"]
+        XCTAssertEqual(originalLocation.value as? String, "Ventana")
+        replace("editPlantName", with: " ", app: app)
+        finishTyping(app)
+        XCTAssertFalse(app.buttons["saveEditPlant"].isEnabled)
+        let validation = app.staticTexts["editPlantValidation"]
+        // Swipe inside the visible form, above the keyboard; app.swipeUp starts on keys.
+        for _ in 0..<20 where !validation.isHittable {
+            app.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.2)))
+        }
+        XCTAssertTrue(validation.isHittable)
+        XCTAssertEqual(validation.label, "Introduce un nombre para esta planta.")
+        capture("edit-invalid", app: app)
+        replace("editPlantName", with: "Fixture 1", app: app)
+        replace("editPlantLocation", with: "", app: app)
+        saveEditor(app)
+        XCTAssertTrue(app.buttons["editPlant-\(plantID(1))"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.descendants(matching: .any)["detailLocation-\(plantID(1))"].firstMatch.exists)
+        back(app)
+        XCTAssertEqual(app.buttons["plantCard-\(plantID(1))"].label, "Fixture 1, Monstera deliciosa")
+        openEditor(2, app: app)
+        replace("editPlantLocation", with: "Patio", app: app)
+        saveEditor(app)
+        XCTAssertTrue(app.buttons["editPlant-\(plantID(2))"].waitForExistence(timeout: 10))
+        let location = app.descendants(matching: .any)["detailLocation-\(plantID(2))"].firstMatch
+        reveal(location, in: app); XCTAssertTrue(location.label.contains("Patio"))
+    }
+
     func testPlantCardsSelectCorrectIdentity() {
         let app = XCUIApplication()
         app.launchArguments = ["--storage-test-id", isolatedID(), "--storage-seed", "-AppleLanguages", "(es)"]
@@ -146,7 +274,7 @@ final class PlantCareAIUITests: XCTestCase {
             XCTAssertEqual(selected.label, "Fixture \(index)")
             capture("selected-\(index)", app: app)
             assertDetail(index, app: app)
-            app.navigationBars.buttons.firstMatch.tap()
+            back(app)
             XCTAssertTrue(card.waitForExistence(timeout: 10))
         }
     }
@@ -186,7 +314,7 @@ final class PlantCareAIUITests: XCTestCase {
         XCTAssertTrue(error.waitForExistence(timeout: 10))
         capture("detail-photo-failure", app: app)
         assertDetail(1, app: app, photoFailed: true)
-        app.navigationBars.buttons.firstMatch.tap()
+        back(app)
         reveal(second, in: app)
         second.tap()
         XCTAssertTrue(app.staticTexts["selectedPlant-\(plantID(2))"].waitForExistence(timeout: 10))
@@ -216,7 +344,7 @@ final class PlantCareAIUITests: XCTestCase {
             content.tap()
             XCTAssertTrue(app.staticTexts["selectedPlant-\(plantID(index))"].waitForExistence(timeout: 10))
             assertDetail(index, app: app, longCare: true)
-            app.navigationBars.buttons.firstMatch.tap()
+            back(app)
         }
     }
 
