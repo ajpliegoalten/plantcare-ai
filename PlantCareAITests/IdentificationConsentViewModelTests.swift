@@ -110,4 +110,81 @@ final class IdentificationConsentViewModelTests: XCTestCase {
         XCTAssertEqual(late.authorizationState, .idle); XCTAssertNil(late.photo)
         let accepted = await repository.value; XCTAssertEqual(accepted, .current)
     }
+
+    func testResultReplacementFailureThenSuccessAndExplicitRetry() async {
+        let repository = ConsentDouble()
+        let result = IdentificationResult(outcome: .proposals, primary: SpeciesCandidate(commonName: "Monstera", scientificName: nil), alternatives: [], uncertainty: "Puede ser esta especie.")
+        var calls = 0
+        let vm = await make(repository) { _ in calls += 1; return .completed(result) }
+        vm.identifyPhoto(); await wait { vm.authorizationState == .awaitingConfirmation }
+        vm.confirmAuthorization(); await wait { vm.identificationResult != nil }
+        let a = vm.photo
+        XCTAssertEqual(vm.identificationResult, result); XCTAssertEqual(calls, 1)
+        vm.select { throw IdentificationPhotoError.transferFailed }; await wait { !vm.isLoading }
+        XCTAssertEqual(vm.photo, a); XCTAssertEqual(vm.identificationResult, result)
+        vm.select { Data([2]) }; await wait { !vm.isLoading }
+        XCTAssertNotEqual(vm.photo?.id, a?.id); XCTAssertNil(vm.identificationResult)
+        XCTAssertEqual(calls, 1)
+        vm.identifyPhoto(); vm.identifyPhoto(); await wait { vm.identificationResult != nil }
+        XCTAssertEqual(calls, 2)
+        vm.close(); XCTAssertNil(vm.identificationResult)
+    }
+
+    func testServiceFailureIsNotInsufficientAndRetryIsExplicit() async {
+        let repository = ConsentDouble()
+        var calls = 0
+        let vm = await make(repository) { _ in
+            calls += 1
+            if calls == 1 { throw SpeciesIdentificationError.network }
+            return .completed(IdentificationResult(outcome: .insufficientEvidence, primary: nil, alternatives: [], uncertainty: "No hay rasgos suficientes."))
+        }
+        vm.identifyPhoto(); await wait { vm.authorizationState == .awaitingConfirmation }
+        vm.confirmAuthorization(); await wait { vm.authorizationState == .failed }
+        XCTAssertEqual(vm.identificationError, .network); XCTAssertNil(vm.identificationResult); XCTAssertNotNil(vm.photo)
+        XCTAssertEqual(calls, 1)
+        vm.identifyPhoto(); await wait { vm.identificationResult != nil }
+        XCTAssertEqual(calls, 2); XCTAssertNil(vm.identificationError)
+        XCTAssertEqual(vm.identificationResult?.outcome, .insufficientEvidence)
+    }
+
+    func testChangedConfigurationDuringNoticeNeverInvokesOrRecordsAndOldAcceptanceRenews() async {
+        let repository = ConsentDouble()
+        try? await repository.record(.current)
+        let scope = ExternalAIConsent(recipient: "reviewed-destination-fingerprint", noticeVersion: 2)
+        var current = true
+        var calls = 0
+        let vm = IdentificationPhotoViewModel(prepare: PrepareIdentificationPhoto(preparer: ConsentPhotoPreparer()), camera: CheckCameraAccess(access: PhotoCameraDouble()), authorize: AuthorizeExternalAIOperation(repository: repository, scope: scope), usesRealRecipient: true, destinationNotice: ExternalAIDestinationNotice(destination: "https://reviewed-destination.invalid/v1/chat/completions", model: "vision"), configurationIsCurrent: { current }) { _ in calls += 1; return .unavailable }
+        vm.select { Data([1]) }; await wait { vm.photo != nil }
+        vm.identifyPhoto(); await wait { vm.authorizationState == .awaitingConfirmation }
+        XCTAssertEqual(calls, 0)
+        current = false; vm.confirmAuthorization()
+        XCTAssertEqual(vm.authorizationState, .unavailable); XCTAssertEqual(calls, 0)
+        let saved = await repository.value; XCTAssertEqual(saved, .current)
+        XCTAssertNotNil(vm.photo)
+    }
+
+    func testCancelRequestPreservesPhotoAndIgnoresLateResult() async {
+        let repository = ConsentDouble()
+        var continuation: CheckedContinuation<IdentificationContinuationResult, Never>?
+        let vm = await make(repository) { _ in await withCheckedContinuation { continuation = $0 } }
+        vm.identifyPhoto(); await wait { vm.authorizationState == .awaitingConfirmation }
+        vm.confirmAuthorization(); await wait { continuation != nil }
+        let photo = vm.photo
+        vm.cancelAuthorization()
+        continuation?.resume(returning: .completed(IdentificationResult(outcome: .insufficientEvidence, primary: nil, alternatives: [], uncertainty: "Duda")))
+        try? await Task.sleep(for: .milliseconds(20))
+        XCTAssertEqual(vm.photo, photo); XCTAssertNil(vm.identificationResult); XCTAssertEqual(vm.authorizationState, .idle)
+    }
+
+    func testRealOperationWithoutDestinationNoticeFailsClosedBeforeAuthorization() async {
+        let repository = ConsentDouble()
+        var calls = 0
+        let vm = IdentificationPhotoViewModel(prepare: PrepareIdentificationPhoto(preparer: ConsentPhotoPreparer()), camera: CheckCameraAccess(access: PhotoCameraDouble()), authorize: AuthorizeExternalAIOperation(repository: repository), usesRealRecipient: true) { _ in calls += 1; return .unavailable }
+        vm.select { Data([1]) }; await wait { vm.photo != nil }
+        vm.identifyPhoto(); vm.confirmAuthorization()
+        XCTAssertEqual(vm.authorizationState, .unavailable)
+        XCTAssertEqual(calls, 0)
+        let saved = await repository.value; XCTAssertNil(saved)
+        XCTAssertNotNil(vm.photo)
+    }
 }

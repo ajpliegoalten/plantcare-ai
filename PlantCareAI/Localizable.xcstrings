@@ -1,77 +1,11 @@
 {
   "sourceLanguage" : "es",
   "strings" : {
-    "externalAIConsent.title" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Antes de usar IA externa" } } } },
-    "externalAIConsent.body" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Para identificar plantas y ofrecer orientación, las funciones de IA enviarán al proveedor externo configurado para esta demo la foto que elijas para IA o el texto necesario de tu planta (especie, cuidados, historial pertinente y tu pregunta, según la función). No se envía toda tu colección ni fotos antiguas para analizar una foto actual. Puedes cancelar antes de continuar. Recordaremos tu aceptación en este dispositivo para futuras solicitudes de IA que tú inicies." } } } },
-    "externalAIConsent.notAvailable" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "La identificación todavía no está disponible; aceptar este aviso no enviará tu foto ahora." } } } },
-    "externalAIConsent.accept" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Aceptar y continuar" } } } },
-    "externalAIConsent.unavailable" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "La identificación todavía no está disponible. No se ha enviado ninguna foto." } } } },
-    "externalAIConsent.error" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudo comprobar o guardar tu aceptación. No se ha enviado ninguna foto. Pulsa Identificar para reintentar." } } } },
-    "externalAIConsent.checking" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Comprobando autorización…" } } } },
-    "identificationPhoto.cameraChecking" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Comprobando acceso a la cámara…" } } } },
-    "identificationPhoto.title" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Foto de tu planta" } } } },
-    "identificationPhoto.placeholder" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Elige una foto de tu planta" } } } },
-    "identificationPhoto.preview" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Foto seleccionada para identificar" } } } },
-    "identificationPhoto.gallery" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Elegir de galería" } } } },
-    "identificationPhoto.camera" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Tomar foto" } } } },
-    "identificationPhoto.cancel" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Cancelar" } } } },
-    "identificationPhoto.identify" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Identificar" } } } },
-    "identificationPhoto.future" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Identificar permite revisar el aviso de IA externa. La identificación todavía no está disponible." } } } },
-    "identificationPhoto.loading" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Preparando foto…" } } } },
-    "identificationPhoto.error" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudo preparar esta foto. Elige otra imagen o inténtalo de nuevo." } } } },
-    "identificationPhoto.tooLarge" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Esta foto supera los límites de tamaño. Elige una imagen más pequeña." } } } },
-    "identificationPhoto.cameraUnavailable" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "La cámara no está disponible en este dispositivo." } } } },
-    "identificationPhoto.cameraDenied" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No has permitido el acceso a la cámara. Puedes abrir Ajustes o elegir una foto de galería." } } } },
-    "identificationPhoto.cameraRestricted" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "El acceso a la cámara está restringido en este dispositivo. Puedes elegir una foto de galería." } } } },
-    "identificationPhoto.settings" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Abrir Ajustes" } } } },
-    "edit.keyboard.done" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Listo" } } } },
-    "edit.open" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Editar" } } } },
-    "edit.title" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Editar planta" } } } },
-    "edit.name" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Nombre personalizado" } } } },
-    "edit.location" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Ubicación (opcional)" } } } },
-    "edit.cancel" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Cancelar" } } } },
-    "edit.save" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Guardar" } } } },
-    "edit.validation" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Introduce un nombre para esta planta." } } } },
-    "edit.error" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudieron guardar los cambios en este dispositivo. Inténtalo de nuevo." } } } },
-    "edit.notFound" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No se encontró esta planta en el dispositivo." } } } },
-    "edit.saving" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Guardando cambios…" } } } },
-    "collection.photo.error" : {
-      "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudo cargar la foto" } } }
-    },
-    "collection.photo.retry" : {
-      "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Reintentar foto" } } }
-    },
-    "collection.photo.loading" : {
-      "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Cargando foto" } } }
-    },
-    "collection.photo.loaded" : {
-      "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Foto cargada" } } }
-    },
-    "collection.select.hint" : {
-      "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Consultar la ficha de esta planta" } } }
-    },
-    "detail.title": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Detalle de planta" } } } },
-    "detail.notFound": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "No se encontró esta planta en el dispositivo." } } } },
-    "detail.storageError": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "No se pudieron leer los datos locales de esta planta. Vuelve a Mis plantas e inténtalo de nuevo." } } } },
-    "detail.createdAt %@": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Guardada el %@" } } } },
-    "detail.care.title": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Ficha de cuidados" } } } },
-    "detail.care.subtitle": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Guía orientativa guardada para este ejemplar" } } } },
-    "detail.care.disclaimer": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Estos cuidados son orientativos y no constituyen un diagnóstico." } } } },
-    "detail.care.light": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Luz" } } } },
-    "detail.care.watering": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Riego" } } } },
-    "detail.care.humidity": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Humedad" } } } },
-    "detail.care.temperature": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Temperatura" } } } },
-    "detail.care.substrate": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Sustrato" } } } },
-    "detail.care.fertilizer": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Abonado" } } } },
-    "detail.photo.loading": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Cargando fotografía local" } } } },
-    "detail.photo.initial": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Fotografía inicial de este ejemplar" } } } },
-    "detail.photo.error": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "No se pudo cargar la fotografía" } } } },
-    "detail.photo.explanation": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "La fotografía se lee desde este dispositivo. Puedes reintentar la carga local." } } } },
-    "detail.photo.retry": { "localizations": { "es": { "stringUnit": { "state": "translated", "value": "Reintentar carga" } } } },
-    "collection.storageError" : {
-      "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudieron leer tus plantas locales. Cierra y vuelve a abrir la app para intentarlo de nuevo." } } }
-    },
+    "identifyCandidates.destination" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Destino de la solicitud" } } } },
+    "identifyCandidates.model" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Modelo solicitado" } } } },
+    "identifyCandidates.unknownOperator" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "La app no verifica quién opera este destino, qué otros procesadores intervienen ni sus políticas de retención o entrenamiento. Revisa el destino antes de aceptar." } } } },
     "collection.add" : {
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -111,6 +45,69 @@
         }
       }
     },
+    "collection.photo.error" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo cargar la foto"
+          }
+        }
+      }
+    },
+    "collection.photo.loaded" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foto cargada"
+          }
+        }
+      }
+    },
+    "collection.photo.loading" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cargando foto"
+          }
+        }
+      }
+    },
+    "collection.photo.retry" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reintentar foto"
+          }
+        }
+      }
+    },
+    "collection.select.hint" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consultar la ficha de esta planta"
+          }
+        }
+      }
+    },
+    "collection.storageError" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudieron leer tus plantas locales. Cierra y vuelve a abrir la app para intentarlo de nuevo."
+          }
+        }
+      }
+    },
     "collection.title" : {
       "localizations" : {
         "es" : {
@@ -120,6 +117,729 @@
           }
         }
       }
+    },
+    "detail.care.disclaimer" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estos cuidados son orientativos y no constituyen un diagnóstico."
+          }
+        }
+      }
+    },
+    "detail.care.fertilizer" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abonado"
+          }
+        }
+      }
+    },
+    "detail.care.humidity" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Humedad"
+          }
+        }
+      }
+    },
+    "detail.care.light" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Luz"
+          }
+        }
+      }
+    },
+    "detail.care.substrate" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sustrato"
+          }
+        }
+      }
+    },
+    "detail.care.subtitle" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guía orientativa guardada para este ejemplar"
+          }
+        }
+      }
+    },
+    "detail.care.temperature" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperatura"
+          }
+        }
+      }
+    },
+    "detail.care.title" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ficha de cuidados"
+          }
+        }
+      }
+    },
+    "detail.care.watering" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riego"
+          }
+        }
+      }
+    },
+    "detail.createdAt %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardada el %@"
+          }
+        }
+      }
+    },
+    "detail.notFound" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontró esta planta en el dispositivo."
+          }
+        }
+      }
+    },
+    "detail.photo.error" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo cargar la fotografía"
+          }
+        }
+      }
+    },
+    "detail.photo.explanation" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La fotografía se lee desde este dispositivo. Puedes reintentar la carga local."
+          }
+        }
+      }
+    },
+    "detail.photo.initial" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fotografía inicial de este ejemplar"
+          }
+        }
+      }
+    },
+    "detail.photo.loading" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cargando fotografía local"
+          }
+        }
+      }
+    },
+    "detail.photo.retry" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reintentar carga"
+          }
+        }
+      }
+    },
+    "detail.storageError" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudieron leer los datos locales de esta planta. Vuelve a Mis plantas e inténtalo de nuevo."
+          }
+        }
+      }
+    },
+    "detail.title" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detalle de planta"
+          }
+        }
+      }
+    },
+    "edit.cancel" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar"
+          }
+        }
+      }
+    },
+    "edit.error" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudieron guardar los cambios en este dispositivo. Inténtalo de nuevo."
+          }
+        }
+      }
+    },
+    "edit.keyboard.done" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listo"
+          }
+        }
+      }
+    },
+    "edit.location" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ubicación (opcional)"
+          }
+        }
+      }
+    },
+    "edit.name" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nombre personalizado"
+          }
+        }
+      }
+    },
+    "edit.notFound" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontró esta planta en el dispositivo."
+          }
+        }
+      }
+    },
+    "edit.open" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editar"
+          }
+        }
+      }
+    },
+    "edit.save" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardar"
+          }
+        }
+      }
+    },
+    "edit.saving" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardando cambios…"
+          }
+        }
+      }
+    },
+    "edit.title" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editar planta"
+          }
+        }
+      }
+    },
+    "edit.validation" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Introduce un nombre para esta planta."
+          }
+        }
+      }
+    },
+    "externalAIConsent.accept" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aceptar y continuar"
+          }
+        }
+      }
+    },
+    "externalAIConsent.body" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para identificar plantas y ofrecer orientación, las funciones de IA enviarán al proveedor externo configurado para esta demo la foto que elijas para IA o el texto necesario de tu planta (especie, cuidados, historial pertinente y tu pregunta, según la función). No se envía toda tu colección ni fotos antiguas para analizar una foto actual. Puedes cancelar antes de continuar. Recordaremos tu aceptación en este dispositivo para futuras solicitudes de IA que tú inicies."
+          }
+        }
+      }
+    },
+    "externalAIConsent.checking" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comprobando autorización…"
+          }
+        }
+      }
+    },
+    "externalAIConsent.error" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo comprobar o guardar tu aceptación. No se ha enviado ninguna foto. Pulsa Identificar para reintentar."
+          }
+        }
+      }
+    },
+    "externalAIConsent.notAvailable" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La identificación todavía no está disponible; aceptar este aviso no enviará tu foto ahora."
+          }
+        }
+      }
+    },
+    "externalAIConsent.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Antes de usar IA externa"
+          }
+        }
+      }
+    },
+    "externalAIConsent.unavailable" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La identificación todavía no está disponible. No se ha enviado ninguna foto."
+          }
+        }
+      }
+    },
+    "identificationPhoto.camera" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tomar foto"
+          }
+        }
+      }
+    },
+    "identificationPhoto.cameraChecking" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comprobando acceso a la cámara…"
+          }
+        }
+      }
+    },
+    "identificationPhoto.cameraDenied" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No has permitido el acceso a la cámara. Puedes abrir Ajustes o elegir una foto de galería."
+          }
+        }
+      }
+    },
+    "identificationPhoto.cameraRestricted" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El acceso a la cámara está restringido en este dispositivo. Puedes elegir una foto de galería."
+          }
+        }
+      }
+    },
+    "identificationPhoto.cameraUnavailable" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La cámara no está disponible en este dispositivo."
+          }
+        }
+      }
+    },
+    "identificationPhoto.cancel" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar"
+          }
+        }
+      }
+    },
+    "identificationPhoto.error" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo preparar esta foto. Elige otra imagen o inténtalo de nuevo."
+          }
+        }
+      }
+    },
+    "identificationPhoto.gallery" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elegir de galería"
+          }
+        }
+      }
+    },
+    "identificationPhoto.identify" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Identificar"
+          }
+        }
+      }
+    },
+    "identificationPhoto.loading" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preparando foto…"
+          }
+        }
+      }
+    },
+    "identificationPhoto.placeholder" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige una foto de tu planta"
+          }
+        }
+      }
+    },
+    "identificationPhoto.preview" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foto seleccionada para identificar"
+          }
+        }
+      }
+    },
+    "identificationPhoto.settings" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir Ajustes"
+          }
+        }
+      }
+    },
+    "identificationPhoto.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foto de tu planta"
+          }
+        }
+      }
+    },
+    "identificationPhoto.tooLarge" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta foto supera los límites de tamaño. Elige una imagen más pequeña."
+          }
+        }
+      }
+    },
+    "identifyCandidates.alternatives" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otras posibilidades"
+          }
+        }
+      }
+    },
+    "identifyCandidates.authorizationError" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El servicio no autorizó la solicitud. Revisa la credencial local de la demo antes de reintentar."
+          }
+        }
+      }
+    },
+    "identifyCandidates.cancellationLimit" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puedes cancelar antes del envío. Una vez enviado, cancelar no retira los datos ya transmitidos ni garantiza revertir el consumo del servicio."
+          }
+        }
+      }
+    },
+    "identifyCandidates.cancelRequest" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar solicitud"
+          }
+        }
+      }
+    },
+    "identifyCandidates.changePhoto" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige otra foto en la que se vean las hojas y el tallo."
+          }
+        }
+      }
+    },
+    "identifyCandidates.configurationUnavailable" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La configuración de identificación no es válida o está incompleta. No se ha enviado ninguna foto."
+          }
+        }
+      }
+    },
+    "identifyCandidates.consentBody" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para proponer una especie, enviaremos al destino indicado la foto que has elegido y una instrucción de identificación, usando el modelo indicado. Las futuras funciones de orientación podrán enviar la foto elegida para IA o el texto necesario de tu planta (especie, cuidados, historial pertinente y tu pregunta, según la función). No se envía toda tu colección ni fotos antiguas para analizar una foto actual. Las propuestas pueden ser incorrectas y no confirman ninguna especie. Recordaremos tu aceptación en este dispositivo para futuras solicitudes que tú inicies al mismo destino y modelo dentro del alcance de este aviso."
+          }
+        }
+      }
+    },
+    "identifyCandidates.explanation" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Identificar envía solo esta foto y una instrucción de identificación tras tu aceptación. No confirma la especie ni guarda una planta."
+          }
+        }
+      }
+    },
+    "identifyCandidates.insufficient" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hay evidencia suficiente"
+          }
+        }
+      }
+    },
+    "identifyCandidates.loading" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscando posibilidades…"
+          }
+        }
+      }
+    },
+    "identifyCandidates.networkError" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo conectar con la IA. Conservamos tu foto. Pulsa Identificar para reintentar."
+          }
+        }
+      }
+    },
+    "identifyCandidates.notConfirmed" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es una propuesta de IA, no una especie confirmada."
+          }
+        }
+      }
+    },
+    "identifyCandidates.proposal" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Propuesta de especie"
+          }
+        }
+      }
+    },
+    "identifyCandidates.rateLimitError" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El servicio ha limitado las solicitudes. Espera y pulsa Identificar para reintentar; conservamos tu foto."
+          }
+        }
+      }
+    },
+    "identifyCandidates.responseError" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La IA no devolvió una propuesta válida. Esto no significa evidencia insuficiente. Conservamos tu foto; puedes reintentar con Identificar."
+          }
+        }
+      }
+    },
+    "identifyCandidates.serviceError" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El servicio no pudo completar la identificación. Conservamos tu foto. Puedes reintentar con Identificar."
+          }
+        }
+      }
+    },
+    "identifyCandidates.timeoutError" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La solicitud tardó demasiado. Conservamos tu foto. Pulsa Identificar para reintentar."
+          }
+        }
+      }
+    },
+    "Instrumented invocations: %@" : {
+
     }
   },
   "version" : "1.0"

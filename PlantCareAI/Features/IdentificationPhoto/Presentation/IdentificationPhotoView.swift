@@ -13,6 +13,15 @@ struct IdentificationPhotoView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     preview
+                    if let result = viewModel.identificationResult { IdentificationResultView(result: result) }
+                    if viewModel.authorizationState == .continuing {
+                        ProgressView("identifyCandidates.loading").accessibilityIdentifier("identificationLoading")
+                        Button("identifyCandidates.cancelRequest") { viewModel.cancelAuthorization() }
+                            .frame(minHeight: 44).accessibilityIdentifier("cancelIdentificationRequest")
+                    }
+                    if let error = viewModel.identificationError {
+                        Text(identificationMessage(error)).accessibilityIdentifier("identificationError")
+                    }
                     if viewModel.isLoading {
                         ProgressView("identificationPhoto.loading")
                             .accessibilityIdentifier("photoLoading")
@@ -51,15 +60,15 @@ struct IdentificationPhotoView: View {
                     }
                         .buttonStyle(.borderedProminent).disabled(!viewModel.canIdentify)
                         .accessibilityIdentifier("identifyPhoto")
-                    Text("identificationPhoto.future").font(.footnote)
+                    Text("identifyCandidates.explanation").font(.footnote)
                         .accessibilityIdentifier("identificationUnavailable")
                     if viewModel.authorizationState == .unavailable {
-                        Text("externalAIConsent.unavailable").accessibilityIdentifier("externalAIUnavailable")
+                        Text(viewModel.usesRealRecipient ? "identifyCandidates.configurationUnavailable" : "externalAIConsent.unavailable").accessibilityIdentifier("externalAIUnavailable")
                     }
-                    if viewModel.authorizationState == .failed {
+                    if viewModel.authorizationState == .failed && viewModel.identificationError == nil {
                         Text("externalAIConsent.error").accessibilityIdentifier("externalAIConsentError")
                     }
-                    if viewModel.authorizationState == .checkingAuthorization || viewModel.authorizationState == .continuing {
+                    if viewModel.authorizationState == .checkingAuthorization {
                         ProgressView("externalAIConsent.checking")
                     }
                     #if DEBUG && targetEnvironment(simulator)
@@ -99,7 +108,7 @@ struct IdentificationPhotoView: View {
         .sheet(isPresented: Binding(get: { viewModel.authorizationState == .awaitingConfirmation }, set: { showing in
             if !showing, viewModel.authorizationState == .awaitingConfirmation { viewModel.cancelAuthorization() }
         })) {
-            ExternalAIConsentView(accept: { viewModel.confirmAuthorization() }, cancel: { viewModel.cancelAuthorization() })
+            ExternalAIConsentView(usesRealRecipient: viewModel.usesRealRecipient, destination: viewModel.destinationNotice, accept: { viewModel.confirmAuthorization() }, cancel: { viewModel.cancelAuthorization() })
         }
         .onChange(of: selection) { _, item in
             guard let item else { return }
@@ -144,6 +153,18 @@ struct IdentificationPhotoView: View {
         case .denied: return "identificationPhoto.cameraDenied"
         case .restricted: return "identificationPhoto.cameraRestricted"
         case .authorized: return "identificationPhoto.cameraUnavailable"
+        }
+    }
+
+    private func identificationMessage(_ error: SpeciesIdentificationError) -> LocalizedStringKey {
+        switch error {
+        case .configuration: return "identifyCandidates.configurationUnavailable"
+        case .network: return "identifyCandidates.networkError"
+        case .timeout: return "identifyCandidates.timeoutError"
+        case .unauthorized: return "identifyCandidates.authorizationError"
+        case .rateLimited: return "identifyCandidates.rateLimitError"
+        case .service: return "identifyCandidates.serviceError"
+        case .rejected, .invalidResponse: return "identifyCandidates.responseError"
         }
     }
 }

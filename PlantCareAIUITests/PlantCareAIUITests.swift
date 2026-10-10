@@ -215,18 +215,17 @@ final class PlantCareAIUITests: XCTestCase {
         let app = XCUIApplication()
         let id = isolatedID()
         // Real production continuation (no spy) with isolated preference and local storage.
-        app.launchArguments = ["--storage-test-id", id, "--storage-seed", "--consent-test-id", id, "--identification-photo-fixture", "-AppleLanguages", "(en)"]
+        app.launchArguments = ["--storage-test-id", id, "--storage-seed", "--consent-test-id", id, "--identification-photo-fixture", "--identification-no-configuration", "-AppleLanguages", "(en)"]
         app.launch(); assertCards(app)
         for _ in 0..<5 { app.swipeDown() }
-        prepareConsentPhoto(app); requestConsent(app)
-        app.buttons["cancelExternalAIConsent"].tap()
-        requestConsent(app)
-        let accept = app.buttons["acceptExternalAIConsent"]
-        reveal(accept, in: app); accept.tap()
+        prepareConsentPhoto(app)
+        let identify = app.buttons["identifyPhoto"]
+        reveal(identify, in: app); identify.tap()
+        XCTAssertFalse(app.navigationBars["Antes de usar IA externa"].exists)
         let unavailable = app.staticTexts["externalAIUnavailable"]
         XCTAssertTrue(unavailable.waitForExistence(timeout: 5))
         reveal(unavailable, in: app)
-        XCTAssertEqual(unavailable.label, "La identificación todavía no está disponible. No se ha enviado ninguna foto.")
+        XCTAssertEqual(unavailable.label, "La configuración de identificación no es válida o está incompleta. No se ha enviado ninguna foto.")
         XCTAssertFalse(app.staticTexts["externalAIInvocationCount"].exists)
         XCTAssertEqual(app.images["identificationPhotoPreview"].value as? String, "120 × 80")
         capture("consent-production-unavailable", app: app)
@@ -252,6 +251,137 @@ final class PlantCareAIUITests: XCTestCase {
         capture("consent-read-error", app: app)
         reveal(identify, in: app); XCTAssertTrue(identify.isEnabled); identify.tap()
         XCTAssertTrue(error.waitForExistence(timeout: 5)); assertInvocations(0, app: app)
+    }
+
+    func testIdentificationCandidatesReadOnlyResultReplacementAndStorageIsolation() {
+        let app = XCUIApplication(), id = isolatedID()
+        app.launchArguments = ["--storage-test-id", id, "--storage-seed", "--consent-test-id", id, "--identification-photo-fixture", "--identification-candidates-fixture", "proposals"]
+        app.launch(); assertCards(app)
+        for _ in 0..<5 { app.swipeDown() }
+        prepareConsentPhoto(app); requestConsent(app)
+        let body = app.staticTexts["externalAIConsentBody"]
+        XCTAssertTrue(body.label.contains("destino indicado")); XCTAssertFalse(body.label.contains("DevExpert"))
+        XCTAssertFalse(body.label.contains("todavía no"))
+        XCTAssertEqual(app.staticTexts["externalAIActualDestination"].label, "https://vision-one.invalid/v1/chat/completions")
+        XCTAssertEqual(app.staticTexts["externalAIActualModel"].label, "vision-test-a")
+        capture("identify-real-recipient-notice-fixture", app: app)
+        app.buttons["cancelExternalAIConsent"].tap()
+        XCTAssertTrue(app.navigationBars["Antes de usar IA externa"].waitForNonExistence(timeout: 5))
+        assertInvocations(0, app: app)
+        XCTAssertEqual(app.images["identificationPhotoPreview"].value as? String, "120 × 80")
+        requestConsent(app)
+        let accept = app.buttons["acceptExternalAIConsent"]; reveal(accept, in: app); accept.tap()
+        XCTAssertTrue(app.staticTexts["Costilla de Adán"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.staticTexts["Otras posibilidades"].exists)
+        XCTAssertTrue(app.staticTexts["Philodendron bipinnatifidum"].exists)
+        XCTAssertTrue(app.staticTexts["Es una propuesta de IA, no una especie confirmada."].exists)
+        XCTAssertFalse(app.buttons["Confirmar"].exists)
+        XCTAssertFalse(app.staticTexts["identificationUncertainty"].label.contains("%"))
+        capture("identify-proposals", app: app); assertInvocations(1, app: app)
+        let invalid = app.buttons["fixture-photo-failure"]; reveal(invalid, in: app); invalid.tap()
+        XCTAssertTrue(app.staticTexts["photoError"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.staticTexts["Costilla de Adán"].exists)
+        let b = app.buttons["fixture-photo-B"]; reveal(b, in: app); b.tap()
+        expectation(for: NSPredicate(format: "value == %@", "80 × 120"), evaluatedWith: app.images["identificationPhotoPreview"])
+        waitForExpectations(timeout: 10)
+        XCTAssertFalse(app.staticTexts["Costilla de Adán"].exists); assertInvocations(1, app: app)
+        app.buttons["cancelIdentificationPhoto"].tap()
+        app.terminate(); app.launchArguments.removeAll { $0 == "--storage-seed" }; app.launchArguments += ["--storage-verify"]
+        app.launch(); assertCards(app); openAndCheckBothDetails(app)
+    }
+
+    func testIdentificationInsufficientNoAlternativesAndExplicitErrorRetry() {
+        for mode in ["insufficient", "no-alternatives", "error", "long"] {
+            let app = XCUIApplication(), id = isolatedID()
+            app.launchArguments = ["--storage-test-id", id, "--consent-test-id", id, "--identification-photo-fixture", "--identification-candidates-fixture", mode]
+            app.launch(); prepareConsentPhoto(app); requestConsent(app)
+            let accept = app.buttons["acceptExternalAIConsent"]; reveal(accept, in: app); accept.tap()
+            if mode == "error" {
+                let error = app.staticTexts["identificationError"]
+                XCTAssertTrue(error.waitForExistence(timeout: 8)); reveal(error, in: app)
+                XCTAssertTrue(error.label.contains("limitado")); XCTAssertFalse(app.staticTexts["No hay evidencia suficiente"].exists)
+                capture("identify-error", app: app); assertInvocations(1, app: app)
+                let identify = app.buttons["identifyPhoto"]; reveal(identify, in: app); identify.tap()
+                XCTAssertTrue(app.staticTexts["Monstera deliciosa"].waitForExistence(timeout: 8))
+                assertInvocations(2, app: app)
+            } else if mode == "insufficient" {
+                XCTAssertTrue(app.staticTexts["No hay evidencia suficiente"].waitForExistence(timeout: 8))
+                XCTAssertFalse(app.staticTexts["Monstera deliciosa"].exists)
+                XCTAssertTrue(app.staticTexts["Elige otra foto en la que se vean las hojas y el tallo."].exists)
+                capture("identify-insufficient", app: app)
+            } else if mode == "no-alternatives" {
+                XCTAssertTrue(app.staticTexts["Monstera deliciosa"].waitForExistence(timeout: 8))
+                XCTAssertFalse(app.staticTexts["Otras posibilidades"].exists)
+                capture("identify-no-alternatives", app: app)
+            } else {
+                XCTAssertTrue(app.staticTexts["identificationUncertainty"].waitForExistence(timeout: 8))
+                XCTAssertEqual(app.staticTexts["identificationUncertainty"].label.count, 1000)
+                capture("identify-long-result", app: app)
+                let identify = app.buttons["identifyPhoto"]; reveal(identify, in: app)
+                XCTAssertTrue(identify.isHittable); XCTAssertTrue(identify.isEnabled)
+                capture("identify-long-result-actions", app: app)
+            }
+            XCTAssertEqual(app.images["identificationPhotoPreview"].value as? String, "120 × 80")
+            XCTAssertFalse(app.staticTexts["identificationUncertainty"].label.contains("%"))
+            app.terminate()
+        }
+    }
+
+    func testIdentificationWaitingCancellationCloseAndRelaunchWithoutDraft() {
+        let app = XCUIApplication(), id = isolatedID()
+        app.launchArguments = ["--storage-test-id", id, "--consent-test-id", id, "--identification-photo-fixture", "--identification-candidates-fixture", "slow"]
+        app.launch(); prepareConsentPhoto(app); requestConsent(app)
+        let accept = app.buttons["acceptExternalAIConsent"]; reveal(accept, in: app); accept.tap()
+        let cancel = app.buttons["cancelIdentificationRequest"]
+        XCTAssertTrue(cancel.waitForExistence(timeout: 5)); reveal(cancel, in: app)
+        XCTAssertEqual(app.images["identificationPhotoPreview"].value as? String, "120 × 80")
+        XCTAssertFalse(app.buttons["identifyPhoto"].isEnabled)
+        app.swipeDown() // Bring the retained preview back into the viewport after fixture selection.
+        XCTAssertTrue(app.images["identificationPhotoPreview"].isHittable)
+        capture("identify-waiting", app: app); reveal(cancel, in: app); cancel.tap()
+        XCTAssertTrue(cancel.waitForNonExistence(timeout: 5))
+        XCTAssertEqual(app.images["identificationPhotoPreview"].value as? String, "120 × 80")
+        XCTAssertFalse(app.staticTexts["Monstera deliciosa"].exists)
+        let identify = app.buttons["identifyPhoto"]; reveal(identify, in: app); identify.tap()
+        XCTAssertTrue(cancel.waitForExistence(timeout: 5))
+        app.buttons["cancelIdentificationPhoto"].tap()
+        app.terminate(); app.launch()
+        app.buttons["addPlantHeader"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["identificationPhotoPlaceholder"].firstMatch.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.images["identificationPhotoPreview"].exists)
+        XCTAssertFalse(app.staticTexts["Monstera deliciosa"].exists)
+        assertInvocations(0, app: app)
+    }
+
+    func testGenericDestinationConsentShowsSnapshotAndRenewsAfterDestinationModelChange() {
+        let app = XCUIApplication(), id = isolatedID()
+        app.launchArguments = ["--storage-test-id", id, "--consent-test-id", id, "--identification-photo-fixture", "--identification-candidates-fixture", "proposals"]
+        app.launch(); prepareConsentPhoto(app); requestConsent(app)
+        let destination = app.staticTexts["externalAIActualDestination"]
+        reveal(destination, in: app)
+        XCTAssertEqual(destination.label, "https://vision-one.invalid/v1/chat/completions")
+        XCTAssertEqual(app.staticTexts["externalAIActualModel"].label, "vision-test-a")
+        XCTAssertTrue(app.staticTexts["externalAIUnknownOperator"].label.contains("no verifica quién opera"))
+        capture("generic-consent-first-destination", app: app)
+        app.buttons["cancelExternalAIConsent"].tap(); assertInvocations(0, app: app)
+        requestConsent(app)
+        let accept = app.buttons["acceptExternalAIConsent"]; reveal(accept, in: app); accept.tap()
+        assertInvocations(1, app: app)
+        app.terminate()
+        app.launchArguments += ["--identification-second-destination"]
+        app.launch(); prepareConsentPhoto(app); assertInvocations(0, app: app)
+        requestConsent(app) // Same preference suite cannot inherit the other destination/model.
+        reveal(destination, in: app)
+        XCTAssertEqual(destination.label, "https://vision-two.invalid/api/chat/completions")
+        XCTAssertEqual(app.staticTexts["externalAIActualModel"].label, "vision-test-b")
+        capture("generic-consent-renewed-destination", app: app)
+        assertInvocations(0, app: app)
+        reveal(accept, in: app); accept.tap(); assertInvocations(1, app: app)
+        app.buttons["cancelIdentificationPhoto"].tap()
+        prepareConsentPhoto(app)
+        let identify = app.buttons["identifyPhoto"]; reveal(identify, in: app); identify.tap()
+        assertInvocations(2, app: app)
+        XCTAssertFalse(app.navigationBars["Antes de usar IA externa"].exists)
     }
 
     func testStoredCollectionSurvivesProcessRelaunch() {
@@ -514,7 +644,7 @@ final class PlantCareAIUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Foto de tu planta"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.descendants(matching: .any)["identificationPhotoPlaceholder"].firstMatch.exists)
         XCTAssertFalse(app.buttons["identifyPhoto"].isEnabled)
-        XCTAssertEqual(app.staticTexts["identificationUnavailable"].label, "Identificar permite revisar el aviso de IA externa. La identificación todavía no está disponible.")
+        XCTAssertEqual(app.staticTexts["identificationUnavailable"].label, "Identificar envía solo esta foto y una instrucción de identificación tras tu aceptación. No confirma la especie ni guarda una planta.")
         capture("photo-empty", app: app)
         app.buttons["takePlantPhoto"].tap()
         XCTAssertTrue(app.staticTexts["cameraIssue"].waitForExistence(timeout: 5))

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>PlantCareAIAPIScheme</key><string>$(INFOPLIST_KEY_PlantCareAIAPIScheme)</string>
+    <key>PlantCareAIAPIHostPath</key><string>$(INFOPLIST_KEY_PlantCareAIAPIHostPath)</string>
+    <key>PlantCareAIModel</key><string>$(INFOPLIST_KEY_PlantCareAIModel)</string>
+    <key>PlantCareAIAPIKey</key><string>$(INFOPLIST_KEY_PlantCareAIAPIKey)</string>
+    <key>PlantCareAITimeoutSeconds</key><string>$(INFOPLIST_KEY_PlantCareAITimeoutSeconds)</string>
+</dict>
+</plist>

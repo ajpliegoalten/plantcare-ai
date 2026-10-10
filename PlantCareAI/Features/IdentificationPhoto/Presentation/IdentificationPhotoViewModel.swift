@@ -8,6 +8,12 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
     @Published private(set) var isCheckingCamera = false
     enum AuthorizationState { case idle, checkingAuthorization, awaitingConfirmation, continuing, failed, unavailable }
     @Published private(set) var authorizationState: AuthorizationState = .idle
+    @Published private(set) var identificationResult: IdentificationResult?
+    @Published private(set) var identificationError: SpeciesIdentificationError?
+    let usesRealRecipient: Bool
+    let destinationNotice: ExternalAIDestinationNotice?
+    private let configurationIsCurrent: () -> Bool
+    private let identificationAvailable: Bool
     var isAuthorizing: Bool { [.checkingAuthorization, .awaitingConfirmation, .continuing].contains(authorizationState) }
     var isBusy: Bool { isLoading || isCheckingCamera || isAuthorizing }
     var canIdentify: Bool { photo != nil && !isBusy && !presentsCamera && !closed }
@@ -30,17 +36,30 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
     @Published private(set) var invocationCount = 0
     #endif
 
-    init(prepare: PrepareIdentificationPhoto, camera: CheckCameraAccess, authorize: AuthorizeExternalAIOperation, identify: @escaping (IdentificationPhoto) async throws -> IdentificationContinuationResult = { _ in .unavailable }) {
+    init(prepare: PrepareIdentificationPhoto, camera: CheckCameraAccess, authorize: AuthorizeExternalAIOperation, usesRealRecipient: Bool = false, destinationNotice: ExternalAIDestinationNotice? = nil, identificationAvailable: Bool = true, configurationIsCurrent: @escaping () -> Bool = { true }, identify: @escaping (IdentificationPhoto) async throws -> IdentificationContinuationResult = { _ in .unavailable }) {
         self.prepare = prepare
         self.camera = camera
         self.authorize = authorize
         self.identify = identify
+        self.usesRealRecipient = usesRealRecipient
+        self.destinationNotice = destinationNotice
+        self.identificationAvailable = identificationAvailable && (!usesRealRecipient || destinationNotice != nil)
+        self.configurationIsCurrent = configurationIsCurrent
     }
 
     deinit { task?.cancel(); authorizationTask?.cancel() }
 
     func identifyPhoto() {
         guard canIdentify, let photo else { return }
+        identificationResult = nil
+        identificationError = nil
+        #if DEBUG && targetEnvironment(simulator)
+        invocationCount = testInvocationCount?() ?? 0
+        #endif
+        guard identificationAvailable, configurationIsCurrent() else {
+            authorizationState = .unavailable
+            return
+        }
         pendingPhotoID = photo.id
         continueAuthorization(confirmed: false)
     }
@@ -56,10 +75,16 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
         authorizationTask = nil
         pendingPhotoID = nil
         authorizationState = .idle
+        identificationError = nil
     }
 
     private func continueAuthorization(confirmed: Bool) {
         guard let snapshot = photo, snapshot.id == pendingPhotoID else { return }
+        guard configurationIsCurrent() else {
+            cancelAuthorization()
+            authorizationState = .unavailable
+            return
+        }
         authorizationGeneration += 1
         let request = authorizationGeneration
         authorizationState = confirmed ? .continuing : .checkingAuthorization
@@ -68,6 +93,7 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
                 let result = try await authorize.execute(confirmed: confirmed) { [weak self] in
                     guard let self, !self.closed, self.authorizationGeneration == request,
                           self.photo?.id == snapshot.id else { throw CancellationError() }
+                    guard self.configurationIsCurrent() else { throw SpeciesIdentificationError.configuration }
                     try Task.checkCancellation()
                     self.authorizationState = .continuing
                     return try await identify(snapshot)
@@ -76,9 +102,15 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
                 self.authorizationTask = nil
                 switch result {
                 case .requiresConfirmation: self.authorizationState = .awaitingConfirmation
-                case .completed:
+                case .completed(let continuation):
                     self.pendingPhotoID = nil
-                    self.authorizationState = .unavailable
+                    guard self.configurationIsCurrent() else { self.authorizationState = .unavailable; return }
+                    switch continuation {
+                    case .unavailable: self.authorizationState = .unavailable
+                    case .completed(let value):
+                        self.identificationResult = try value.validated()
+                        self.authorizationState = .idle
+                    }
                 }
                 #if DEBUG && targetEnvironment(simulator)
                 self.invocationCount = self.testInvocationCount?() ?? 0
@@ -88,6 +120,10 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
                 self.authorizationTask = nil
                 self.pendingPhotoID = nil
                 self.authorizationState = .failed
+                self.identificationError = error as? SpeciesIdentificationError
+                #if DEBUG && targetEnvironment(simulator)
+                self.invocationCount = self.testInvocationCount?() ?? 0
+                #endif
             }
         }
     }
@@ -107,6 +143,8 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
                 guard let self, !self.closed, self.generation == request, !Task.isCancelled else { return }
                 self.photo = prepared
                 self.authorizationState = .idle
+                self.identificationResult = nil
+                self.identificationError = nil
                 self.isLoading = false
                 self.task = nil
             } catch {
@@ -143,6 +181,8 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
         task?.cancel()
         task = nil
         photo = nil
+        identificationResult = nil
+        identificationError = nil
         error = nil
         cameraIssue = nil
         isLoading = false
