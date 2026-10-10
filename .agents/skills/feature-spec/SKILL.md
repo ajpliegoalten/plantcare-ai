@@ -98,6 +98,7 @@ Before finishing, check:
 - Verification includes commands or manual checks available in the repo's current state.
 - If a persistent E2E command exists and the feature changes user-visible behavior, authentication, authorization, routing, or API flows, the verification plan should include adding/updating focused E2E coverage or explicitly justify why unit/integration coverage is enough.
 - For shell scripts such as `init.sh`, the spec states whether the script must execute checks, print guidance, start services, or provide modes. The default harness rule is: `init.sh` executes non-blocking startup/verification checks and must not start long-running dev servers.
+- Follow `../../../AGENTS.md` for verification ownership: plan impact-selected tests and directly related regressions for the implementer, and one full final gate for the validator. Include changes → risks → tests/commands, valid baseline reuse and focused repair checks; do not require automatic full gates before/after implementation or duplicate focused runs already covered by the gate. Documentation-only changes need consistency/static review, not iOS tests without executable impact.
 - Durable documentation impact is explicit: `../../../ARCHITECTURE.md`, `../../../CONSTRAINTS.md`, `../../../AGENTS.md`, and other durable docs are each marked create/update/not needed with a reason.
 - Non-goals prevent scope creep.
 - Unknowns are explicit and do not hide blocking ambiguity.

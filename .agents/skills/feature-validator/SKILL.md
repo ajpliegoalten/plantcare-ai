@@ -70,7 +70,13 @@ Check:
 
 ### 3. Rerun Or Inspect Verification
 
-Run the repo standard gate and focused checks when practical. If checks are expensive, unavailable, or require external services, inspect recorded evidence and state what was not rerun.
+Own the full final gate under `../../../AGENTS.md`: for executable product/test/harness changes, run the repo standard gate once on the final source state. The implementer normally hands off focused self-verification, not a full-suite result; this is expected, not a finding against `passing`.
+
+- First inspect the diff, impacted-test mapping, evidence and environment. If a valid full gate already covers the exact relevant source/configuration/environment state, independently corroborate and reuse it instead of duplicating it for a role change. Older baseline evidence does not cover new changes.
+- Do not run separate focused tests that the final gate already covers unless there is a concrete coverage gap, uncertain evidence or a failure to diagnose; state that reason. Do not enable repeated-test iterations/retries as a routine acceptance strategy.
+- If a gate fails, preserve the failure and hand off a focused repair brief. Repair starts with the failed scenario and affected regressions. Run a full gate again only when changed source/tests/resources/relevant configuration invalidate prior evidence; explain why. A failed gate is not valid passing evidence.
+- For documentation/instruction-only changes with no executable impact, review consistency and static diff checks instead of running the iOS suite. Required executable checks that cannot run must be reported as missing, with the acceptance impact; expense alone does not establish a pass.
+- Record commands, test selection/reason, source/environment state, new vs reused results and any gaps. Coordinate with the active session to avoid overlapping simulator runs.
 
 If `init.sh` exists after a runnable baseline has been created, treat it as the standard non-blocking startup/verification gate. It should execute the relevant checks and fail on errors. If it only prints commands while the repo is already bootstrapped, raise a `revise` finding with a concrete repair brief. It must not start long-running processes such as a dev server.
 

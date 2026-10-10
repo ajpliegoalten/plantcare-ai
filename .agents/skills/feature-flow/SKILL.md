@@ -21,6 +21,7 @@ The main agent is the orchestrator. It chooses the next role, launches the right
 - Do not implement work in the main agent while a subagent owns that role.
 - Subagents do not create commits. The main orchestrator owns final staging and commit after validator acceptance.
 - Do not treat `passing` as accepted. `passing` means implementer self-verification passed; validator `accept` is independent.
+- Apply `../../../AGENTS.md` verification ownership in every handoff: implementer runs impact-selected checks, validator owns one full final gate. `passing` may legitimately have that gate pending. Carry forward exact source/environment evidence so a role change does not duplicate a valid run; do not add an orchestrator test pass after acceptance. After `revise`, request focused repair checks first and let validator determine whether changes invalidated full-gate evidence.
 - After validation returns `accept`, persist acceptance by changing the selected feature status in `feature_list.json` from `passing` to `accepted` and appending concise evidence that names the independent validator acceptance.
 - If validation returns `revise`, route the repair brief back to `implementer` for the same feature.
 - After a `revise` repair, route the same feature back to `validator`; do not stop after the repair unless the user explicitly asked for a single role step.

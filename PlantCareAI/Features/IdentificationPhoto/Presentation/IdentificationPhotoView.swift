@@ -50,29 +50,24 @@ struct IdentificationPhotoView: View {
                             }.frame(minHeight: 44)
                         }
                     }
-                    PhotosPicker(selection: $selection, matching: .images, preferredItemEncoding: .current) {
-                        Label("identificationPhoto.gallery", systemImage: "photo")
-                            .frame(maxWidth: .infinity, minHeight: 44)
-                            .foregroundStyle(viewModel.isBusy ? Color("TextSecondary") : Color("Surface"))
+                    if viewModel.identificationResult != nil {
+                        HStack(spacing: 12) {
+                            Rectangle()
+                                .fill(Color("Outline"))
+                                .frame(height: 1)
+                                .accessibilityHidden(true)
+                            Text("identificationPhoto.retrySection.separator")
+                                .font(.caption.weight(.semibold))
+                                .fixedSize()
+                                .accessibilityIdentifier("identificationRetrySeparator")
+                            Rectangle()
+                                .fill(Color("Outline"))
+                                .frame(height: 1)
+                                .accessibilityHidden(true)
+                        }
+                            .padding(.top, 12)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .accessibilityIdentifier("chooseGalleryPhoto")
-                    .disabled(viewModel.isBusy)
-                    Button { viewModel.takePhoto() } label: {
-                        Label("identificationPhoto.camera", systemImage: "camera")
-                            .frame(maxWidth: .infinity, minHeight: 44)
-                    }
-                    .buttonStyle(.bordered)
-                    .accessibilityIdentifier("takePlantPhoto")
-                    .disabled(viewModel.isBusy)
-                    Button { viewModel.identifyPhoto() } label: {
-                        Text("identificationPhoto.identify").frame(minHeight: 44)
-                            .foregroundStyle(viewModel.canIdentify ? Color("Surface") : Color("TextSecondary"))
-                    }
-                        .buttonStyle(.borderedProminent).disabled(!viewModel.canIdentify)
-                        .accessibilityIdentifier("identifyPhoto")
-                    Text("identifyCandidates.explanation").font(.footnote)
-                        .accessibilityIdentifier("identificationUnavailable")
+                    photoActions
                     if viewModel.authorizationState == .unavailable {
                         Text(viewModel.usesRealRecipient ? "identifyCandidates.configurationUnavailable" : "externalAIConsent.unavailable").accessibilityIdentifier("externalAIUnavailable")
                     }
@@ -137,6 +132,59 @@ struct IdentificationPhotoView: View {
                 viewModel.presentsCamera = false
             }.ignoresSafeArea()
         }
+    }
+
+    private var photoActions: some View {
+        VStack(spacing: 16) {
+            if viewModel.identificationResult != nil {
+                VStack(alignment: .leading, spacing: 8) {
+                    Label("identificationPhoto.retrySection.title", systemImage: "arrow.clockwise")
+                        .font(.headline)
+                        .foregroundStyle(Color("TextPrimary"))
+                        .accessibilityAddTraits(.isHeader)
+                        .accessibilityIdentifier("identificationRetryHeading")
+                    Text("identificationPhoto.retrySection.body")
+                        .font(.subheadline)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .multilineTextAlignment(.leading)
+            }
+            PhotosPicker(selection: $selection, matching: .images, preferredItemEncoding: .current) {
+                Label("identificationPhoto.gallery", systemImage: "photo")
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .foregroundStyle(viewModel.isBusy ? Color("TextSecondary") : Color("Surface"))
+            }
+            .buttonStyle(.borderedProminent)
+            .buttonBorderShape(.capsule)
+            .accessibilityIdentifier("chooseGalleryPhoto")
+            .disabled(viewModel.isBusy)
+            Button { viewModel.takePhoto() } label: {
+                Label("identificationPhoto.camera", systemImage: "camera")
+                    .frame(maxWidth: .infinity, minHeight: 44)
+            }
+            .buttonStyle(.bordered)
+            .buttonBorderShape(.capsule)
+            .accessibilityIdentifier("takePlantPhoto")
+            .disabled(viewModel.isBusy)
+            Button { viewModel.identifyPhoto() } label: {
+                Text("identificationPhoto.identify")
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .foregroundStyle(viewModel.canIdentify ? Color("Surface") : Color("TextSecondary"))
+            }
+            .buttonStyle(.borderedProminent)
+            .buttonBorderShape(.capsule)
+            .disabled(!viewModel.canIdentify)
+            .accessibilityIdentifier("identifyPhoto")
+            Divider()
+                .padding(.top, 4)
+            Text("identifyCandidates.explanation")
+                .font(.footnote)
+                .padding(.top, 4)
+                .accessibilityIdentifier("identificationUnavailable")
+        }
+        .padding(16)
+        .background(Color("SurfaceMuted"), in: RoundedRectangle(cornerRadius: 22))
+        .overlay(RoundedRectangle(cornerRadius: 22).stroke(Color("Outline"), lineWidth: 1))
     }
 
     private var preview: some View {

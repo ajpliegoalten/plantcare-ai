@@ -34,5 +34,7 @@ struct EmptyPlantView: View {
         .padding(16)
         .frame(maxWidth: .infinity)
         .background(Color("Surface"), in: RoundedRectangle(cornerRadius: 22))
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("emptyCollectionCard")
     }
 }

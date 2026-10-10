@@ -12,7 +12,7 @@ Use this skill to implement one already-planned feature. The implementer writes 
 You are the implementer/generator, not the planner and not the final validator.
 
 - Do implement the selected feature.
-- Do self-verify with the checks required by the spec and repo harness.
+- Do self-verify with impact-selected checks under `../../../AGENTS.md`; the validator owns the full final gate.
 - Do update status, progress, evidence, and required durable docs.
 - Do not broaden the feature scope.
 - Do not silently redesign the spec. If the spec is wrong or blocked, update the spec with findings or mark the feature blocked instead of improvising.
@@ -79,11 +79,17 @@ Rules:
 
 ### 4. Self-Verify
 
-Run the spec's verification plan and the repo's standard gate. If a required check cannot run, document exactly why and what is missing.
+Apply the verification policy in `../../../AGENTS.md`, including when an older spec assigns a full gate to the implementer. Do not rewrite an approved spec to apply this policy.
+
+- Analyze the actual diff, changed contracts and affected callers. Record a compact changes → risks → selected tests mapping and exact commands, including directly related regressions. Shared persistence/composition/navigation/resources may warrant a broader selection; justify it instead of automatically selecting everything.
+- Run affected static checks, focused unit/integration/UI tests and basic visual inspection for affected screens. Build as needed, but do not run the full standard gate or an automatic full baseline before/after implementation. Reuse valid baseline evidence for the same relevant source/environment state; if absent or broken, diagnose with build/focused checks first.
+- After a failure, repair and rerun the failing scenario plus checks affected by the repair, not every suite. Never enable repeated-test iterations/retries to obtain green; diagnostic repetitions require a stated hypothesis and preserve failures.
+- Hand off focused evidence, its source/environment state and any coverage gaps. The full final gate belongs to the validator; its deliberate deferral is not a blocker for `passing`. If an implementer full run is exceptionally needed, state the concrete reason so the validator can reuse valid evidence rather than duplicate it.
+- If a required focused check cannot run, document exactly why and what is missing; do not claim it passed.
 
 If the feature creates or updates `init.sh`, make it an executable non-blocking gate: it should run the standard verification checks for the current repo state and must not start long-running dev servers. A script that only prints the checks is not enough unless the spec explicitly says this repository is still pre-bootstrap.
 
-Self-verification should include the strongest applicable levels available today:
+Self-verification should include the applicable levels for the impacted scope, not all repository tests:
 
 1. static/syntax checks,
 2. tests and runtime/startup checks,
@@ -106,7 +112,7 @@ CONSTRAINTS.md rule: read `../../../CONSTRAINTS.md` before implementing (see Inp
 
 Status rule:
 
-- `passing` means required verification passed and evidence is recorded.
+- `passing` means impact-selected self-verification passed and evidence is recorded; the full gate may still be pending with the validator and must be labelled as such.
 - `passing` does not mean independently accepted. It means the implementer believes the feature is ready for `feature-validator`.
 - `accepted` means an independent validator returned `accept` and the main orchestrator persisted that acceptance.
 - `blocked` means implementation cannot continue and the reason is durable in `../../../PROGRESS.md` and/or the feature entry.

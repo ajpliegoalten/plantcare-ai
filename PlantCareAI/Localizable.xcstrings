@@ -220,7 +220,6 @@
       }
     },
     "confirmSpecies.selected" : {
-      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -734,6 +733,37 @@
         }
       }
     },
+    "identificationPhoto.retrySection.body" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puedes cambiar la foto o volver a identificar la actual."
+          }
+        }
+      }
+    },
+    "identificationPhoto.retrySection.separator" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O bien"
+          }
+        }
+      }
+    },
+    "identificationPhoto.retrySection.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volver a identificar"
+          }
+        }
+      }
+    },
     "identificationPhoto.settings" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -863,7 +893,6 @@
       }
     },
     "identifyCandidates.insufficient" : {
-      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -906,6 +935,7 @@
       }
     },
     "identifyCandidates.notConfirmed" : {
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -916,7 +946,6 @@
       }
     },
     "identifyCandidates.proposal" : {
-      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
