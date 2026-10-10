@@ -13,7 +13,18 @@ struct IdentificationPhotoView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     preview
-                    if let result = viewModel.identificationResult { IdentificationResultView(result: result) }
+                    if let identity = viewModel.confirmedIdentity {
+                        ConfirmedSpeciesView(identity: identity, canChange: !viewModel.isBusy && !viewModel.presentsCamera,
+                                             change: { viewModel.changeConfirmedSpecies() })
+                    } else if let result = viewModel.identificationResult, let revision = viewModel.resultID {
+                        IdentificationResultView(result: result, selected: viewModel.selectedProposal,
+                            canSelect: viewModel.canSelectProposal, canConfirm: viewModel.canConfirmSpecies,
+                            select: { viewModel.selectProposal($0, resultID: revision) },
+                            confirm: { viewModel.confirmSpecies(resultID: revision) })
+                    }
+                    if viewModel.hasConfirmationError {
+                        Text("confirmSpecies.error").accessibilityIdentifier("speciesConfirmationError")
+                    }
                     if viewModel.authorizationState == .continuing {
                         ProgressView("identifyCandidates.loading").accessibilityIdentifier("identificationLoading")
                         Button("identifyCandidates.cancelRequest") { viewModel.cancelAuthorization() }

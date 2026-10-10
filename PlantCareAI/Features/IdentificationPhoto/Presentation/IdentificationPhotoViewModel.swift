@@ -10,6 +10,17 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
     @Published private(set) var authorizationState: AuthorizationState = .idle
     @Published private(set) var identificationResult: IdentificationResult?
     @Published private(set) var identificationError: SpeciesIdentificationError?
+    @Published private(set) var resultID: UUID?
+    @Published private(set) var selectedProposal: SpeciesProposalSelection?
+    @Published private(set) var confirmedIdentity: ConfirmedDraftIdentity?
+    @Published private(set) var hasConfirmationError = false
+    private var resultPhotoID: UUID?
+    private let confirmation: any ConfirmSpeciesUseCase
+    var canSelectProposal: Bool {
+        !closed && !isBusy && !presentsCamera && photo != nil && photo?.id == resultPhotoID &&
+        resultID != nil && identificationResult?.outcome == .proposals && confirmedIdentity == nil
+    }
+    var canConfirmSpecies: Bool { canSelectProposal && selectedProposal != nil }
     let usesRealRecipient: Bool
     let destinationNotice: ExternalAIDestinationNotice?
     private let configurationIsCurrent: () -> Bool
@@ -36,11 +47,12 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
     @Published private(set) var invocationCount = 0
     #endif
 
-    init(prepare: PrepareIdentificationPhoto, camera: CheckCameraAccess, authorize: AuthorizeExternalAIOperation, usesRealRecipient: Bool = false, destinationNotice: ExternalAIDestinationNotice? = nil, identificationAvailable: Bool = true, configurationIsCurrent: @escaping () -> Bool = { true }, identify: @escaping (IdentificationPhoto) async throws -> IdentificationContinuationResult = { _ in .unavailable }) {
+    init(prepare: PrepareIdentificationPhoto, camera: CheckCameraAccess, authorize: AuthorizeExternalAIOperation, confirmSpecies: any ConfirmSpeciesUseCase = ConfirmSpecies(), usesRealRecipient: Bool = false, destinationNotice: ExternalAIDestinationNotice? = nil, identificationAvailable: Bool = true, configurationIsCurrent: @escaping () -> Bool = { true }, identify: @escaping (IdentificationPhoto) async throws -> IdentificationContinuationResult = { _ in .unavailable }) {
         self.prepare = prepare
         self.camera = camera
         self.authorize = authorize
         self.identify = identify
+        self.confirmation = confirmSpecies
         self.usesRealRecipient = usesRealRecipient
         self.destinationNotice = destinationNotice
         self.identificationAvailable = identificationAvailable && (!usesRealRecipient || destinationNotice != nil)
@@ -49,9 +61,47 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
 
     deinit { task?.cancel(); authorizationTask?.cancel() }
 
+    func selectProposal(_ selection: SpeciesProposalSelection, resultID revision: UUID) {
+        guard canSelectProposal, revision == resultID, let result = identificationResult else { return }
+        switch selection {
+        case .primary: guard result.primary != nil else { return }
+        case .alternative(let index): guard result.alternatives.indices.contains(index) else { return }
+        }
+        selectedProposal = selection
+        hasConfirmationError = false
+    }
+
+    func confirmSpecies(resultID revision: UUID) {
+        guard canConfirmSpecies, revision == resultID, let photoID = photo?.id,
+              let result = identificationResult, let selectedProposal else { return }
+        do {
+            confirmedIdentity = try confirmation.execute(photoID: photoID, resultID: revision, result: result, selection: selectedProposal)
+            hasConfirmationError = false
+        } catch {
+            confirmedIdentity = nil
+            hasConfirmationError = true
+        }
+    }
+
+    func changeConfirmedSpecies() {
+        guard !closed, !isBusy, !presentsCamera, let identity = confirmedIdentity,
+              identity.photoID == photo?.id, identity.resultID == resultID else { return }
+        confirmedIdentity = nil
+        hasConfirmationError = false
+    }
+
+    private func clearIdentification() {
+        identificationResult = nil
+        resultID = nil
+        resultPhotoID = nil
+        selectedProposal = nil
+        confirmedIdentity = nil
+        hasConfirmationError = false
+    }
+
     func identifyPhoto() {
         guard canIdentify, let photo else { return }
-        identificationResult = nil
+        clearIdentification()
         identificationError = nil
         #if DEBUG && targetEnvironment(simulator)
         invocationCount = testInvocationCount?() ?? 0
@@ -108,7 +158,12 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
                     switch continuation {
                     case .unavailable: self.authorizationState = .unavailable
                     case .completed(let value):
+                        guard self.photo?.id == snapshot.id else { return }
                         self.identificationResult = try value.validated()
+                        self.resultID = UUID()
+                        self.resultPhotoID = snapshot.id
+                        self.selectedProposal = nil
+                        self.confirmedIdentity = nil
                         self.authorizationState = .idle
                     }
                 }
@@ -143,7 +198,7 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
                 guard let self, !self.closed, self.generation == request, !Task.isCancelled else { return }
                 self.photo = prepared
                 self.authorizationState = .idle
-                self.identificationResult = nil
+                self.clearIdentification()
                 self.identificationError = nil
                 self.isLoading = false
                 self.task = nil
@@ -181,7 +236,7 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
         task?.cancel()
         task = nil
         photo = nil
-        identificationResult = nil
+        clearIdentification()
         identificationError = nil
         error = nil
         cameraIssue = nil

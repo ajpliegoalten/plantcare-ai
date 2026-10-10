@@ -9,7 +9,7 @@ Organizar el código **por funcionalidad**, y dentro de cada funcionalidad separ
 - **Data**: implementaciones de los protocolos del dominio (almacenamiento local o adaptadores futuros). Ningún tipo de `Data` se importa en `Domain` o en las vistas.
 - **Composición**: `PlantCareAIApp.swift` elige las implementaciones concretas e inyecta el caso de uso en el ViewModel. `ContentView` solo delega en la vista raíz de la funcionalidad; no alberga la pantalla «Mis plantas». Las dependencias apuntan `Presentation → Domain ← Data` y la composición conecta las capas.
 
-La separación no autoriza a adelantar comportamiento: existe persistencia local, consulta de ficha por UUID, edición de nombre/ubicación, selección/captura efímera e identificación orientativa configurada para demo Debug, pero no confirmación de especie, alta desde UI ni historial. Los contratos son asíncronos y propagadores de errores; un fallo no representa una colección vacía.
+La separación no autoriza a adelantar comportamiento: existe persistencia local, consulta de ficha por UUID, edición de nombre/ubicación, selección/captura efímera, identificación orientativa configurada para demo Debug y confirmación humana de especie en el borrador, pero no alta desde UI ni historial. Los contratos de IO son asíncronos y propagadores de errores; un fallo no representa una colección vacía.
 
 ## Implementación actual: `PlantList`, `PlantDetail` y `EditPlant`
 
@@ -78,7 +78,7 @@ Estos límites son del borrador, no del contrato de alta. `loadTransferable(Data
 
 ## Propuestas efímeras: `IdentifyCandidates`
 
-`IdentificationPhotoView → IdentificationPhotoViewModel → AuthorizeExternalAIOperation → IdentifyCandidates → SpeciesIdentificationRepository ← OpenAICompatibleSpeciesIdentificationRepository`. El contrato de continuación se mueve de consentimiento al Domain de identificación. `IdentificationResultView` es solo lectura; nombres/alternativas/incertidumbre no son identidad confirmada ni entidades persistentes. Resultado/error están ligados a la selección; cambio exitoso limpia ambos, fallo conserva A, cierre/cancelación descarta respuestas tardías.
+`IdentificationPhotoView → IdentificationPhotoViewModel → AuthorizeExternalAIOperation → IdentifyCandidates → SpeciesIdentificationRepository ← OpenAICompatibleSpeciesIdentificationRepository`. El contrato de continuación se mueve de consentimiento al Domain de identificación. `IdentificationResultView` presenta propuestas seleccionables, sin preselección; nombres/alternativas/incertidumbre no son identidad confirmada ni entidades persistentes. Resultado/error están ligados a la foto; cambio exitoso limpia ambos, fallo conserva A, cierre/cancelación descarta respuestas tardías.
 
 Data usa **un único adaptador OpenAI-compatible Chat Completions**, sin perfiles/whitelist/vendor SDK. Cambio posterior explícitamente autorizado (ADR 004): cualquier base HTTPS/modelo bien formado configurable, `API_KEY` opcional; vacía omite Authorization, servicio puede rechazarla con 401/403 sin retry/fallback de auth. `API_SCHEME`/`API_HOST_PATH` llegan por plist puente; Data construye y valida/canonicaliza URL, preserva prefijo y añade `/chat/completions` una vez. Rechaza credenciales en URL, query/fragment/ambigüedades/endpoint duplicado/no HTTPS, sin relax ATS/TLS. Puertos HTTPS válidos se conservan salvo 443 canónico.
 
@@ -87,6 +87,14 @@ Data usa **un único adaptador OpenAI-compatible Chat Completions**, sin perfile
 La app captura configuración/scope/aviso/transporte juntos por borrador y revalida antes de aceptar, enviar y publicar. SHA256 canónico de destino real/modelo/revisión de aviso, **versión 3** y prefijo openai-compatible: no hereda aceptación DevExpert v2 ni provisional v1. `ExternalAIDestinationNotice` Domain lleva endpoint/modelo de ese snapshot a la vista; aviso muestra destino HTTP completo y modelo, declara desconocidos operador/subprocesadores/retención/entrenamiento sin atribuir empresas. Operación real sin notice falla localmente antes de autorización. Cambiar host/puerto/base path/modelo cambia alcance; clave/timeout no. Sin discovery ni fallback/envío automático; configurar no equivale a aceptar el aviso ni a acreditar visión/JSON del endpoint.
 
 URLSession efímera, sin cache/cookies/credenciales persistentes, POST único con JPEG preparado actual + prompt, sin redirecciones ni retries automáticos. JSON es dato no confiable: parseo/invariantes/límites fallidos son error, no evidencia insuficiente. Timeout total 60 s (10–120 configurables), respuesta ≤1 MiB, salida solicitada ≤1000 tokens, JPEG ≤5 MiB; base64 y JSON generan copias en memoria, no memoria constante. Compatibilidad y presupuesto reales del gateway siguen pendientes de prueba autorizada; dobles no los acreditan. El único adaptador OpenAI-compatible admite base HTTPS/modelo configurables sin perfiles de proveedor, con aviso v3 antes del envío, solo en demo Debug local privada; no hay cuentas/backend ni custodia de credencial para distribución.
+
+## Confirmación local: `ConfirmSpecies`
+
+`IdentificationResultView → IdentificationPhotoViewModel → ConfirmSpeciesUseCase ← ConfirmSpecies` es un flujo síncrono/puro. Domain (`ConfirmedDraftIdentity.swift`, `ConfirmSpeciesUseCase.swift`) conserva UUID de foto/revisión, nombres opcionales exactos y procedencia posicional; valida resultado y pertenencia sin IO. No hay Data nueva ni entidad persistida. App inyecta `ConfirmSpecies()`; el VM existente posee selección única, revisión, identidad y foto sin duplicar JPEG.
+
+Cada resultado publicado obtiene revisión UUID nueva. La vista captura esa revisión en acciones; VM exige foto/revisión vigentes y disponibilidad (abierto, no busy/cámara). Seleccionar no confirma, confirmar es idempotente, y `ConfirmedSpeciesView` muestra un resumen humano separado de la propuesta, no cuidados/alta. Cambiar especie borra confirmación y conserva selección para reconfirmación explícita.
+
+Iniciar identificación limpia resultado/revisión/selección/identidad antes de configuración/aviso; cancelar/fallar no los restaura. Sustituir foto solo limpia al publicar B con éxito, incluso si bytes/recurso iguales; fallo/cancelación/cámara denegada conservan A. Cerrar elimina todo. Generaciones existentes bloquean continuaciones obsoletas. La futura generación de cuidados deberá consumir foto e identidad del mismo VM comprobando photoID; manual-species definirá su procedencia, save-plant mapeará/persistirá. No se activan aquí (ADR 005).
 
 ## Recursos y comprobación
 
