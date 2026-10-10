@@ -2,6 +2,7 @@ import XCTest
 @testable import PlantCareAI
 
 actor DetailRepository: PlantRepository {
+    func updatePlant(id: UUID, name: String, location: String?) async throws -> Plant { throw PlantStorageError.storage }
     let plants: [Plant]
     var failure: PlantStorageError?
     var metadataRequests = 0

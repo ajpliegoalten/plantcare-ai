@@ -14,11 +14,30 @@ final class PlantDetailViewModel: ObservableObject {
     private var metadataGeneration = 0
     private var photoGeneration = 0
     private var metadataPending = false
+    private let update: UpdatePlant
+    private let onUpdated: @MainActor (Plant) -> Void
 
-    init(id: UUID, loadDetail: LoadPlantDetail, loadPhoto: LoadInitialPlantPhoto) {
+    init(id: UUID, loadDetail: LoadPlantDetail, loadPhoto: LoadInitialPlantPhoto, update: UpdatePlant, onUpdated: @escaping @MainActor (Plant) -> Void = { _ in }) {
         self.id = id
         self.loadDetail = loadDetail
         self.loadPhoto = loadPhoto
+        self.update = update
+        self.onUpdated = onUpdated
+    }
+
+    func editor() -> EditPlantViewModel? {
+        guard case .loaded(let plant) = state else { return nil }
+        return EditPlantViewModel(plant: plant, update: update) { [weak self] plant in
+            self?.applyUpdatedPlant(plant)
+        }
+    }
+
+    func applyUpdatedPlant(_ plant: Plant) {
+        guard plant.id == id else { return }
+        metadataGeneration += 1
+        metadataPending = false
+        state = .loaded(plant)
+        onUpdated(plant)
     }
 
     func load() async {

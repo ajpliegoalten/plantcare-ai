@@ -9,9 +9,9 @@ Organizar el código **por funcionalidad**, y dentro de cada funcionalidad separ
 - **Data**: implementaciones de los protocolos del dominio (almacenamiento local o adaptadores futuros). Ningún tipo de `Data` se importa en `Domain` o en las vistas.
 - **Composición**: `PlantCareAIApp.swift` elige las implementaciones concretas e inyecta el caso de uso en el ViewModel. `ContentView` solo delega en la vista raíz de la funcionalidad; no alberga la pantalla «Mis plantas». Las dependencias apuntan `Presentation → Domain ← Data` y la composición conecta las capas.
 
-La separación no autoriza a adelantar comportamiento: existe persistencia local y consulta de ficha por UUID desde tarjetas, pero no cámara, alta desde UI, edición ni historial. Los contratos son asíncronos y propagadores de errores; un fallo no representa una colección vacía.
+La separación no autoriza a adelantar comportamiento: existe persistencia local, consulta de ficha por UUID desde tarjetas y edición local de nombre/ubicación, pero no cámara, alta desde UI ni historial. Los contratos son asíncronos y propagadores de errores; un fallo no representa una colección vacía.
 
-## Implementación actual: `PlantList` y `PlantDetail`
+## Implementación actual: `PlantList`, `PlantDetail` y `EditPlant`
 
 ```
 PlantCareAI/
@@ -26,7 +26,7 @@ PlantCareAI/
       PlantCardViewModel.swift         # foto por demanda, cache de imagen acotada y generación
     Domain/
       Plant.swift, CareSheet.swift      # ejemplar confirmado y copia de seis cuidados
-      PlantRepository.swift            # lectura, creación y foto bajo demanda; errores tipados
+      PlantRepository.swift            # lectura, creación, update estrecho y foto; errores tipados
       LoadPlantsUseCase.swift          # contrato y caso de uso de consulta
       SavePlantUseCase.swift            # validación de campos obligatorios y foto no vacía
       LoadInitialPlantPhotoUseCase.swift # foto por UUID, sin rutas en Domain
@@ -40,13 +40,23 @@ PlantCareAI/
       PlantDetailViewModel.swift       # metadata/foto independientes, cancelación y reintento
     Domain/
       LoadPlantDetailUseCase.swift     # relectura metadata + filtro UUID, nil distinto de error
+  Features/EditPlant/
+    Presentation/
+      EditPlantView.swift              # Form modal nativo, cancelar/guardar y errores
+      EditPlantViewModel.swift         # borradores aislados, save único y resultado confirmado
+    Domain/
+      UpdatePlantUseCase.swift         # nombre obligatorio y normalización name/location
 ```
 
 `PlantCareAIApp` crea una misma instancia de `LocalPlantRepository` para `LoadPlants` y `LoadInitialPlantPhoto`, inyectados en `PlantListViewModel` con ciclo de vida `@StateObject`. El listado conserva modelos de tarjeta por UUID; no inicia fotos. Cada tarjeta solicita su foto con `.task` mediante `PlantCardViewModel → LoadInitialPlantPhoto → PlantRepository`, prepara un thumbnail ImageIO de máximo 1600 px fuera del MainActor y conserva solo la imagen. Cancelación/generaciones impiden que respuestas antiguas sustituyan el estado nuevo. No hay miniaturas en disco; Data sigue leyendo/validando el original completo. Vacío y error global siguen separados de errores por foto. El fixture Debug usa la misma instancia/raíz para ambos flujos. Los botones de alta permanecen deshabilitados hasta `choose-identification-photo`.
 
 `PlantListView` contiene el único `NavigationStack` y rutas UUID. Para todo UUID construye un destino con VM propio `@StateObject`, sin IO en fábrica/init. `PlantDetailView → PlantDetailViewModel → LoadPlantDetail → PlantRepository ← LocalPlantRepository` relee metadata al abrir y filtra por UUID (coste O(n) para este prototipo), nunca reutiliza el snapshot de tarjeta como fallback. Reutiliza los modelos/contratos Domain de PlantList y su adaptador Data; no hay repositorio ni esquema nuevo. La composición inyecta detalle y foto sobre la misma instancia elegida después del override Debug, sin volver a seed/verify.
 
-Metadata loading/loaded/notFound/failed y foto idle/loading/loaded/failed son independientes. Los seis cuidados aparecen antes de completar IO/decode de foto; un reintento solo solicita la foto propia. ImageIO prepara máximo 1600 px fuera del MainActor, sin cache global ni Data retenida con UIImage; cada destino conserva solo su imagen mientras vive. Generaciones y cancelación invalidan respuestas tardías al desaparecer. Ubicación blanca/ausente se omite, especie se muestra literal y fecha larga española deriva de `createdAt` persistido. No hay escrituras ni red en la consulta, ni riegos, salud, edición o eventos sin contratos reales.
+Metadata loading/loaded/notFound/failed y foto idle/loading/loaded/failed son independientes. Los seis cuidados aparecen antes de completar IO/decode de foto; un reintento solo solicita la foto propia. ImageIO prepara máximo 1600 px fuera del MainActor, sin cache global ni Data retenida con UIImage; cada destino conserva solo su imagen mientras vive. Generaciones y cancelación invalidan respuestas tardías al desaparecer. Ubicación blanca/ausente se omite, especie se muestra literal y fecha larga española deriva de `createdAt` persistido. No hay escrituras ni red en la consulta, ni riegos, salud o eventos sin contratos reales.
+
+La app inyecta `UpdatePlant` sobre el mismo repositorio seleccionado después del override Debug. `EditPlantView → EditPlantViewModel → UpdatePlant → PlantRepository ← LocalPlantRepository` escribe solo nombre/ubicación por UUID. Domain normaliza extremos de ambos textos y ubicación blanca a nil; Data aplica la misma validación antes de mutar. El actor hace fetch/mutación/beforeCommit/save sin suspensión y rollback ante fallo, sin acceder al JPEG ni insertar. No cambia el esquema (ADR 002).
+
+El editor se crea solo desde metadata loaded, incluso con foto fallida; nueva sheet crea borradores nuevos. Cancelar y gesto descartan sin escribir; durante save campos/cancelar/gesto están bloqueados. El resultado canónico tras commit se aplica al detalle y callback MainActor débil al listado antes del dismiss. El listado reemplaza solo metadata por UUID en state/cards; conserva VM/imagen/tareas de cada tarjeta. Generaciones protegen resultados confirmados de metadata tardía. No se recarga el fixture ni fotos por una edición.
 
 El actor crea perezosamente `ModelContainer` y su `ModelContext` fuera del MainActor; todas las operaciones están serializadas, sin suspensiones entre comprobar duplicado y confirmar. Hay una sola instancia por almacén en producción; no se admiten escritores simultáneos de otros procesos/repositorios sobre el mismo directorio. Metadatos en `Application Support/PlantStore/Plants.store`, ficha embebida por ejemplar, referencia interna UUID.jpg; bytes únicamente en `Photos/UUID.jpg`. Listar no lee fotos. Domain recibe un UUID opaco, no una ruta ni binarios precargados.
 

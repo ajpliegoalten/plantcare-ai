@@ -2,6 +2,8 @@
 
 ## Source Feature
 
+> Política de verificación vigente: `AGENTS.md`. Un único iPhone Simulator estándar con texto normal y una apariencia, `./init.sh`, pruebas unitarias/UI funcionales e inspección visual básica. SE/pantallas pequeñas, Dynamic Type aumentado/máximo, VoiceOver/Accessibility Inspector y matrices adicionales de apariencia solo si el usuario lo solicita expresamente. Se conserva soporte de accesibilidad y todas las aserciones funcionales; no declarar superadas comprobaciones no ejecutadas. Este ajuste sustituye únicamente obligaciones de verificación ampliada, no alcance ni evidencias históricas.
+
 - `id`: `design-resources`
 - `area`: `diseno-ios`
 - `title`: Centralizar colores, imágenes usadas y textos visibles
@@ -72,7 +74,7 @@ Then pasan build y UI tests; la apertura es legible sin regresión visual, y el 
 
 - No existe `Assets.xcassets`, `Localizable.xcstrings` ni fichero de imagen; no hay mecanismos previos de localización ni colores compartidos.
 - Hay que verificar la sintaxis concreta de `.xcstrings` admitida por Xcode instalado y que la inclusión en bundle resuelva español en tiempo de ejecución; no basta JSON válido o compilar. El idioma del simulador puede no ser español: fijarlo explícitamente para la prueba o configurar español como idioma de desarrollo con fallback comprobado.
-- La comprobación de contraste y apariencia oscura exige inspección en runtime; no cambiar los hex definidos para simular variantes sin validar. Evitar texto ilegible por Dynamic Type o dark mode.
+- Inspeccionar contraste y legibilidad en runtime en el simulador estándar con texto normal y una apariencia; no cambiar los hex definidos para simular variantes sin validar. Conservar soporte Dynamic Type/dark mode; su comprobación ampliada solo por petición expresa.
 
 ## Technical Approach
 
@@ -95,7 +97,7 @@ Agregar ambos catálogos al target de app en `PBXResourcesBuildPhase` con refere
 
 - UI involucrada: sí, solo apariencia/textos ya visibles de la pantalla inicial.
 - Fuente: `DESIGN.md` (tokens del frontmatter y dirección de contraste/accesibilidad); `docs/build-brief.md` para límites funcionales.
-- Estado afectado: lanzamiento bootstrap, sin acciones; conservar fondo a pantalla completa y textos legibles bajo Dynamic Type; revisar también modo oscuro por ausencia actual de colores adaptativos.
+- Estado afectado: lanzamiento bootstrap, sin acciones; conservar fondo a pantalla completa y soporte de textos escalables. Inspección habitual con texto normal y una apariencia; modo oscuro adicional y Dynamic Type aumentado/máximo solo por petición expresa.
 - Nuevo artefacto de diseño: no; el catálogo de colores y strings son recursos de implementación, no una pantalla nueva.
 
 ## Durable Documentation Impact
@@ -125,7 +127,7 @@ Agregar ambos catálogos al target de app en `PBXResourcesBuildPhase` con refere
 
 - Comprobar estructura y valores de todos los `Contents.json` y `Localizable.xcstrings` (`plutil -lint PlantCareAI.xcodeproj/project.pbxproj`; `python3 -m json.tool PlantCareAI/Localizable.xcstrings >/dev/null`; revisar colorsets). Inspeccionar la fase de recursos y producto compilado para confirmar catálogos presentes y ausencia de imágenes de muestra.
 - `./init.sh` desde raíz: **ejecuta**, no solo imprime, build + test no bloqueantes en simulador iPhone; no arranca servidor ni requiere modificar `init.sh`. Prueba UI con launch language español (`-AppleLanguages '(es)'` en `XCUIApplication.launchArguments` o mecanismo equivalente), afirma ambos textos resueltos, identifier y ausencia de «Añadir». Un build aislado no demuestra localización.
-- `xcrun simctl install <UDID> DerivedData/Build/Products/Debug-iphonesimulator/PlantCareAI.app` y `xcrun simctl launch <UDID> org.plantcareai.prototype`; observar/capturar fondo, color y textos en español frente al bootstrap, sin acción «Añadir»; comprobar tamaño de texto grande y modo oscuro al menos manualmente para detectar regresiones de legibilidad. Si idioma de dispositivo no es español, fijar español o comprobar fallback explícitamente.
+- `xcrun simctl install <UDID> DerivedData/Build/Products/Debug-iphonesimulator/PlantCareAI.app` y `xcrun simctl launch <UDID> org.plantcareai.prototype`; observar/capturar fondo, color y textos en español frente al bootstrap, sin acción «Añadir», en el único simulador estándar con texto normal y una apariencia. Texto aumentado/máximo y otras apariencias solo por petición expresa. Si idioma de dispositivo no es español, fijar español o comprobar fallback explícitamente.
 - No existe comando E2E externo; el UI test persistente ejecutado por `./init.sh` cubre la única conducta visible de esta funcionalidad, más inspección visual de colores que el test no mide.
 - `git diff --check` y revisar que no se añaden fotos/secretos ni UI de `empty-collection`.
 

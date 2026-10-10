@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PlantDetailView: View {
     @StateObject private var viewModel: PlantDetailViewModel
+    @State private var editor: EditPlantViewModel?
 
     init(viewModel: PlantDetailViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -53,6 +54,15 @@ struct PlantDetailView: View {
         .background(Color("Background").ignoresSafeArea())
         .navigationTitle(Text("detail.title"))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if case .loaded = viewModel.state {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { editor = viewModel.editor() } label: { Text("edit.open").frame(minWidth: 44, minHeight: 44) }
+                        .accessibilityIdentifier("editPlant-\(viewModel.id)")
+                }
+            }
+        }
+        .sheet(item: $editor) { EditPlantView(viewModel: $0) }
         .accessibilityIdentifier("plantDetail-\(viewModel.id)")
         .task { await viewModel.load() }
         .onDisappear { viewModel.cancelLoading() }

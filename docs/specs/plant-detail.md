@@ -2,6 +2,8 @@
 
 ## Source Feature
 
+> Política de verificación vigente: `AGENTS.md`. Un único iPhone Simulator estándar con texto normal y una apariencia, `./init.sh`, pruebas unitarias/UI funcionales e inspección visual básica. SE/pantallas pequeñas, Dynamic Type aumentado/máximo, VoiceOver/Accessibility Inspector y matrices adicionales de apariencia solo si el usuario lo solicita expresamente. Se conserva soporte de accesibilidad y todas las aserciones funcionales; no declarar superadas comprobaciones no ejecutadas. Este ajuste sustituye únicamente obligaciones de verificación ampliada, no alcance ni evidencias históricas.
+
 - `id`: `plant-detail`; `area`: `detalle`; `title`: Consultar la ficha de un ejemplar.
 - `user_visible_behavior`: Desde su tarjeta se ven foto, especie confirmada, ubicación opcional y cuidados guardados de esa planta.
 - `depends_on`: `plant-cards`, `accepted`; transitivas `empty-collection`, `local-plant-storage`, `design-resources`, `ios-bootstrap`, `accepted` en `feature_list.json`.
@@ -71,8 +73,8 @@ When se termina y relanza la app sin desinstalar/resembrar y sin conectividad,
 Then ambos detalles conservan sus datos/fotos/cuidados; no se solicita red ni se presenta error de conexión.
 
 ### 6. Accesibilidad y consejo orientativo
-Given pantalla pequeña y Dynamic Type máximo, con nombre/especie/cuidados largos,
-When se recorre el detalle y sus controles con desplazamiento/VoiceOver,
+Given un iPhone Simulator estándar con texto normal y nombre/especie/cuidados largos,
+When se recorre el detalle y sus controles con desplazamiento,
 Then todos los textos y seis filas son alcanzables sin elipsis horizontal; Atrás y reintento tienen objetivo >=44×44 pt; etiquetas y orden son comprensibles.
 Then la ficha se identifica como orientación guardada de ese ejemplar, no diagnóstico, pauta urgente, salud confirmada o guía sincronizada/permanente.
 
@@ -210,8 +212,8 @@ git diff --check
 ```
 
 - `init.sh` sigue ejecutando build/unit/UI, termina y puede imprimir guía; no modificarlo para imprimir solamente ni arrancar servidores/procesos de desarrollo largos.
-- Manual con fixture aislado según guía existente: dos fichas, Atrás/gesto, fotografías distintas y fallback, offline, claro/oscuro, iPhone pequeño, texto normal y `simctl ui "$UDID" content_size accessibility-extra-extra-extra-large`; restaurar large y limpiar solo fixture.
-- Inspección real de screenshots y VoiceOver/Accessibility Inspector: orden, encabezados, textos completos, controles >=44 pt, contraste. Registrar indisponibilidad de lectura auditiva/dispositivo físico sin presentarla como prueba aprobada.
+- Manual habitual con fixture aislado: dos fichas, Atrás/gesto, fotografías distintas y fallback, comportamiento local offline e inspección visual básica de textos/controles/contraste en el único simulador estándar con texto normal y una apariencia; limpiar solo fixture.
+- VoiceOver/Accessibility Inspector, pantalla pequeña/SE, texto aumentado/máximo y apariencias adicionales solo por petición expresa; no requisitos de aceptación habitual ni pruebas aprobadas si no se ejecutaron.
 - Release sin flags/símbolos fixture según patrón existente. No descargar fotos; motivos locales de prueba no demuestran importación de fotografías reales.
 
 ## Risks / Decisions / Open Questions
@@ -224,7 +226,7 @@ git diff --check
 
 ## Evidence To Capture / Validator Checklist
 
-- Futuro: logs/xcresult, entorno/UDID, resultados unitarios/UI, capturas de ambos detalles/foto fallida/texto máximo, reapertura sin resembrar y límites manuales reales en PROGRESS/feature list. No logs de fotos/datos sensibles ni evidencia inventada.
+- Futuro: logs/xcresult, entorno/UDID, resultados unitarios/UI, capturas básicas de ambos detalles/foto fallida con texto normal, reapertura sin resembrar y límites manuales reales en PROGRESS/feature list. Texto aumentado/máximo y otras variantes solo si solicitadas expresamente. No logs de fotos/datos sensibles ni evidencia inventada.
 - [ ] Solo plant-detail; shell retirado; ninguna edición, historial, riego, IA o acción nueva ajena.
 - [ ] Lookup por UUID, metadata/foto separadas, mismo repo en composición producción/fixture; sin escrituras ni red de consulta.
 - [ ] Dos ejemplares de misma especie mantienen seis cuidados e imágenes propios al navegar/reabrir.

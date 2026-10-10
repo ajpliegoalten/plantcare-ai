@@ -84,10 +84,11 @@
     "title": "Editar nombre y ubicación",
     "user_visible_behavior": "El usuario modifica el nombre personalizado y la ubicación opcional sin alterar la especie ni otra planta.",
     "depends_on": ["plant-detail"],
-    "status": "not_started",
+    "status": "accepted",
     "verification": ["Editar nombre y ubicación de una de dos plantas, reabrir la app y verificar cambios locales aislados; gate estándar."],
-    "evidence": [],
-    "notes": "No implica editar la ficha generada por IA."
+    "evidence": ["2026-10-10 autoverificación final: baseline limpia HEAD 33703f9, caffeinate -dius ./init.sh → BUILD/TEST SUCCEEDED, 25 unit + 8 UI = 33/33, 0 omitidas (DerivedData/evidence/edit-recovery-baseline.log y edit-recovery-baseline.xcresult). Gate sobre fuentes finales → BUILD/TEST SUCCEEDED, 33 unit + 10 UI = 43/43, 0 omitidas: DerivedData/evidence/edit-final-gate.log; DerivedData/Logs/Test/Test-PlantCareAI-2026.10.10_10-23-15-+0200.xcresult; edit-final-gate-summary.json. Ambos escenarios finales pasan también en SE 3 oscuro/AX máximo: 2/2, edit-small-form-scroll-final.log y DerivedData/FinalSmallCheck/Logs/Test/Test-PlantCareAI-2026.10.10_10-19-13-+0200.xcresult. Release BUILD SUCCEEDED edit-final-release.log; fixtures ausentes del binario, plutil/JSON/diff/hash correctos edit-final-static.log. Spec aprobada intacta SHA256 5989ccc4503e172495b7ee047067261f5b42c216803d340976408a00f981a5e5. Capturas claro/oscuro/AX máximo exportadas e inspeccionadas. Causa concreta de pausas 903 s: Clamshell Sleep del host incluso con caffeinate; errores de helper selección/scroll/gesto reparados sin quitar assertions, intentos fallidos conservados en PROGRESS.md."],
+    "validator_evidence": ["2026-10-10 independent validator openai/gpt-6.1-sol verdict accept: fresh caffeinate -dius ./init.sh BUILD SUCCEEDED / TEST SUCCEEDED, 43/43 (33 unit + 10 UI), zero failures/skipped; DerivedData/evidence/edit-validator-gate.log, DerivedData/Logs/Test/Test-PlantCareAI-2026.10.10_10-34-58-+0200.xcresult. Fresh Release without fixture symbols/arguments and ANALYZE SUCCEEDED; project/JSON/bash/diff checks passed. Independent screenshots inspected; baseline 33/33 and SE dark/maximum Dynamic Type 2/2 evidence inspected, not rerun. Approved spec SHA256 unchanged. No blocking architecture, behavior, scope or security findings; real VoiceOver, physical device, forced offline and physical disk failure untested. See PROGRESS.md."],
+    "notes": "Aceptada tras validación independiente. Solo nombre/ubicación por UUID; sin ficha IA, migración ni IO JPEG. Spec aprobada conservada. VoiceOver real/dispositivo físico no probados; título nativo abreviado en SE/AX máximo documentado. Fixture manual y cleanup en docs/testing-local-plant-storage.md. Commit local por orquestador; sin push, PR ni merge."
   },
   {
     "id": "choose-identification-photo",

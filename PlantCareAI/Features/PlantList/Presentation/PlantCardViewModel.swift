@@ -5,7 +5,7 @@ import ImageIO
 @MainActor
 final class PlantCardViewModel: ObservableObject, Identifiable {
     enum PhotoState { case idle, loading, loaded(UIImage), failed }
-    let plant: Plant
+    @Published private(set) var plant: Plant
     nonisolated let id: UUID
     @Published private(set) var photoState: PhotoState = .idle
     private let loadPhoto: LoadInitialPlantPhoto
@@ -15,6 +15,11 @@ final class PlantCardViewModel: ObservableObject, Identifiable {
         self.plant = plant
         self.id = plant.id
         self.loadPhoto = loadPhoto
+    }
+
+    func applyUpdatedPlant(_ plant: Plant) {
+        guard plant.id == id else { return }
+        self.plant = plant
     }
 
     func load() async {

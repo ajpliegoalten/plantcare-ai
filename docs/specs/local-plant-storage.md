@@ -2,6 +2,8 @@
 
 ## Source Feature
 
+> Política de verificación vigente: `AGENTS.md`. Un único iPhone Simulator estándar con texto normal y una apariencia, `./init.sh`, pruebas unitarias/UI funcionales e inspección visual básica. SE/pantallas pequeñas, Dynamic Type aumentado/máximo, VoiceOver/Accessibility Inspector y matrices adicionales de apariencia solo si el usuario lo solicita expresamente. Se conserva soporte de accesibilidad y todas las aserciones funcionales; no declarar superadas comprobaciones no ejecutadas. Este ajuste sustituye únicamente obligaciones de verificación ampliada, no alcance ni evidencias históricas.
+
 - `id`: `local-plant-storage`; `area`: `persistencia`; `title`: Conservar un ejemplar local al reabrir.
 - `user_visible_behavior`: Un ejemplar de prueba con identidad, foto inicial y ficha propia permanece tras cerrar y reabrir la app.
 - `depends_on`: [`ios-bootstrap`] (`accepted`); `status` al planificar: `not_started`.
@@ -124,7 +126,7 @@ Then no muestra el estado «Todavía no tienes plantas» ni simula tarjetas/deta
 - `./init.sh` desde raíz: **ejecuta** build y tests no bloqueantes en simulador (incluido nuevo target XCTest en el scheme compartido y UI tests); no inicia servidores ni se limita a imprimir instrucciones. No hay `pnpm test:e2e`: XCTest UI es el E2E persistente apropiado, por eso se añade prueba focalizada de relanzamiento además de integración del repositorio.
 - Ejecutar por separado `xcodebuild -project PlantCareAI.xcodeproj -scheme PlantCareAI -destination 'platform=iOS Simulator,id=<UDID>' -derivedDataPath "$PWD/DerivedData" -parallel-testing-enabled NO '-only-testing:PlantCareAITests/LocalPlantRepositoryTests' test` y el UI test de relanzamiento; confirmar resultados reales y que los tres tests UI existentes siguen pasando.
 - Verificar seis campos por UUID tras recrear contexto/repositorio usando el mismo almacén SwiftData en disco y bytes de **cada foto solicitada bajo demanda**; comprobar que la lectura de lista no carga binarios. Probar almacén vacío, duplicado, incompleto, imagen ausente, fallo de SwiftData y escritura fallida antes de confirmar metadatos, sin estado vacío falso ni registro parcial; cubrir huérfanos tras interrupción conforme a la política documentada. Relanzar app en el mismo contenedor de prueba y comprobar que el estado no vacío persiste; instalación limpia mantiene vacío. No usar desinstalación para la prueba de reapertura (elimina datos).
-- `plutil -lint PlantCareAI.xcodeproj/project.pbxproj`; `python3 -m json.tool PlantCareAI/Localizable.xcstrings >/dev/null`; `git diff --check`. Revisar que la app no trae fixture, imagen o clave y que no hay accesos cruzados Domain→Data ni I/O desde la vista. Si se cambia UI, inspeccionar mensaje no vacío/error en simulador, VoiceOver y Dynamic Type; registrar lo no comprobado.
+- `plutil -lint PlantCareAI.xcodeproj/project.pbxproj`; `python3 -m json.tool PlantCareAI/Localizable.xcstrings >/dev/null`; `git diff --check`. Revisar que la app no trae fixture, imagen o clave y que no hay accesos cruzados Domain→Data ni I/O desde la vista. Si se cambia UI, inspeccionar mensaje no vacío/error en el único simulador estándar con texto normal y una apariencia. VoiceOver y Dynamic Type aumentado/máximo solo bajo petición expresa, fuera de la rutina; no declararlos aprobados sin ejecución.
 
 ## Evidence To Capture
 

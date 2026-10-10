@@ -8,7 +8,7 @@ actor LocalPlantRepository: PlantRepository {
     private let root: URL
     private var container: ModelContainer?
     private var context: ModelContext?
-    // Internal fault seam: tests can fail exactly between photo publication and metadata commit.
+    // Internal fault seam: tests can fail after mutation/publication, before metadata commit.
     private let beforeCommit: @Sendable () throws -> Void
 
     init(root: URL, beforeCommit: @escaping @Sendable () throws -> Void = {}) {
@@ -75,6 +75,26 @@ actor LocalPlantRepository: PlantRepository {
             context.rollback()
             try? FileManager.default.removeItem(at: temporary)
             if published { try? FileManager.default.removeItem(at: destination) }
+            throw PlantStorageError.storage
+        }
+    }
+
+    func updatePlant(id: UUID, name: String, location: String?) async throws -> Plant {
+        let fields = try UpdatePlant.normalized(name: name, location: location)
+        let context = try store()
+        do {
+            guard let record = try context.fetch(FetchDescriptor<PersistedPlant>()).first(where: { $0.id == id }) else {
+                throw PlantStorageError.notFound
+            }
+            _ = try record.domain()
+            record.name = fields.name
+            record.location = fields.location
+            try beforeCommit()
+            try context.save()
+            return try record.domain()
+        } catch {
+            context.rollback()
+            if let error = error as? PlantStorageError, error == .notFound { throw error }
             throw PlantStorageError.storage
         }
     }

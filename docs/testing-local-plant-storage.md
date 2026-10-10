@@ -1,6 +1,10 @@
-# Verificación local de almacenamiento, tarjetas y `plant-detail`
+# Verificación local de almacenamiento, tarjetas, detalle y edición
 
 Desde la raíz del worktree, Xcode 26.2 / iPhone Simulator instalado:
+
+Verificación habitual: un único iPhone Simulator estándar, tamaño de texto normal y una sola apariencia. Mantener `./init.sh`, pruebas unitarias y UI funcionales, escenarios de persistencia/aislamiento/reapertura e inspección visual básica. No lanzar ejecuciones duplicadas con la sesión activa. SE/pantallas pequeñas, Dynamic Type aumentado/máximo, VoiceOver/Accessibility Inspector y matrices adicionales de apariencia quedan fuera de esta rutina y **solo se ejecutan si el usuario las solicita expresamente**. Conservar soporte y aserciones funcionales; no declarar aprobadas comprobaciones no ejecutadas.
+
+En portátil, mantener la tapa abierta durante toda la prueba. Puede ejecutarse `caffeinate -dius ./init.sh` para impedir suspensión por inactividad; no evita necesariamente el cierre de tapa en batería. Ejecutar una sola prueba/simulador por vez. Ante pausas de ~900 s en eventos/capturas, cotejar `pmset -g log` antes de atribuirlas a la app. No apagar/reiniciar el simulador en uso.
 
 ```sh
 ./init.sh
@@ -56,6 +60,29 @@ Para nombres/especie/ubicación largos, añadir `--storage-long-text`; para seis
 
 En detalle de la foto ausente, identidad y cuidados deben permanecer legibles y «Reintentar carga» vuelve a solicitar el JPEG de ese mismo UUID, sin reparar/resembrar ni releer metadata. El fallback explica carga local, no conexión. Volver y abrir la segunda conserva su foto válida. Recuperación real, nil/error de metadata y respuestas tardías están cubiertos por dobles deterministas en `PlantDetailViewModelTests`; `LoadPlantDetailTests` también consulta un almacén real reabierto sin la primera foto.
 
-Para Dynamic Type: `xcrun simctl ui "$UDID" content_size accessibility-extra-extra-extra-large`; repetir estados y desplazarse hasta Abonado y el aviso orientativo de ambos detalles. Restaurar `content_size large`. Para VoiceOver, comprobar orden foto/identidad/seis cuidados, encabezados, Atrás y reintento independiente; los identificadores XCTest no prueban la lectura auditiva real. Tocar foto/contenido abre la ficha de ese UUID. Probar también sin conectividad: no existen solicitudes de red en este flujo.
+En el simulador estándar con texto normal, recorrer ambos detalles hasta Abonado y el aviso orientativo; tocar foto/contenido debe abrir la ficha del UUID correcto. Mantener las comprobaciones funcionales locales sin API/red. Solo bajo petición expresa: pruebas de Dynamic Type aumentado/máximo, VoiceOver/Accessibility Inspector, pantallas pequeñas o apariencias adicionales; los identificadores XCTest no prueban lectura auditiva real. No ejecutar esas variantes por defecto ni declararlas superadas sin evidencia.
 
 No existe alta de usuario aún. El almacenamiento acepta JPEG ya preparado; no probar fotos reales de alta hasta planificar orientación/reescalado/límites en `save-plant`. Tarjetas y detalle preparan imágenes de presentación acotadas, no un pipeline de importación. Desinstalar elimina el almacén local real: no usarlo para demostrar reapertura.
+
+## Probar edición mientras no existe alta (Debug Simulator)
+
+```sh
+UDID=00BBB7EC-8DF7-400C-A08A-9D3C8818D886 # elegir disponible
+xcrun simctl install "$UDID" DerivedData/Build/Products/Debug-iphonesimulator/PlantCareAI.app
+FIXTURE=$(uuidgen)
+xcrun simctl launch "$UDID" org.plantcareai.prototype --storage-test-id "$FIXTURE" --storage-seed -AppleLanguages '(es)'
+# Abrir Fixture 1 → Editar: solo nombre y ubicación. Cambiar a Mi monstera / Salón.
+# Guardar: detalle y tarjeta nuevos; Fixture 2 intacta. Cancelar/gesto no guardan.
+xcrun simctl terminate "$UDID" org.plantcareai.prototype
+xcrun simctl launch "$UDID" org.plantcareai.prototype --storage-test-id "$FIXTURE" --storage-verify-edited -AppleLanguages '(es)'
+# Verifica Plant completo (A Mi monstera / Salón, B original) y ambos JPEG exactos.
+xcrun simctl terminate "$UDID" org.plantcareai.prototype
+xcrun simctl launch "$UDID" org.plantcareai.prototype --storage-test-id "$FIXTURE" --storage-cleanup
+xcrun simctl terminate "$UDID" org.plantcareai.prototype
+```
+
+No usar `--storage-verify` original tras editar: sigue exigiendo valores originales. Para otros nombres/ubicaciones, relanzar solo con `--storage-test-id "$FIXTURE"` (sin seed/verify) y comprobar manualmente. Nunca resembrar para demostrar persistencia. Todos los flags están compilados solo en Debug Simulator; sin flags se usa PlantStore real.
+
+Pruebas focalizadas: `xcodebuild` con destino anterior y `-parallel-testing-enabled NO '-only-testing:PlantCareAITests/UpdatePlantTests' '-only-testing:PlantCareAITests/EditPlantViewModelTests' '-only-testing:PlantCareAITests/LocalPlantRepositoryTests' '-only-testing:PlantCareAIUITests/PlantCareAIUITests/testEditPersistsAndRefreshesOnlySelectedPlant' '-only-testing:PlantCareAIUITests/PlantCareAIUITests/testCancelGestureValidationAndOptionalLocationWithMissingPhoto' test`.
+
+Comprobar manualmente teclado, nombre blanco (Guardar deshabilitado/exposición del error), quitar/añadir ubicación, nombres largos/emoji, Cancelar/descarte y nueva precarga en el único simulador estándar con texto normal. Durante guardar no se puede cancelar ni editar; fallo mantiene textos y permite reintento. El fallo de escritura se inyecta en pruebas unitarias/integración, no con corrupción en producción. Repeticiones en pantallas pequeñas, texto aumentado/máximo, VoiceOver/Accessibility Inspector y otras apariencias solo bajo petición expresa; fuera de la verificación habitual, no se declaran superadas.

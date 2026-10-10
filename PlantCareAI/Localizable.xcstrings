@@ -1,6 +1,17 @@
 {
   "sourceLanguage" : "es",
   "strings" : {
+    "edit.keyboard.done" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Listo" } } } },
+    "edit.open" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Editar" } } } },
+    "edit.title" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Editar planta" } } } },
+    "edit.name" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Nombre personalizado" } } } },
+    "edit.location" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Ubicación (opcional)" } } } },
+    "edit.cancel" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Cancelar" } } } },
+    "edit.save" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Guardar" } } } },
+    "edit.validation" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Introduce un nombre para esta planta." } } } },
+    "edit.error" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudieron guardar los cambios en este dispositivo. Inténtalo de nuevo." } } } },
+    "edit.notFound" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No se encontró esta planta en el dispositivo." } } } },
+    "edit.saving" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Guardando cambios…" } } } },
     "collection.photo.error" : {
       "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudo cargar la foto" } } }
     },

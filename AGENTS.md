@@ -14,10 +14,18 @@ Prototipo iOS personal para identificar plantas, guardar cuidados e historial lo
 
 1. Confirmar la raíz del repositorio con `pwd` y consultar `PROGRESS.md`.
 2. Elegir la primera funcionalidad no completada cuyas dependencias estén completadas, según el orden de `feature_list.json`.
-3. Ejecutar `./init.sh`: exige Xcode, selecciona un iPhone Simulator disponible y ejecuta `xcodebuild build` y `test` (UI test de arranque). No comprueba visualmente la pantalla fuera de la prueba UI.
+3. Ejecutar `./init.sh`: exige Xcode, selecciona un iPhone Simulator disponible y ejecuta `xcodebuild build` y `test` (pruebas unitarias y UI funcionales). No comprueba visualmente la pantalla fuera de la prueba UI.
 4. Para apertura visual, abrir `PlantCareAI.xcodeproj` o instalar `DerivedData/Build/Products/Debug-iphonesimulator/PlantCareAI.app` con `xcrun simctl install <UDID> ...` y lanzar `xcrun simctl launch <UDID> org.plantcareai.prototype`. Si falla la línea base, corregirla antes de ampliar la funcionalidad.
 
 ## Reglas de trabajo
+
+### Política habitual de verificación
+
+- Usar un único iPhone Simulator estándar con tamaño de texto normal y una sola apariencia, sin matrices adicionales. Mantener `./init.sh`, todas las pruebas unitarias y UI funcionales, los escenarios concretos de la feature y la inspección visual básica de las pantallas afectadas.
+- iPhone SE/pantallas pequeñas, Dynamic Type aumentado o máximo, VoiceOver/Accessibility Inspector y matrices adicionales de apariencia quedan fuera de la verificación habitual. Ejecutarlas **solo si el usuario las solicita expresamente**, nunca como requisito automático de aceptación ni por estar disponibles.
+- Conservar soporte de accesibilidad en código, etiquetas, controles y diseño adaptable. No eliminar tests funcionales ni debilitar aserciones para ocultar fallos. Los textos largos y el desplazamiento funcional siguen comprobándose en el simulador estándar, sin cambiar su tamaño de texto.
+- Registrar únicamente comprobaciones realmente ejecutadas. Las ampliadas no solicitadas son «fuera de la verificación habitual; no ejecutadas», no aprobadas ni bloqueos pendientes por defecto. Conservar las evidencias históricas sin reinterpretarlas.
+- Esta política rige planificación, implementación y validación, y prevalece sobre obligaciones antiguas de verificación ampliada en specs/guías. Antes de probar, coordinar con la sesión activa del worktree: reutilizar ejecuciones válidas y no lanzar procesos duplicados ni pruebas simultáneas sobre el mismo simulador.
 
 - Implementar una funcionalidad por sesión y verificar su escenario concreto además de la comprobación estándar.
 - Mantener vistas y ViewModels en Presentation, contratos/modelos/casos de uso en Domain y adaptadores concretos en Data; conectar dependencias desde la entrada de la app. No ubicar pantallas de features en `ContentView` ni crear adaptadores que aparenten persistencia real cuando aún no existe.

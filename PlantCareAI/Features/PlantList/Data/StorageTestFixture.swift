@@ -62,8 +62,13 @@ struct StorageFixtureLoad: LoadPlantsUseCase {
             }
         }
         let plants = try await repository.loadPlants()
-        if seed || ProcessInfo.processInfo.arguments.contains("--storage-verify") {
-            guard plants == (1...2).map(StorageTestFixture.plant) else { throw PlantStorageError.storage }
+        let edited = ProcessInfo.processInfo.arguments.contains("--storage-verify-edited")
+        if seed || edited || ProcessInfo.processInfo.arguments.contains("--storage-verify") {
+            let expected = (1...2).map { index in
+                let plant = StorageTestFixture.plant(index)
+                return edited && index == 1 ? Plant(id: plant.id, name: "Mi monstera", confirmedSpecies: plant.confirmedSpecies, createdAt: plant.createdAt, location: "Salón", careSheet: plant.careSheet) : plant
+            }
+            guard plants == expected else { throw PlantStorageError.storage }
             for index in 1...2 {
                 let bytes = try await repository.loadInitialPhoto(for: StorageTestFixture.plant(index).id)
                 guard bytes == StorageTestFixture.photo(index) else { throw PlantStorageError.photoCorrupt }

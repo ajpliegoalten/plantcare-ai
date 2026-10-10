@@ -1,5 +1,9 @@
 # Restricciones operativas
 
+- MUST: aplicar la política de verificación de `AGENTS.md`: un único iPhone Simulator estándar con texto normal, sin matrices adicionales de apariencia. Mantener `./init.sh`, pruebas unitarias/UI funcionales e inspección visual básica. SE/pantallas pequeñas, Dynamic Type aumentado/máximo y VoiceOver/Accessibility Inspector solo bajo petición expresa del usuario; no retirar soporte de accesibilidad ni debilitar tests.
+
+- MUST: mantener el host despierto y la tapa del portátil abierta durante XCUITest local. `caffeinate -dius ./init.sh` evita suspensión por inactividad, pero no garantiza evitar `Clamshell Sleep` al cerrar la tapa en batería. Motivo: se comprobaron pausas de 903–904 s en `pmset` coincidentes con timeouts de eventos/capturas del simulador; no interpretar una ejecución interrumpida por suspensión como evidencia funcional.
+
 - El target iPhone tiene despliegue mínimo iOS 17.0; cambios posteriores deben conservar compatibilidad o documentar explícitamente el cambio. Motivo: configuración de compilación reproducible del bootstrap.
 - La compilación de simulador usa `CODE_SIGNING_ALLOWED=NO`; si se prepara una demo en dispositivo real se necesitará configurar firma fuera del repositorio. Motivo: el gate local no exige equipo ni credenciales.
 - MUST: cuando se incorpore la API externa, su credencial y configuración sensible deben proporcionarse localmente por quien prepara la demo y mantenerse fuera de control de versiones; comprobar que cualquier archivo local elegido esté realmente ignorado antes de usarlo. Motivo: `.gitignore` ya cubre `*.env`, `*.local.xcconfig` y `Secrets.xcconfig`, pero no garantiza cobertura de otros nombres ni elimina archivos ya versionados.

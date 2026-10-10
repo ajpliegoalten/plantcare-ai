@@ -31,6 +31,60 @@ final class LocalPlantRepositoryTests: XCTestCase {
         XCTAssertEqual(files.count, 2)
     }
 
+    func testUpdatePreservesCompleteModelsPhotosAndReopensAndRejectsInvalidOrAbsent() async throws {
+        var repository: LocalPlantRepository? = LocalPlantRepository(root: root)
+        let originals = (1...2).map(StorageTestFixture.plant)
+        for index in 1...2 { try await repository!.savePlant(originals[index - 1], initialPhoto: StorageTestFixture.photo(index)) }
+        let a = originals[0]
+        let expected = Plant(id: a.id, name: "Mi monstera", confirmedSpecies: a.confirmedSpecies, createdAt: a.createdAt, location: "Salón", careSheet: a.careSheet)
+        let result = try await repository!.updatePlant(id: a.id, name: " Mi monstera\n", location: " Salón ")
+        XCTAssertEqual(result, expected)
+        await expect(.validation) { _ = try await repository!.updatePlant(id: a.id, name: " \n", location: "Mutación") }
+        await expect(.notFound) { _ = try await repository!.updatePlant(id: UUID(), name: "Otra", location: nil) }
+        repository = nil
+        let reopened = LocalPlantRepository(root: root)
+        let plants = try await reopened.loadPlants(); XCTAssertEqual(plants, [expected, originals[1]])
+        for index in 1...2 {
+            let bytes = try await reopened.loadInitialPhoto(for: originals[index - 1].id)
+            XCTAssertEqual(bytes, StorageTestFixture.photo(index))
+        }
+        let noLocation = try await reopened.updatePlant(id: a.id, name: expected.name, location: " \n")
+        XCTAssertNil(noLocation.location)
+        let added = try await reopened.updatePlant(id: originals[1].id, name: originals[1].name, location: "Patio")
+        XCTAssertEqual(added.location, "Patio")
+        let persistedOptional = try await LocalPlantRepository(root: root).loadPlants()
+        XCTAssertEqual(persistedOptional, [noLocation, added])
+        try FileManager.default.removeItem(at: root.appendingPathComponent("Photos/\(a.id).jpg"))
+        _ = try await reopened.updatePlant(id: a.id, name: "Sin foto", location: nil)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: root.appendingPathComponent("Photos/\(a.id).jpg").path))
+    }
+
+    func testUpdateFailureRollsBackBothFieldsInSameRepositoryAndReopenedAndCanRetry() async throws {
+        let original = StorageTestFixture.plant(1)
+        var seed: LocalPlantRepository? = LocalPlantRepository(root: root)
+        try await seed!.savePlant(original, initialPhoto: StorageTestFixture.photo(1))
+        seed = nil
+        let fault = EditCommitFault()
+        var repository: LocalPlantRepository? = LocalPlantRepository(root: root, beforeCommit: { try fault.check() })
+        await expect(.storage) { _ = try await repository!.updatePlant(id: original.id, name: "Nuevo", location: "Nueva") }
+        let rolledBack = try await repository!.loadPlants(); XCTAssertEqual(rolledBack, [original])
+        fault.disable()
+        let retry = try await repository!.updatePlant(id: original.id, name: "Reintento", location: "Patio")
+        XCTAssertEqual(retry.name, "Reintento")
+        // Restore original, then fail again to check failed values across recreation.
+        _ = try await repository!.updatePlant(id: original.id, name: original.name, location: original.location)
+        fault.enable()
+        await expect(.storage) { _ = try await repository!.updatePlant(id: original.id, name: "Nuevo", location: "Nueva") }
+        repository = nil
+        var reopened: LocalPlantRepository? = LocalPlantRepository(root: root)
+        let persisted = try await reopened!.loadPlants(); XCTAssertEqual(persisted, [original])
+        reopened = nil
+        fault.disable()
+        repository = LocalPlantRepository(root: root, beforeCommit: { try fault.check() })
+        let result = try await repository!.updatePlant(id: original.id, name: "Nuevo", location: "Nueva")
+        XCTAssertEqual(result.name, "Nuevo"); XCTAssertEqual(result.location, "Nueva")
+    }
+
     func testEmptyAndValidationAndDuplicateDoNotOverwrite() async throws {
         let repository = LocalPlantRepository(root: root)
         let empty = try await repository.loadPlants()
@@ -101,4 +155,12 @@ final class LocalPlantRepositoryTests: XCTestCase {
         await expect(.storage) { _ = try await repository.loadPlants() }
         XCTAssertTrue(FileManager.default.fileExists(atPath: photos.appendingPathComponent("preserved.jpg").path))
     }
+}
+
+private final class EditCommitFault: @unchecked Sendable {
+    private let lock = NSLock()
+    private var fails = true
+    func check() throws { lock.lock(); defer { lock.unlock() }; if fails { throw PlantStorageError.storage } }
+    func disable() { lock.lock(); defer { lock.unlock() }; fails = false }
+    func enable() { lock.lock(); defer { lock.unlock() }; fails = true }
 }

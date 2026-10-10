@@ -4,8 +4,25 @@ import UIKit
 
 @MainActor
 final class PlantDetailViewModelTests: XCTestCase {
+    func testEditorAvailabilityAndCommitRejectsLateMetadata() async {
+        let repository = DetailRepository(suspendMetadata: true)
+        let vm = model(1, repository)
+        XCTAssertNil(vm.editor())
+        let task = Task { await vm.load() }
+        await repository.wait(metadata: true, count: 1)
+        let original = StorageTestFixture.plant(1)
+        let updated = Plant(id: original.id, name: "Actualizada", confirmedSpecies: original.confirmedSpecies, createdAt: original.createdAt, location: nil, careSheet: original.careSheet)
+        vm.applyUpdatedPlant(updated)
+        await repository.resolveMetadata(0, .success([original]))
+        await task.value
+        guard case .loaded(let actual) = vm.state else { return XCTFail("Lost commit") }
+        XCTAssertEqual(actual, updated)
+        XCTAssertEqual(vm.editor()?.name, updated.name)
+        let absent = model(1, DetailRepository(plants: [])); await absent.load(); XCTAssertNil(absent.editor())
+        let failed = model(1, DetailRepository(failure: .storage)); await failed.load(); XCTAssertNil(failed.editor())
+    }
     private func model(_ index: Int = 1, _ repository: DetailRepository) -> PlantDetailViewModel {
-        PlantDetailViewModel(id: StorageTestFixture.plant(index).id, loadDetail: LoadPlantDetail(repository: repository), loadPhoto: LoadInitialPlantPhoto(repository: repository))
+        PlantDetailViewModel(id: StorageTestFixture.plant(index).id, loadDetail: LoadPlantDetail(repository: repository), loadPhoto: LoadInitialPlantPhoto(repository: repository), update: UpdatePlant(repository: repository))
     }
     private func assertPlant(_ model: PlantDetailViewModel, _ index: Int, file: StaticString = #filePath, line: UInt = #line) {
         guard case .loaded(let plant) = model.state else { return XCTFail("Metadata missing", file: file, line: line) }
@@ -34,6 +51,15 @@ final class PlantDetailViewModelTests: XCTestCase {
         XCTAssertEqual(counts.1, [first.id, second.id])
         guard case .loaded(let image1) = first.photoState, case .loaded(let image2) = second.photoState else { return XCTFail("Images missing") }
         XCTAssertNotEqual(image1.pngData(), image2.pngData())
+        let plant = StorageTestFixture.plant(1)
+        let updated = Plant(id: plant.id, name: "Editada", confirmedSpecies: plant.confirmedSpecies, createdAt: plant.createdAt, location: "Patio", careSheet: plant.careSheet)
+        first.applyUpdatedPlant(updated)
+        await first.load()
+        guard case .loaded(let retained) = first.photoState else { return XCTFail("Photo lost after edit") }
+        XCTAssertTrue(retained === image1)
+        let afterEdit = await repository.counts()
+        XCTAssertEqual(afterEdit.0, counts.0); XCTAssertEqual(afterEdit.1, counts.1)
+        assertPlant(second, 2)
     }
 
     func testMissingCorruptInvalidDecodeAndRealRetryDoNotReloadMetadata() async {
