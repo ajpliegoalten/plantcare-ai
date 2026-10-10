@@ -45,12 +45,28 @@ struct IdentificationPhotoView: View {
                     .buttonStyle(.bordered)
                     .accessibilityIdentifier("takePlantPhoto")
                     .disabled(viewModel.isBusy)
-                    Button("identificationPhoto.identify") {}.frame(minHeight: 44)
-                        .buttonStyle(.borderedProminent).disabled(true)
+                    Button { viewModel.identifyPhoto() } label: {
+                        Text("identificationPhoto.identify").frame(minHeight: 44)
+                            .foregroundStyle(viewModel.canIdentify ? Color("Surface") : Color("TextSecondary"))
+                    }
+                        .buttonStyle(.borderedProminent).disabled(!viewModel.canIdentify)
                         .accessibilityIdentifier("identifyPhoto")
                     Text("identificationPhoto.future").font(.footnote)
                         .accessibilityIdentifier("identificationUnavailable")
+                    if viewModel.authorizationState == .unavailable {
+                        Text("externalAIConsent.unavailable").accessibilityIdentifier("externalAIUnavailable")
+                    }
+                    if viewModel.authorizationState == .failed {
+                        Text("externalAIConsent.error").accessibilityIdentifier("externalAIConsentError")
+                    }
+                    if viewModel.authorizationState == .checkingAuthorization || viewModel.authorizationState == .continuing {
+                        ProgressView("externalAIConsent.checking")
+                    }
                     #if DEBUG && targetEnvironment(simulator)
+                    if viewModel.testInvocationCount != nil {
+                        Text("Instrumented invocations: \(viewModel.invocationCount)")
+                            .accessibilityIdentifier("externalAIInvocationCount")
+                    }
                     if !viewModel.testSelections.isEmpty {
                         ForEach(viewModel.testSelections.keys.sorted(), id: \.self) { name in
                             Button("Test \(name)") {
@@ -80,6 +96,11 @@ struct IdentificationPhotoView: View {
             }
         }
         .tint(Color("PrimaryAction"))
+        .sheet(isPresented: Binding(get: { viewModel.authorizationState == .awaitingConfirmation }, set: { showing in
+            if !showing, viewModel.authorizationState == .awaitingConfirmation { viewModel.cancelAuthorization() }
+        })) {
+            ExternalAIConsentView(accept: { viewModel.confirmAuthorization() }, cancel: { viewModel.cancelAuthorization() })
+        }
         .onChange(of: selection) { _, item in
             guard let item else { return }
             viewModel.select { try await item.loadTransferable(type: Data.self) }
