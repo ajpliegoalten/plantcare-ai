@@ -108,9 +108,22 @@ Use these rules:
 
 ## Verification Plan
 
-- <Command or manual scenario to run.>
-- <Expected result.>
+Follow `../../../../AGENTS.md` for verification ownership and evidence reuse.
+
+### Implementer — impact-selected checks
+
+- <Changed files/contracts → risks/affected callers → focused tests and directly related regressions.>
+- <Exact targeted command or manual scenario and expected result.>
+- <Valid baseline evidence to reuse, or focused diagnosis/build if it is unavailable. No automatic full baseline/final gate.>
+- <After a failure: rerun the failing scenario and repair-affected checks; preserve failures and explain diagnostic repetitions.>
 - If the repo has a persistent E2E command such as `pnpm test:e2e` and this feature changes user-visible behavior, authentication, authorization, routing, or API flows, add or update focused E2E coverage and include the E2E command here. If E2E is not appropriate, state why.
+
+### Validator — final gate
+
+- <One full standard gate on final sources, or corroborated valid evidence of the same relevant source/environment state.>
+- <Coverage gaps requiring extra checks, if any; do not repeat focused tests already covered by the gate without a reason.>
+- <Conditions that invalidate full-gate evidence after repair and justify another run.>
+- Documentation/instruction-only changes without executable impact need consistency/static review, not an iOS suite run.
 
 For `init.sh`, be explicit:
 
@@ -121,6 +134,7 @@ For `init.sh`, be explicit:
 ## Evidence To Capture
 
 - <Command output, screenshot, test name, log line, or manual result to record in `feature_list.json` or `../../../../PROGRESS.md`.>
+- <Test selection/reason, source/environment state, newly run vs reused results, and full gate pending with validator.>
 
 ## Validator Checklist
 

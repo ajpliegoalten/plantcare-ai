@@ -1,9 +1,6 @@
 {
   "sourceLanguage" : "es",
   "strings" : {
-    "identifyCandidates.destination" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Destino de la solicitud" } } } },
-    "identifyCandidates.model" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Modelo solicitado" } } } },
-    "identifyCandidates.unknownOperator" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "La app no verifica quién opera este destino, qué otros procesadores intervienen ni sus políticas de retención o entrenamiento. Revisa el destino antes de aceptar." } } } },
     "collection.add" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -114,6 +111,120 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mis plantas"
+          }
+        }
+      }
+    },
+    "confirmSpecies.alternative" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alternativa"
+          }
+        }
+      }
+    },
+    "confirmSpecies.caution" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu elección no garantiza la identificación botánica."
+          }
+        }
+      }
+    },
+    "confirmSpecies.change" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cambiar especie"
+          }
+        }
+      }
+    },
+    "confirmSpecies.confirm" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirmar especie"
+          }
+        }
+      }
+    },
+    "confirmSpecies.confirmed" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Especie confirmada por ti"
+          }
+        }
+      }
+    },
+    "confirmSpecies.couldBe" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podría ser…"
+          }
+        }
+      }
+    },
+    "confirmSpecies.draft" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La especie está confirmada en este borrador. La planta aún no se ha añadido."
+          }
+        }
+      }
+    },
+    "confirmSpecies.error" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se ha podido confirmar esta elección. Selecciona una propuesta vigente e inténtalo de nuevo."
+          }
+        }
+      }
+    },
+    "confirmSpecies.futureCare" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La ficha de cuidados estará disponible en un siguiente paso."
+          }
+        }
+      }
+    },
+    "confirmSpecies.primary" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Candidata principal"
+          }
+        }
+      }
+    },
+    "confirmSpecies.selected" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seleccionada"
           }
         }
       }
@@ -622,6 +733,37 @@
         }
       }
     },
+    "identificationPhoto.retrySection.body" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puedes cambiar la foto o volver a identificar la actual."
+          }
+        }
+      }
+    },
+    "identificationPhoto.retrySection.separator" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O bien"
+          }
+        }
+      }
+    },
+    "identificationPhoto.retrySection.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volver a identificar"
+          }
+        }
+      }
+    },
     "identificationPhoto.settings" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -730,6 +872,16 @@
         }
       }
     },
+    "identifyCandidates.destination" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Destino de la solicitud"
+          }
+        }
+      }
+    },
     "identifyCandidates.explanation" : {
       "localizations" : {
         "es" : {
@@ -741,7 +893,6 @@
       }
     },
     "identifyCandidates.insufficient" : {
-      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -762,6 +913,16 @@
         }
       }
     },
+    "identifyCandidates.model" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modelo solicitado"
+          }
+        }
+      }
+    },
     "identifyCandidates.networkError" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -774,6 +935,7 @@
       }
     },
     "identifyCandidates.notConfirmed" : {
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -784,12 +946,11 @@
       }
     },
     "identifyCandidates.proposal" : {
-      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Propuesta de especie"
+            "value" : "Propuesta de IA"
           }
         }
       }
@@ -834,6 +995,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "La solicitud tardó demasiado. Conservamos tu foto. Pulsa Identificar para reintentar."
+          }
+        }
+      }
+    },
+    "identifyCandidates.unknownOperator" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La app no verifica quién opera este destino, qué otros procesadores intervienen ni sus políticas de retención o entrenamiento. Revisa el destino antes de aceptar."
           }
         }
       }

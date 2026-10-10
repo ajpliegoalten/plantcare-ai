@@ -7,34 +7,35 @@ struct PlantListView: View {
 
     var body: some View {
         NavigationStack {
-            GeometryReader { geometry in
-                ScrollView {
-                    VStack(spacing: 24) {
-                        header
-
-                        switch viewModel.state {
-                        case .loading:
-                            ProgressView()
-                        case .loaded(let plants) where plants.isEmpty:
-                            Spacer(minLength: 32)
-                            EmptyPlantView(onAdd: openPhoto)
-                            Spacer(minLength: 32)
-                        case .loaded:
-                            LazyVStack(spacing: 24) {
-                                ForEach(viewModel.cards) { card in
-                                    PlantCardView(viewModel: card)
-                                }
-                            }
-                        case .failed:
-                            Spacer(minLength: 32)
-                            statusMessage("collection.storageError", identifier: "storageErrorMessage")
-                            Spacer(minLength: 32)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .frame(minHeight: geometry.size.height, alignment: .top)
+            VStack(spacing: 0) {
+                header
                     .padding(.horizontal, 20)
                     .padding(.bottom, 20)
+
+                GeometryReader { geometry in
+                    ScrollView {
+                        VStack(spacing: 24) {
+                            switch viewModel.state {
+                            case .loading:
+                                ProgressView()
+                            case .loaded(let plants) where plants.isEmpty:
+                                EmptyPlantView(onAdd: openPhoto)
+                            case .loaded:
+                                LazyVStack(spacing: 24) {
+                                    ForEach(viewModel.cards) { card in
+                                        PlantCardView(viewModel: card)
+                                    }
+                                }
+                            case .failed:
+                                statusMessage("collection.storageError", identifier: "storageErrorMessage")
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 20)
+                        .frame(minHeight: geometry.size.height, alignment: contentAlignment)
+                    }
+                    .accessibilityIdentifier("collectionViewport")
                 }
             }
             .background(Color("Background").ignoresSafeArea())
@@ -49,6 +50,13 @@ struct PlantListView: View {
                 IdentificationPhotoView(viewModel: draft)
             }
         }
+    }
+
+    private var contentAlignment: Alignment {
+        if case .loaded(let plants) = viewModel.state, !plants.isEmpty {
+            return .top
+        }
+        return .center
     }
 
     private func statusMessage(_ key: LocalizedStringKey, identifier: String) -> some View {
