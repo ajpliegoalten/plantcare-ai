@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PlantListView: View {
     @ObservedObject var viewModel: PlantListViewModel
+    @State private var photoDraft: IdentificationPhotoViewModel?
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
@@ -16,7 +17,7 @@ struct PlantListView: View {
                             ProgressView()
                         case .loaded(let plants) where plants.isEmpty:
                             Spacer(minLength: 32)
-                            EmptyPlantView()
+                            EmptyPlantView(onAdd: openPhoto)
                             Spacer(minLength: 32)
                         case .loaded:
                             LazyVStack(spacing: 24) {
@@ -40,6 +41,12 @@ struct PlantListView: View {
             .task { await viewModel.load() }
             .navigationDestination(for: UUID.self) { id in
                 PlantDetailView(viewModel: viewModel.detailViewModel(id: id)).id(id)
+            }
+            .sheet(item: Binding(get: { photoDraft }, set: { newValue in
+                if newValue == nil { photoDraft?.close() }
+                photoDraft = newValue
+            })) { draft in
+                IdentificationPhotoView(viewModel: draft)
             }
         }
     }
@@ -83,15 +90,17 @@ struct PlantListView: View {
     }
 
     private var headerAddButton: some View {
-        Button(action: {}) {
+        Button(action: openPhoto) {
             Label("collection.add", systemImage: "plus")
                 .font(.body.weight(.semibold))
                 .padding(.horizontal, 12)
                 .frame(minHeight: 44)
         }
         .foregroundStyle(Color("PrimaryAction"))
-        .disabled(true)
-        .accessibilityHint(Text("collection.add.unavailable"))
         .accessibilityIdentifier("addPlantHeader")
+    }
+
+    private func openPhoto() {
+        photoDraft = viewModel.makeIdentificationPhoto?()
     }
 }

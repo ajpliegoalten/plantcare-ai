@@ -21,6 +21,26 @@ final class PlantCareAIUITests: XCTestCase {
         XCTAssertTrue(element.isHittable)
     }
 
+    private func dismissPhotoByDrag(_ app: XCUIApplication, capturePrefix: String) {
+        let bar = app.navigationBars["Foto de tu planta"]
+        XCTAssertTrue(bar.waitForExistence(timeout: 5))
+        XCTAssertTrue(bar.isHittable)
+        // swipeDown on a 54 pt NavigationBar provides too short an element-relative
+        // path to reliably finish UISheet's interactive dismissal. Start in the
+        // visible, trailing bar area (away from Cancelar), then drag down the screen.
+        let origin = bar.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.5))
+        let destination = app.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.9))
+        XCTAssertTrue(bar.frame.contains(origin.screenPoint))
+        XCTAssertTrue(app.frame.contains(destination.screenPoint))
+        capture("\(capturePrefix)-before", app: app)
+        origin.press(forDuration: 0.05, thenDragTo: destination)
+        XCTAssertTrue(bar.waitForNonExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["emptyCollectionTitle"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["addPlantHeader"].isHittable)
+        XCTAssertTrue(app.buttons["addFirstPlant"].isHittable)
+        capture("\(capturePrefix)-dismissed", app: app)
+    }
+
     private func assertCards(_ app: XCUIApplication) {
         for index in 1...2 {
             let card = app.buttons["plantCard-\(plantID(index))"]
@@ -123,7 +143,7 @@ final class PlantCareAIUITests: XCTestCase {
         assertCards(app)
         openAndCheckBothDetails(app)
         XCTAssertFalse(app.staticTexts["emptyCollectionTitle"].exists)
-        XCTAssertFalse(app.buttons["addPlantHeader"].isEnabled)
+        XCTAssertTrue(app.buttons["addPlantHeader"].isEnabled)
     }
 
     private func openEditor(_ index: Int, app: XCUIApplication) {
@@ -354,8 +374,151 @@ final class PlantCareAIUITests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.staticTexts["storageErrorMessage"].waitForExistence(timeout: 10))
         XCTAssertFalse(app.staticTexts["emptyCollectionTitle"].exists)
+        app.buttons["addPlantHeader"].tap()
+        XCTAssertTrue(app.navigationBars["Foto de tu planta"].waitForExistence(timeout: 5))
+        app.buttons["cancelIdentificationPhoto"].tap()
+        XCTAssertTrue(app.staticTexts["storageErrorMessage"].waitForExistence(timeout: 5))
     }
-    func testCleanLaunchShowsEmptyCollectionAndUnavailableAdd() {
+
+    func testIdentificationPhotoReplacementFailureCancellationAndEphemeralDraft() {
+        let app = XCUIApplication()
+        let storage = isolatedID()
+        app.launchArguments = ["--storage-test-id", storage, "--identification-photo-fixture", "-AppleLanguages", "(es)", "-AppleLocale", "es_ES"]
+        app.launch()
+        app.buttons["addPlantHeader"].tap()
+        XCTAssertTrue(app.navigationBars["Foto de tu planta"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.descendants(matching: .any)["identificationPhotoPlaceholder"].firstMatch.exists)
+        XCTAssertFalse(app.buttons["identifyPhoto"].isEnabled)
+        XCTAssertEqual(app.staticTexts["identificationUnavailable"].label, "La identificación estará disponible próximamente.")
+        capture("photo-empty", app: app)
+        app.buttons["takePlantPhoto"].tap()
+        XCTAssertTrue(app.staticTexts["cameraIssue"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["cameraIssue"].label, "La cámara no está disponible en este dispositivo.")
+        let a = app.buttons["fixture-photo-A"]
+        reveal(a, in: app); a.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["photoLoading"].firstMatch.waitForExistence(timeout: 2))
+        capture("photo-progress", app: app)
+        let preview = app.images["identificationPhotoPreview"]
+        XCTAssertTrue(preview.waitForExistence(timeout: 10))
+        XCTAssertEqual(preview.value as? String, "120 × 80")
+        capture("photo-A", app: app)
+        // Real system picker cancellation with A retained.
+        reveal(app.buttons["chooseGalleryPhoto"], in: app)
+        app.buttons["chooseGalleryPhoto"].tap()
+        let cancelPicker = app.navigationBars["Fotos"].buttons["Cancel"]
+        XCTAssertTrue(cancelPicker.waitForExistence(timeout: 5))
+        cancelPicker.tap()
+        XCTAssertTrue(app.navigationBars["Fotos"].waitForNonExistence(timeout: 5))
+        XCTAssertTrue(preview.waitForExistence(timeout: 5))
+        XCTAssertEqual(preview.value as? String, "120 × 80")
+        let failure = app.buttons["fixture-photo-failure"]
+        reveal(failure, in: app); failure.tap()
+        XCTAssertTrue(app.staticTexts["photoError"].waitForExistence(timeout: 10))
+        XCTAssertEqual(preview.value as? String, "120 × 80")
+        capture("photo-error-preserves-A", app: app)
+        let b = app.buttons["fixture-photo-B"]
+        reveal(b, in: app); b.tap()
+        expectation(for: NSPredicate(format: "value == %@", "80 × 120"), evaluatedWith: preview)
+        waitForExpectations(timeout: 10)
+        capture("photo-B", app: app)
+        app.buttons["cancelIdentificationPhoto"].tap()
+        XCTAssertTrue(app.staticTexts["emptyCollectionTitle"].waitForExistence(timeout: 5))
+        app.buttons["addFirstPlant"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["identificationPhotoPlaceholder"].firstMatch.waitForExistence(timeout: 5))
+        let loadA = app.buttons["fixture-photo-A"]
+        reveal(loadA, in: app); loadA.tap()
+        app.buttons["cancelIdentificationPhoto"].tap()
+        app.buttons["addPlantHeader"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["identificationPhotoPlaceholder"].firstMatch.waitForExistence(timeout: 5))
+        XCTAssertFalse(preview.exists)
+        // Keep empty-modal gesture coverage, then prove discard with a prepared A
+        // and immediate reopen in this very process, before any terminate/launch.
+        dismissPhotoByDrag(app, capturePrefix: "photo-gesture-empty")
+        app.buttons["addPlantHeader"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["identificationPhotoPlaceholder"].firstMatch.waitForExistence(timeout: 5))
+        XCTAssertFalse(preview.exists)
+        let gestureA = app.buttons["fixture-photo-A"]
+        reveal(gestureA, in: app); gestureA.tap()
+        XCTAssertTrue(preview.waitForExistence(timeout: 10))
+        XCTAssertEqual(preview.value as? String, "120 × 80")
+        dismissPhotoByDrag(app, capturePrefix: "photo-gesture-with-A")
+        app.buttons["addFirstPlant"].tap()
+        XCTAssertTrue(app.navigationBars["Foto de tu planta"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.descendants(matching: .any)["identificationPhotoPlaceholder"].firstMatch.exists)
+        XCTAssertFalse(preview.exists)
+        XCTAssertFalse(app.descendants(matching: .any)["photoLoading"].firstMatch.exists)
+        XCTAssertFalse(app.staticTexts["photoError"].exists)
+        XCTAssertFalse(app.buttons["identifyPhoto"].isEnabled)
+        capture("photo-gesture-reopened-empty-after-A", app: app)
+        app.terminate(); app.launch()
+        XCTAssertTrue(app.staticTexts["emptyCollectionTitle"].waitForExistence(timeout: 5))
+        app.buttons["addPlantHeader"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["identificationPhotoPlaceholder"].firstMatch.waitForExistence(timeout: 5))
+    }
+
+    func testIdentificationPhotoLeavesBothPersistedPlantsUnchanged() {
+        let app = XCUIApplication()
+        let storage = isolatedID()
+        app.launchArguments = ["--storage-test-id", storage, "--storage-seed", "--identification-photo-fixture"]
+        app.launch()
+        assertCards(app)
+        for _ in 0..<5 { app.swipeDown() }
+        app.buttons["addPlantHeader"].tap()
+        XCTAssertTrue(app.navigationBars["Foto de tu planta"].waitForExistence(timeout: 5))
+        let a = app.buttons["fixture-photo-A"]
+        reveal(a, in: app); a.tap()
+        XCTAssertTrue(app.images["identificationPhotoPreview"].waitForExistence(timeout: 10))
+        app.buttons["cancelIdentificationPhoto"].tap()
+        app.terminate()
+        app.launchArguments.removeAll { $0 == "--storage-seed" }
+        app.launchArguments += ["--storage-verify"]
+        app.launch()
+        assertCards(app)
+        for index in 1...2 {
+            let card = app.buttons["plantCard-\(plantID(index))"]
+            reveal(card, in: app); card.tap()
+            assertDetail(index, app: app)
+            back(app)
+        }
+    }
+
+    func testRealGalleryPickerSelectReplaceCancelAndReselect() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--storage-test-id", isolatedID(), "-AppleLanguages", "(es)", "-AppleLocale", "es_ES"]
+        app.launch()
+        app.buttons["addPlantHeader"].tap()
+        XCTAssertTrue(app.navigationBars["Foto de tu planta"].waitForExistence(timeout: 5))
+        func select(_ index: Int) {
+            app.buttons["chooseGalleryPhoto"].tap()
+            let assets = app.images.matching(identifier: "PXGGridLayout-Info")
+            XCTAssertTrue(assets.element(boundBy: index).waitForExistence(timeout: 10), app.debugDescription)
+            let asset = assets.element(boundBy: index)
+            XCTAssertGreaterThan(asset.frame.width, 0)
+            XCTAssertTrue(app.frame.contains(asset.frame))
+            capture("photo-real-picker-\(index)", app: app)
+            // iOS 26 Photos exposes grid assets as Images without an AX hit point.
+            // Tap the actual visible asset center; preview assertions verify selection.
+            asset.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+            XCTAssertTrue(app.navigationBars["Fotos"].waitForNonExistence(timeout: 10))
+        }
+        select(0)
+        let preview = app.images["identificationPhotoPreview"]
+        XCTAssertTrue(preview.waitForExistence(timeout: 10))
+        let first = preview.value as? String
+        XCTAssertTrue(["160 × 80", "80 × 160"].contains(first ?? ""))
+        capture("photo-real-first", app: app)
+        select(1)
+        expectation(for: NSPredicate(format: "value != %@", first ?? ""), evaluatedWith: preview)
+        waitForExpectations(timeout: 10)
+        XCTAssertTrue(["160 × 80", "80 × 160"].contains(preview.value as? String ?? ""))
+        capture("photo-real-replacement", app: app)
+        select(1) // same asset after PhotosPickerItem reset
+        XCTAssertTrue(preview.waitForExistence(timeout: 10))
+        XCTAssertFalse(app.buttons["identifyPhoto"].isEnabled)
+        app.buttons["cancelIdentificationPhoto"].tap()
+        XCTAssertTrue(app.staticTexts["emptyCollectionTitle"].waitForExistence(timeout: 5))
+    }
+    func testCleanLaunchShowsEmptyCollectionAndAvailableAdd() {
         let app = XCUIApplication()
         app.launchArguments += ["-AppleLanguages", "(es)", "-AppleLocale", "es_ES"]
         app.launchArguments += ["--storage-test-id", isolatedID()]
@@ -367,15 +530,15 @@ final class PlantCareAIUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["emptyCollectionTitle"].waitForExistence(timeout: 10))
         XCTAssertEqual(app.staticTexts["emptyCollectionTitle"].label, "Todavía no tienes plantas")
         XCTAssertTrue(app.staticTexts["Guarda aquí tus plantas para tener sus cuidados a mano."].exists)
-        XCTAssertTrue(app.staticTexts["Disponible cuando puedas elegir una foto."].exists)
+        XCTAssertFalse(app.staticTexts["Disponible cuando puedas elegir una foto."].exists)
         let headerAdd = app.buttons["addPlantHeader"]
         let firstAdd = app.buttons["addFirstPlant"]
         XCTAssertTrue(headerAdd.exists)
         XCTAssertTrue(headerAdd.label.contains("Añadir"))
-        XCTAssertFalse(headerAdd.isEnabled)
+        XCTAssertTrue(headerAdd.isEnabled)
         XCTAssertTrue(firstAdd.exists)
         XCTAssertEqual(firstAdd.label, "Añadir mi primera planta")
-        XCTAssertFalse(firstAdd.isEnabled)
+        XCTAssertTrue(firstAdd.isEnabled)
         XCTAssertFalse(app.staticTexts["Preparando tu espacio para cuidar plantas."].exists)
         XCTAssertFalse(app.staticTexts["Actividad"].exists)
     }
@@ -392,7 +555,7 @@ final class PlantCareAIUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["emptyCollectionTitle"].waitForExistence(timeout: 10))
         XCTAssertEqual(app.staticTexts["emptyCollectionTitle"].label, "Todavía no tienes plantas")
         XCTAssertTrue(app.buttons["addFirstPlant"].exists)
-        XCTAssertTrue(app.staticTexts["Disponible cuando puedas elegir una foto."].exists)
+        XCTAssertFalse(app.staticTexts["Disponible cuando puedas elegir una foto."].exists)
         app.terminate()
         app.launchArguments += ["--storage-seed"]
         app.launch()
@@ -402,7 +565,7 @@ final class PlantCareAIUITests: XCTestCase {
         assertDetail(1, app: app)
     }
 
-    func testEmptyCollectionCanScrollToUnavailableAction() {
+    func testEmptyCollectionCanScrollToAvailableAction() {
         let app = XCUIApplication()
         app.launchArguments += ["-AppleLanguages", "(es)", "-AppleLocale", "es_ES"]
         app.launchArguments += ["--storage-test-id", isolatedID()]
@@ -416,7 +579,11 @@ final class PlantCareAIUITests: XCTestCase {
             app.swipeUp()
         }
         XCTAssertTrue(action.isHittable)
-        XCTAssertFalse(action.isEnabled)
-        XCTAssertTrue(app.staticTexts["Disponible cuando puedas elegir una foto."].exists)
+        XCTAssertTrue(action.isEnabled)
+        XCTAssertFalse(app.staticTexts["Disponible cuando puedas elegir una foto."].exists)
+        action.tap()
+        XCTAssertTrue(app.navigationBars["Foto de tu planta"].waitForExistence(timeout: 5))
+        app.buttons["cancelIdentificationPhoto"].tap()
+        XCTAssertTrue(app.staticTexts["emptyCollectionTitle"].waitForExistence(timeout: 5))
     }
 }

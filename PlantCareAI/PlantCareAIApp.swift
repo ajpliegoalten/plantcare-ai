@@ -17,7 +17,17 @@ struct PlantCareAIApp: App {
             load = StorageFixtureLoad(root: testRoot, repository: repository, seed: arguments.contains("--storage-seed"), corrupt: arguments.contains("--storage-corrupt"))
         }
         #endif
-        _plantListViewModel = StateObject(wrappedValue: PlantListViewModel(loadPlants: load, loadPhoto: LoadInitialPlantPhoto(repository: repository), loadDetail: LoadPlantDetail(repository: repository), update: UpdatePlant(repository: repository)))
+        let viewModel = PlantListViewModel(loadPlants: load, loadPhoto: LoadInitialPlantPhoto(repository: repository), loadDetail: LoadPlantDetail(repository: repository), update: UpdatePlant(repository: repository))
+        viewModel.makeIdentificationPhoto = {
+            let draft = IdentificationPhotoViewModel(prepare: PrepareIdentificationPhoto(preparer: LocalIdentificationPhotoPreparer()), camera: CheckCameraAccess(access: SystemCameraAccess()))
+            #if DEBUG && targetEnvironment(simulator)
+            if arguments.contains("--identification-photo-fixture") {
+                draft.testSelections = IdentificationPhotoTestFixture.selections()
+            }
+            #endif
+            return draft
+        }
+        _plantListViewModel = StateObject(wrappedValue: viewModel)
     }
 
     var body: some Scene {

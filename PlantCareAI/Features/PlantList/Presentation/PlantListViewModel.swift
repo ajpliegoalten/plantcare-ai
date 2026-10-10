@@ -11,6 +11,7 @@ final class PlantListViewModel: ObservableObject {
     private var hasLoaded = false
     private let update: UpdatePlant
     private var metadataGeneration = 0
+    var makeIdentificationPhoto: (() -> IdentificationPhotoViewModel)?
 
     init(loadPlants: any LoadPlantsUseCase, loadPhoto: LoadInitialPlantPhoto, loadDetail: LoadPlantDetail, update: UpdatePlant) {
         self.loadPlants = loadPlants

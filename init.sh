@@ -34,5 +34,11 @@ fi
 echo "Destino iPhone Simulator: $udid"
 destination="platform=iOS Simulator,id=$udid"
 xcodebuild -project PlantCareAI.xcodeproj -scheme PlantCareAI -destination "$destination" -derivedDataPath "$PWD/DerivedData" build
+# Seed distinguishable local images for the real PhotosPicker UI test, outside the app.
+# They contain no user data and remain in ignored DerivedData / simulator Photos.
+xcrun swift scripts/seed-identification-photos.swift "$PWD/DerivedData/IdentificationPhotoMedia"
+xcrun simctl boot "$udid" 2>/dev/null || true
+xcrun simctl bootstatus "$udid" -b
+xcrun simctl addmedia "$udid" "$PWD/DerivedData/IdentificationPhotoMedia/picker-A.png" "$PWD/DerivedData/IdentificationPhotoMedia/picker-B.png"
 xcodebuild -project PlantCareAI.xcodeproj -scheme PlantCareAI -destination "$destination" -derivedDataPath "$PWD/DerivedData" -parallel-testing-enabled NO test
 echo "Build y tests correctos. Apertura visual: instalar DerivedData/Build/Products/Debug-iphonesimulator/PlantCareAI.app y lanzar org.plantcareai.prototype con simctl, o abrir PlantCareAI.xcodeproj en Xcode."

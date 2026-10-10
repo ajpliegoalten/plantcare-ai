@@ -9,7 +9,7 @@ Organizar el código **por funcionalidad**, y dentro de cada funcionalidad separ
 - **Data**: implementaciones de los protocolos del dominio (almacenamiento local o adaptadores futuros). Ningún tipo de `Data` se importa en `Domain` o en las vistas.
 - **Composición**: `PlantCareAIApp.swift` elige las implementaciones concretas e inyecta el caso de uso en el ViewModel. `ContentView` solo delega en la vista raíz de la funcionalidad; no alberga la pantalla «Mis plantas». Las dependencias apuntan `Presentation → Domain ← Data` y la composición conecta las capas.
 
-La separación no autoriza a adelantar comportamiento: existe persistencia local, consulta de ficha por UUID desde tarjetas y edición local de nombre/ubicación, pero no cámara, alta desde UI ni historial. Los contratos son asíncronos y propagadores de errores; un fallo no representa una colección vacía.
+La separación no autoriza a adelantar comportamiento: existe persistencia local, consulta de ficha por UUID, edición de nombre/ubicación y selección/captura efímera de foto, pero no identificación IA, alta desde UI ni historial. Los contratos son asíncronos y propagadores de errores; un fallo no representa una colección vacía.
 
 ## Implementación actual: `PlantList`, `PlantDetail` y `EditPlant`
 
@@ -48,7 +48,7 @@ PlantCareAI/
       UpdatePlantUseCase.swift         # nombre obligatorio y normalización name/location
 ```
 
-`PlantCareAIApp` crea una misma instancia de `LocalPlantRepository` para `LoadPlants` y `LoadInitialPlantPhoto`, inyectados en `PlantListViewModel` con ciclo de vida `@StateObject`. El listado conserva modelos de tarjeta por UUID; no inicia fotos. Cada tarjeta solicita su foto con `.task` mediante `PlantCardViewModel → LoadInitialPlantPhoto → PlantRepository`, prepara un thumbnail ImageIO de máximo 1600 px fuera del MainActor y conserva solo la imagen. Cancelación/generaciones impiden que respuestas antiguas sustituyan el estado nuevo. No hay miniaturas en disco; Data sigue leyendo/validando el original completo. Vacío y error global siguen separados de errores por foto. El fixture Debug usa la misma instancia/raíz para ambos flujos. Los botones de alta permanecen deshabilitados hasta `choose-identification-photo`.
+`PlantCareAIApp` crea una misma instancia de `LocalPlantRepository` para `LoadPlants` y `LoadInitialPlantPhoto`, inyectados en `PlantListViewModel` con ciclo de vida `@StateObject`. El listado conserva modelos de tarjeta por UUID; no inicia fotos. Cada tarjeta solicita su foto con `.task` mediante `PlantCardViewModel → LoadInitialPlantPhoto → PlantRepository`, prepara un thumbnail ImageIO de máximo 1600 px fuera del MainActor y conserva solo la imagen. Cancelación/generaciones impiden que respuestas antiguas sustituyan el estado nuevo. No hay miniaturas en disco; Data sigue leyendo/validando el original completo. Vacío y error global siguen separados de errores por foto. El fixture Debug usa la misma instancia/raíz para ambos flujos. Ambas acciones Añadir abren ahora el borrador efímero de foto, incluso ante error local; no guardan una planta.
 
 `PlantListView` contiene el único `NavigationStack` y rutas UUID. Para todo UUID construye un destino con VM propio `@StateObject`, sin IO en fábrica/init. `PlantDetailView → PlantDetailViewModel → LoadPlantDetail → PlantRepository ← LocalPlantRepository` relee metadata al abrir y filtra por UUID (coste O(n) para este prototipo), nunca reutiliza el snapshot de tarjeta como fallback. Reutiliza los modelos/contratos Domain de PlantList y su adaptador Data; no hay repositorio ni esquema nuevo. La composición inyecta detalle y foto sobre la misma instancia elegida después del override Debug, sin volver a seed/verify.
 
@@ -64,8 +64,16 @@ Publicación: validar JPEG completo, escribir/verificar temporal, mover sin sobr
 
 JPEG es el formato aceptado de este fundamento, no un pipeline de importación. `save-plant` debe definir orientación, resolución, límite de bytes, compresión y memoria antes de aceptar fotografías reales; `add-plant-photo` reutilizará ese pipeline. La presentación de tarjetas acota su imagen, pero no resuelve el pipeline de importación ni limita el original.
 
+## Selección efímera: `IdentificationPhoto`
+
+`PlantListView` presenta una sheet con VM nuevo por apertura, creado por la fábrica inyectada desde la app. `IdentificationPhotoView → IdentificationPhotoViewModel → PrepareIdentificationPhoto → IdentificationPhotoPreparing ← LocalIdentificationPhotoPreparer`. Domain contiene únicamente UUID de selección, JPEG y dimensiones; no conoce UIImage, PhotosPickerItem, rutas ni repositorio. PhotosPicker y el puente de captura UIImagePickerController pertenecen a Presentation; entregan bytes al caso de uso. `CheckCameraAccess → CameraAccess ← SystemCameraAccess` consulta disponibilidad y AVFoundation solo por intención Tomar foto, reevaluando el permiso en cada intento. Abrir Ajustes es una intención explícita de Presentation. No se pide acceso global a Fotos ni micrófono.
+
+Data prepara el primer frame fuera de MainActor mediante ImageIO, sin disco: entrada ≤30 MiB y ≤80 MP, thumbnail orientado de lado ≤2048 sin ampliar, alfa blanco, JPEG calidad 0.85 y ≤5 MiB sin metadata fuente EXIF/GPS. Las tareas propagan cancelación entre operaciones síncronas. VM conserva A durante reemplazo/error, bloquea selecciones duplicadas y verifica generación/cierre antes de publicar. Cancelar y dismiss de sheet liberan borrador/tareas; no hay restauración tras relanzar. Identificar permanece deshabilitado hasta sus features de consentimiento e identificación.
+
+Estos límites son del borrador, no del contrato de alta. `loadTransferable(Data)` puede materializar el recurso completo antes de comprobar 30 MiB; UIKit entrega UIImage completa y su transporte JPEG se codifica fuera del actor UI. No se garantiza memoria constante ni se da por resuelto `save-plant`. El fixture de UI está compilado solo en Debug Simulator, activado por argumento desde composición, y no simula cámara física. El gate siembra dos imágenes sintéticas desde macOS en Fotos del simulador para probar además el PhotosPicker real; no son assets de la app ni fotos del usuario.
+
 ## Recursos y comprobación
 
-- `PlantCareAI/Assets.xcassets`: ocho colores semánticos sRGB de `DESIGN.md`, sin imágenes. Las vistas usan los ocho tokens por nombre; las fotos proceden exclusivamente del repositorio local por UUID.
+- `PlantCareAI/Assets.xcassets`: ocho colores semánticos sRGB de `DESIGN.md`, sin imágenes. Las fotos de ejemplares proceden del repositorio local por UUID; la preview efímera muestra únicamente la selección/captura del usuario.
 - `PlantCareAI/Localizable.xcstrings`: solo claves usadas por la pantalla actual, textos españoles con fallback español; las claves obsoletas de bootstrap se retiraron.
 - `./init.sh` elige un iPhone Simulator disponible y ejecuta build, XCTest de repositorio y UI tests; no sustituye a la inspección visual. Artefactos locales en `DerivedData/` ignorado. No hay cuentas, backend ni proveedor de IA.
