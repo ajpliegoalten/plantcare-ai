@@ -8,6 +8,8 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
+      - name: Preparar configuración de pruebas sin secretos
+        run: cp Config/IdentificationSecrets.xcconfig.example Config/IdentificationSecrets.xcconfig
       - name: Compilar y probar en iPhone Simulator
         run: ./init.sh
         env:
