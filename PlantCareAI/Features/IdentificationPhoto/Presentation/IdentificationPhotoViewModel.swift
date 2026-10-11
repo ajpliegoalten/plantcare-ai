@@ -20,6 +20,16 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
     @Published private(set) var selectedProposal: SpeciesProposalSelection?
     @Published private(set) var confirmedIdentity: ConfirmedDraftIdentity?
     @Published private(set) var hasConfirmationError = false
+    enum CareState: Equatable { case idle, checking, awaitingConsent, loading, loaded, failed, cancelled }
+    @Published private(set) var careState: CareState = .idle
+    @Published private(set) var careSheet: CareSheet?
+    @Published private(set) var careError: CareSheetGenerationError?
+    private let generateCare: GenerateCareSheet?
+    private var careTask: Task<Void, Never>?
+    private var careGeneration = 0
+    private var pendingCare = false
+    var isGeneratingCare: Bool { [.checking, .awaitingConsent, .loading].contains(careState) }
+    var reviewableCareSheet: CareSheet? { isSelectingSpecies ? nil : careSheet }
     private var resultPhotoID: UUID?
     private let confirmation: any ConfirmSpeciesUseCase
     private let manualConfirmation: any ConfirmManualSpeciesUseCase
@@ -57,7 +67,7 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
     private let configurationIsCurrent: () -> Bool
     private let identificationAvailable: Bool
     var isAuthorizing: Bool { [.checkingAuthorization, .awaitingConfirmation, .continuing].contains(authorizationState) }
-    var isBusy: Bool { isLoading || isCheckingCamera || isAuthorizing }
+    var isBusy: Bool { isLoading || isCheckingCamera || isAuthorizing || isGeneratingCare }
     var canIdentify: Bool { photo != nil && !isBusy && !presentsCamera && !closed && !isEditingManualSpecies }
     private let authorize: AuthorizeExternalAIOperation
     private let identify: (IdentificationPhoto) async throws -> IdentificationContinuationResult
@@ -74,24 +84,100 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
     private var closed = false
     #if DEBUG && targetEnvironment(simulator)
     var testSelections: [String: Data] = [:]
+    var testCareInvocationCount: (() -> Int)?
     var testInvocationCount: (() -> Int)? { didSet { invocationCount = testInvocationCount?() ?? 0 } }
     @Published private(set) var invocationCount = 0
     #endif
 
-    init(prepare: PrepareIdentificationPhoto, camera: CheckCameraAccess, authorize: AuthorizeExternalAIOperation, confirmSpecies: any ConfirmSpeciesUseCase = ConfirmSpecies(), confirmManualSpecies: any ConfirmManualSpeciesUseCase = ConfirmManualSpecies(), usesRealRecipient: Bool = false, destinationNotice: ExternalAIDestinationNotice? = nil, identificationAvailable: Bool = true, configurationIsCurrent: @escaping () -> Bool = { true }, identify: @escaping (IdentificationPhoto) async throws -> IdentificationContinuationResult = { _ in .unavailable }) {
+    init(prepare: PrepareIdentificationPhoto, camera: CheckCameraAccess, authorize: AuthorizeExternalAIOperation, confirmSpecies: any ConfirmSpeciesUseCase = ConfirmSpecies(), confirmManualSpecies: any ConfirmManualSpeciesUseCase = ConfirmManualSpecies(), generateCare: GenerateCareSheet? = nil, usesRealRecipient: Bool = false, destinationNotice: ExternalAIDestinationNotice? = nil, identificationAvailable: Bool = true, configurationIsCurrent: @escaping () -> Bool = { true }, identify: @escaping (IdentificationPhoto) async throws -> IdentificationContinuationResult = { _ in .unavailable }) {
         self.prepare = prepare
         self.camera = camera
         self.authorize = authorize
         self.identify = identify
         self.confirmation = confirmSpecies
         self.manualConfirmation = confirmManualSpecies
+        self.generateCare = generateCare
         self.usesRealRecipient = usesRealRecipient
         self.destinationNotice = destinationNotice
         self.identificationAvailable = identificationAvailable && (!usesRealRecipient || destinationNotice != nil)
         self.configurationIsCurrent = configurationIsCurrent
     }
 
-    deinit { task?.cancel(); authorizationTask?.cancel() }
+    deinit { task?.cancel(); authorizationTask?.cancel(); careTask?.cancel() }
+
+    func retryCare() {
+        guard !closed, !isBusy, !isSelectingSpecies, !presentsCamera,
+              [.idle, .failed, .cancelled].contains(careState), confirmedIdentity != nil else { return }
+        startCare(confirmed: false)
+    }
+
+    private func startCare(confirmed: Bool) {
+        guard !closed, let identity = confirmedIdentity, let photoID = photo?.id,
+              identity.photoID == photoID else { return }
+        careGeneration += 1
+        let revision = careGeneration
+        careTask?.cancel()
+        careSheet = nil
+        careError = nil
+        guard identificationAvailable, configurationIsCurrent(), let generateCare else {
+            careTask = nil
+            pendingCare = false
+            authorizationState = .idle
+            careState = .failed; careError = .configuration; return
+        }
+        pendingCare = true
+        careState = .checking
+        authorizationState = confirmed ? .continuing : .checkingAuthorization
+        careTask = Task { [weak self, authorize] in
+            do {
+                let result = try await authorize.execute(confirmed: confirmed) { [weak self] in
+                    guard let self, !self.closed, self.careGeneration == revision,
+                          self.confirmedIdentity == identity, self.photo?.id == photoID else { throw CancellationError() }
+                    guard self.configurationIsCurrent() else { throw CareSheetGenerationError.configuration }
+                    try Task.checkCancellation()
+                    self.careState = .loading
+                    self.authorizationState = .idle
+                    return try await generateCare.execute(identity: identity, photoID: photoID)
+                }
+                guard let self, !self.closed, self.careGeneration == revision, !Task.isCancelled,
+                      self.confirmedIdentity == identity, self.photo?.id == photoID else { return }
+                self.careTask = nil
+                guard self.configurationIsCurrent() else { throw CareSheetGenerationError.configuration }
+                switch result {
+                case .requiresConfirmation:
+                    self.careState = .awaitingConsent
+                    self.authorizationState = .awaitingConfirmation
+                case .completed(let sheet):
+                    self.careSheet = sheet
+                    self.careState = .loaded
+                    self.pendingCare = false
+                    self.authorizationState = .idle
+                }
+            } catch {
+                guard let self, !self.closed, self.careGeneration == revision, !Task.isCancelled else { return }
+                self.careTask = nil
+                self.pendingCare = false
+                self.authorizationState = .idle
+                self.careState = .failed
+                self.careError = (error as? CareSheetGenerationError) ?? .service
+            }
+        }
+    }
+
+    func cancelCare() {
+        careGeneration += 1
+        careTask?.cancel(); careTask = nil
+        pendingCare = false
+        authorizationState = .idle
+        careState = .cancelled
+        careSheet = nil
+        careError = nil
+    }
+
+    private func clearCare() {
+        cancelCare()
+        careState = .idle
+    }
 
     func selectProposal(_ selection: SpeciesProposalSelection, resultID revision: UUID) {
         guard canSelectProposal, revision == resultID, let result = identificationResult else { return }
@@ -114,6 +200,8 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
             confirmedIdentity = try confirmation.execute(photoID: photoID, resultID: revision, result: result, selection: selectedProposal)
             isSelectingSpecies = false
             hasConfirmationError = false
+            clearCare()
+            startCare(confirmed: false)
         } catch {
             hasConfirmationError = true
         }
@@ -126,7 +214,8 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
         case .manual: beginManualSpecies()
         case .aiProposal(let revision, _, _, _):
             guard revision == resultID else { return }
-            confirmedIdentity = nil
+            retainedProposal = selectedProposal
+            isSelectingSpecies = true
             hasConfirmationError = false
         }
     }
@@ -174,6 +263,8 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
             hasManualConfirmationError = false
             manualDraft = nil
             isSelectingSpecies = false
+            clearCare()
+            startCare(confirmed: false)
         } catch { hasManualConfirmationError = true }
     }
 
@@ -187,6 +278,7 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
 
     func returnToAIProposals() {
         guard canReturnToAIProposals else { return }
+        clearCare()
         confirmedIdentity = nil
         selectedProposal = retainedProposal
         hasConfirmationError = false
@@ -204,6 +296,7 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
     }
 
     private func clearIdentification() {
+        clearCare()
         identificationResult = nil
         resultID = nil
         resultPhotoID = nil
@@ -232,11 +325,17 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
     }
 
     func confirmAuthorization() {
+        if pendingCare {
+            guard careState == .awaitingConsent, !closed else { return }
+            startCare(confirmed: true)
+            return
+        }
         guard authorizationState == .awaitingConfirmation, !closed, photo?.id == pendingPhotoID else { return }
         continueAuthorization(confirmed: true)
     }
 
     func cancelAuthorization() {
+        if pendingCare { cancelCare() }
         authorizationGeneration += 1
         authorizationTask?.cancel()
         authorizationTask = nil

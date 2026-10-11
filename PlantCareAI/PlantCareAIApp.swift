@@ -43,7 +43,7 @@ struct PlantCareAIApp: App {
         viewModel.makeIdentificationPhoto = {
             // Snapshot once per draft; recheck the same configuration before acceptance and transport.
             let configuration = IdentificationAPIConfiguration.localDemo()
-            var scope = configuration?.scope ?? ExternalAIConsent(recipient: "unconfigured-identification", noticeVersion: 3)
+            var scope = configuration?.scope ?? ExternalAIConsent(recipient: "unconfigured-identification", noticeVersion: 4)
             var destinationNotice = configuration?.notice
             var available = configuration != nil
             var realRecipient = true
@@ -64,7 +64,18 @@ struct PlantCareAIApp: App {
             #endif
             let authorization = AuthorizeExternalAIOperation(repository: consentRepository, scope: scope)
             let identify = configuration.map { IdentifyCandidates(repository: OpenAICompatibleSpeciesIdentificationRepository(configuration: $0)) }
-            let draft = IdentificationPhotoViewModel(prepare: PrepareIdentificationPhoto(preparer: LocalIdentificationPhotoPreparer()), camera: CheckCameraAccess(access: SystemCameraAccess()), authorize: authorization, confirmSpecies: ConfirmSpecies(), confirmManualSpecies: ConfirmManualSpecies(), usesRealRecipient: realRecipient, destinationNotice: destinationNotice, identificationAvailable: available, configurationIsCurrent: {
+            var care = configuration.map { GenerateCareSheet(repository: OpenAICompatibleCareSheetGenerationRepository(configuration: $0)) }
+            #if DEBUG && targetEnvironment(simulator)
+            var careFixture: CareSheetGenerationTestFixture?
+            if candidatesFixture != nil {
+                let position = arguments.firstIndex(of: "--care-sheet-fixture")
+                let mode = position.flatMap { arguments.indices.contains($0 + 1) ? arguments[$0 + 1] : nil } ?? "success"
+                let fixture = CareSheetGenerationTestFixture(mode: mode)
+                careFixture = fixture
+                care = GenerateCareSheet(repository: fixture)
+            }
+            #endif
+            let draft = IdentificationPhotoViewModel(prepare: PrepareIdentificationPhoto(preparer: LocalIdentificationPhotoPreparer()), camera: CheckCameraAccess(access: SystemCameraAccess()), authorize: authorization, confirmSpecies: ConfirmSpecies(), confirmManualSpecies: ConfirmManualSpecies(), generateCare: care, usesRealRecipient: realRecipient, destinationNotice: destinationNotice, identificationAvailable: available, configurationIsCurrent: {
                 #if DEBUG && targetEnvironment(simulator)
                 if consentFixture != nil || candidatesFixture != nil { return true }
                 #endif
@@ -72,7 +83,13 @@ struct PlantCareAIApp: App {
             }, identify: { photo in
                 #if DEBUG && targetEnvironment(simulator)
                 if let consentFixture { return consentFixture.invoke() }
-                if let candidatesFixture { return try await candidatesFixture.identify(photo) }
+                if let candidatesFixture {
+                    let result = try await candidatesFixture.identify(photo)
+                    if arguments.contains("--care-sheet-renew-consent") {
+                        try await consentRepository.record(ExternalAIConsent(recipient: scope.recipient, noticeVersion: 3))
+                    }
+                    return result
+                }
                 #endif
                 guard let identify else { return .unavailable }
                 return .completed(try await identify.execute(photo: photo))
@@ -82,6 +99,7 @@ struct PlantCareAIApp: App {
                 draft.testInvocationCount = { consentFixture.invocations }
             }
             if let candidatesFixture { draft.testInvocationCount = { candidatesFixture.invocations } }
+            if let careFixture { draft.testCareInvocationCount = { careFixture.invocations } }
             if arguments.contains("--identification-photo-fixture") {
                 draft.testSelections = IdentificationPhotoTestFixture.selections()
             }

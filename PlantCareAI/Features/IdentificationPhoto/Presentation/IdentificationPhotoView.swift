@@ -14,16 +14,7 @@ struct IdentificationPhotoView: View {
                 VStack(spacing: 20) {
                     preview
                     if let identity = viewModel.confirmedIdentity, !viewModel.isSelectingSpecies {
-                        ConfirmedSpeciesView(identity: identity, canChange: !viewModel.isBusy && !viewModel.presentsCamera,
-                                             change: { viewModel.changeConfirmedSpecies() },
-                                             canReturnToAI: viewModel.canReturnToAIProposals,
-                                             returnToAI: { viewModel.returnToAIProposals() })
-                        if identity.manualName == nil {
-                            VStack(alignment: .leading, spacing: 16) {
-                                Text("identifyCandidates.alternatives").font(.headline)
-                                manualOption
-                            }
-                        }
+                        CareSheetReviewView(viewModel: viewModel, identity: identity)
                     } else if let result = viewModel.identificationResult, let revision = viewModel.resultID {
                         IdentificationResultView(result: result, selected: viewModel.selectedProposal,
                             canSelect: viewModel.canSelectProposal,
@@ -99,6 +90,9 @@ struct IdentificationPhotoView: View {
                     if viewModel.testInvocationCount != nil {
                         Text("Instrumented invocations: \(viewModel.invocationCount)")
                             .accessibilityIdentifier("externalAIInvocationCount")
+                    }
+                    if let count = viewModel.testCareInvocationCount {
+                        Text("Care invocations: \(count())").accessibilityIdentifier("careSheetInvocationCount")
                     }
                     if !viewModel.testSelections.isEmpty {
                         ForEach(viewModel.testSelections.keys.sorted(), id: \.self) { name in

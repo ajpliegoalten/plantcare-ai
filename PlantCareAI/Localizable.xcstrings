@@ -1,6 +1,157 @@
 {
   "sourceLanguage" : "es",
   "strings" : {
+    "careSheet.aiIdentity" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Especie elegida por ti a partir de una propuesta de IA"
+          }
+        }
+      }
+    },
+    "careSheet.cancelled" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solicitud cancelada. Puedes reintentar o cambiar la especie. Cancelar no retira datos ni costes ya producidos en el destino."
+          }
+        }
+      }
+    },
+    "careSheet.configuration" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La configuración de IA no está disponible o ha cambiado. Conservamos foto y especie; corrige la configuración y reintenta cuidados."
+          }
+        }
+      }
+    },
+    "careSheet.invalidInput" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No podemos enviar este nombre. Debe tener contenido y no superar 2000 caracteres; cambia la especie para corregirlo."
+          }
+        }
+      }
+    },
+    "careSheet.invalidResponse" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No recibimos una ficha completa válida. Reintenta o cambia la especie."
+          }
+        }
+      }
+    },
+    "careSheet.loading" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generando cuidados…"
+          }
+        }
+      }
+    },
+    "careSheet.network" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo conectar con la IA. Conservamos foto y especie; reintenta cuidados cuando tengas conexión."
+          }
+        }
+      }
+    },
+    "careSheet.orientation" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuidados orientativos generados por IA"
+          }
+        }
+      }
+    },
+    "careSheet.rateLimited" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El servicio ha limitado las solicitudes. Espera antes de reintentar cuidados; conservamos foto y especie."
+          }
+        }
+      }
+    },
+    "careSheet.rejected" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El servicio no pudo ofrecer cuidados para esta especie. Reintenta o cambia el nombre."
+          }
+        }
+      }
+    },
+    "careSheet.retry" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reintentar cuidados"
+          }
+        }
+      }
+    },
+    "careSheet.service" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo autorizar o completar la solicitud de cuidados. Conservamos foto y especie; puedes reintentar cuidados."
+          }
+        }
+      }
+    },
+    "careSheet.timeout" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La solicitud de cuidados tardó demasiado. Conservamos foto y especie; puedes reintentar cuidados."
+          }
+        }
+      }
+    },
+    "careSheet.unauthorized" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El servicio rechazó la autorización. Revisa su configuración antes de reintentar cuidados; conservamos foto y especie."
+          }
+        }
+      }
+    },
     "collection.add" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -126,16 +277,6 @@
         }
       }
     },
-    "confirmSpecies.caution" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tu elección no garantiza la identificación botánica."
-          }
-        }
-      }
-    },
     "confirmSpecies.change" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -157,17 +298,6 @@
         }
       }
     },
-    "confirmSpecies.confirmed" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Especie confirmada por ti"
-          }
-        }
-      }
-    },
     "confirmSpecies.couldBe" : {
       "localizations" : {
         "es" : {
@@ -178,32 +308,12 @@
         }
       }
     },
-    "confirmSpecies.draft" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La especie está confirmada en este borrador. La planta aún no se ha añadido."
-          }
-        }
-      }
-    },
     "confirmSpecies.error" : {
       "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "No se ha podido confirmar esta elección. Selecciona una propuesta vigente e inténtalo de nuevo."
-          }
-        }
-      }
-    },
-    "confirmSpecies.futureCare" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La ficha de cuidados estará disponible en un siguiente paso."
           }
         }
       }
@@ -867,7 +977,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Para proponer una especie, enviaremos al destino indicado la foto que has elegido y una instrucción de identificación, usando el modelo indicado. Las futuras funciones de orientación podrán enviar la foto elegida para IA o el texto necesario de tu planta (especie, cuidados, historial pertinente y tu pregunta, según la función). No se envía toda tu colección ni fotos antiguas para analizar una foto actual. Las propuestas pueden ser incorrectas y no confirman ninguna especie. Recordaremos tu aceptación en este dispositivo para futuras solicitudes que tú inicies al mismo destino y modelo dentro del alcance de este aviso."
+            "value" : "Para proponer una especie, enviaremos al destino indicado la foto elegida y una instrucción de identificación, usando el modelo indicado. Al confirmar una especie, enviaremos solo sus nombres y procedencia para generar cuidados orientativos: no volvemos a enviar la foto para esa ficha. No se envían alternativas, tu colección, ubicación ni historial. Las propuestas y los cuidados pueden ser incorrectos y no certifican la especie. Recordaremos tu aceptación en este dispositivo para las solicitudes de identificación y cuidados que tú inicies al mismo destino y modelo dentro de este aviso."
           }
         }
       }
@@ -1010,9 +1120,7 @@
         }
       }
     },
-    "Instrumented invocations: %@" : {
-
-    },
+    "Instrumented invocations: %@" : {},
     "manualSpecies.cancelEdit" : {
       "extractionState" : "stale",
       "localizations" : {

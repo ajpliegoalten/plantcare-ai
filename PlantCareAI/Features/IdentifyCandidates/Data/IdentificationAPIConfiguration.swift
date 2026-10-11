@@ -62,10 +62,10 @@ struct IdentificationAPIConfiguration: Equatable, Sendable {
         self.timeout = seconds
         self.notice = ExternalAIDestinationNotice(destination: endpoint.absoluteString, model: model)
         // Canonical destination + model + notice revision. No assumed vendor/processors, key or timeout.
-        // v3 deliberately does NOT inherit the former DevExpert/profile-v2 acceptance.
-        let scopeBytes = try JSONEncoder().encode([canonical, endpoint.absoluteString, model, "openai-compatible-identification:notice-3"])
+        // v4 includes textual care generation; earlier acceptances never authorize this scope.
+        let scopeBytes = try JSONEncoder().encode([canonical, endpoint.absoluteString, model, "openai-compatible-identification:notice-4"])
         let fingerprint = SHA256.hash(data: scopeBytes).map { String(format: "%02x", $0) }.joined()
-        self.scope = ExternalAIConsent(recipient: "openai-compatible:" + fingerprint, noticeVersion: 3)
+        self.scope = ExternalAIConsent(recipient: "openai-compatible:" + fingerprint, noticeVersion: 4)
     }
 
     static func localDemo(bundle: Bundle = .main) -> Self? {
