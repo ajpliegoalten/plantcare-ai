@@ -420,6 +420,7 @@
       }
     },
     "detail.care.title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -526,6 +527,61 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Detalle de planta"
+          }
+        }
+      }
+    },
+    "detail.watering.checkSubstrate" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Antes de regar, comprueba la humedad del sustrato."
+          }
+        }
+      }
+    },
+    "detail.watering.register" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrar riego"
+          }
+        }
+      }
+    },
+    "detail.watering.soon" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximamente"
+          }
+        }
+      }
+    },
+    "detail.watering.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riego"
+          }
+        }
+      }
+    },
+    "detail.watering.unavailable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El registro y la fecha del último riego estarán disponibles próximamente."
           }
         }
       }

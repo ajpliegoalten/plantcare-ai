@@ -1228,6 +1228,55 @@ final class SavePlantUITests: PlantCareAIUITestCase {
 }
 
 final class StoredCollectionUITests: PlantCareAIUITestCase {
+    func testDetailRedesignCareGridAndUnavailableWatering() {
+        let app = XCUIApplication(), id = isolatedID()
+        app.launchArguments = ["--storage-test-id", id, "--storage-seed", "-AppleLanguages", "(es)"]
+        app.launch()
+        let card = app.buttons["plantCard-\(plantID(1))"]
+        XCTAssertTrue(card.waitForExistence(timeout: 10)); card.tap()
+        let name = app.staticTexts["selectedPlant-\(plantID(1))"]
+        XCTAssertTrue(name.waitForExistence(timeout: 10))
+        XCTAssertEqual(name.label, "Fixture 1")
+        XCTAssertTrue(app.buttons["editPlant-\(plantID(1))"].isHittable)
+        capture("redesign-photo-identity", app: app)
+
+        let register = app.buttons["detailRegisterWatering-\(plantID(1))"]
+        XCTAssertTrue(register.exists)
+        reveal(register, in: app)
+        XCTAssertFalse(register.isEnabled)
+        XCTAssertEqual(register.label, "Registrar riego")
+        XCTAssertEqual(app.staticTexts["detailWateringComingSoon"].label, "Próximamente")
+        XCTAssertEqual(app.staticTexts["detailWateringUnavailable"].label,
+                       "El registro y la fecha del último riego estarán disponibles próximamente.")
+        XCTAssertGreaterThanOrEqual(register.frame.height, 44)
+        capture("redesign-watering-preview", app: app)
+        for text in ["Óptimo estado", "Sustrato moderadamente seco", "Riego recomendado hoy", "Ciclo: ~9-11 d"] {
+            XCTAssertFalse(app.staticTexts[text].exists)
+        }
+        XCTAssertEqual(app.buttons.matching(identifier: "detailRegisterWatering-\(plantID(1))").count, 1)
+        XCTAssertFalse(app.buttons["Marcar como favorita"].exists)
+
+        for (leftField, rightField) in [("light", "watering"), ("humidity", "temperature"), ("substrate", "fertilizer")] {
+            let left = app.staticTexts["detailCare-\(leftField)-\(plantID(1))"]
+            let right = app.staticTexts["detailCare-\(rightField)-\(plantID(1))"]
+            reveal(left, in: app)
+            XCTAssertTrue(right.isHittable)
+            XCTAssertEqual(left.frame.minY, right.frame.minY, accuracy: 1)
+            XCTAssertEqual(left.frame.width, right.frame.width, accuracy: 1)
+            XCTAssertEqual(left.frame.height, right.frame.height, accuracy: 1)
+            XCTAssertGreaterThan(right.frame.minX, left.frame.maxX)
+            XCTAssertGreaterThanOrEqual(left.frame.minX, app.frame.minX + 19)
+            XCTAssertLessThanOrEqual(right.frame.maxX, app.frame.maxX - 19)
+        }
+        capture("redesign-care-grid", app: app)
+        back(app)
+        app.terminate()
+        app.launchArguments = ["--storage-test-id", id, "--storage-verify", "-AppleLanguages", "(es)"]
+        app.launch()
+        XCTAssertTrue(app.buttons["plantCard-\(plantID(1))"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.staticTexts["storageErrorMessage"].exists)
+    }
+
     func testStoredCollectionSurvivesProcessRelaunch() {
         let app = XCUIApplication()
         let id = isolatedID()
