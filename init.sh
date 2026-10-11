@@ -33,12 +33,32 @@ fi
 
 echo "Destino iPhone Simulator: $udid"
 destination="platform=iOS Simulator,id=$udid"
-xcodebuild -project PlantCareAI.xcodeproj -scheme PlantCareAI -destination "$destination" -derivedDataPath "$PWD/DerivedData" build
-# Seed distinguishable local images for the real PhotosPicker UI test, outside the app.
-# They contain no user data and remain in ignored DerivedData / simulator Photos.
+workers="${TEST_WORKERS:-5}"
+if [[ ! "$workers" =~ ^[1-5]$ ]]; then
+  echo "Error: TEST_WORKERS debe ser un entero de 1 a 5 (por defecto 5)." >&2
+  exit 1
+fi
+screenshots="${UI_TEST_SCREENSHOTS:-0}"
+if [[ ! "$screenshots" =~ ^[01]$ ]]; then
+  echo "Error: UI_TEST_SCREENSHOTS debe ser 0 o 1 (por defecto 0)." >&2
+  exit 1
+fi
+results="$PWD/DerivedData/TestResults/$(date +%Y%m%d-%H%M%S)-$$"
+mkdir -p "$results"
+common=(-project PlantCareAI.xcodeproj -scheme PlantCareAI -destination "$destination" -derivedDataPath "$PWD/DerivedData")
+# Compile app and both test bundles once; subsequent phases reuse those products.
+xcodebuild "${common[@]}" build-for-testing
+# Custom scheme variables are not expanded from arbitrary CLI build settings.
+# Set the explicit runner environment once and use that exact configuration.
+test_run=$(python3 scripts/configure-ui-test-environment.py "$PWD/DerivedData/Build/Products" "$screenshots")
+test_common=(-xctestrun "$test_run" -destination "$destination")
+# XCTest owns the workers/clones. Do not start competing xcodebuild sessions.
+# The system Photos test needs media on a known simulator, so it runs separately.
+xcodebuild "${test_common[@]}" -parallel-testing-enabled YES -parallel-testing-worker-count "$workers" -maximum-concurrent-test-simulator-destinations "$workers" -skip-testing:PlantCareAIUITests/SystemGalleryUITests -resultBundlePath "$results/parallel.xcresult" test-without-building
+# Seed distinguishable synthetic images only for the serial PhotosPicker test.
 xcrun swift scripts/seed-identification-photos.swift "$PWD/DerivedData/IdentificationPhotoMedia"
 xcrun simctl boot "$udid" 2>/dev/null || true
 xcrun simctl bootstatus "$udid" -b
 xcrun simctl addmedia "$udid" "$PWD/DerivedData/IdentificationPhotoMedia/picker-A.png" "$PWD/DerivedData/IdentificationPhotoMedia/picker-B.png"
-xcodebuild -project PlantCareAI.xcodeproj -scheme PlantCareAI -destination "$destination" -derivedDataPath "$PWD/DerivedData" -parallel-testing-enabled NO test
-echo "Build y tests correctos. Apertura visual: instalar DerivedData/Build/Products/Debug-iphonesimulator/PlantCareAI.app y lanzar org.plantcareai.prototype con simctl, o abrir PlantCareAI.xcodeproj en Xcode."
+xcodebuild "${test_common[@]}" -parallel-testing-enabled NO -only-testing:PlantCareAIUITests/SystemGalleryUITests -resultBundlePath "$results/gallery.xcresult" test-without-building
+echo "Build y tests correctos. Resultados: $results (parallel.xcresult + gallery.xcresult). Apertura visual: abrir PlantCareAI.xcodeproj en Xcode."
