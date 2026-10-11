@@ -1,12 +1,11 @@
 import SwiftUI
 
-struct IdentificationResultView: View {
+struct IdentificationResultView<ManualOption: View>: View {
     let result: IdentificationResult
     let selected: SpeciesProposalSelection?
     let canSelect: Bool
-    let canConfirm: Bool
     let select: (SpeciesProposalSelection) -> Void
-    let confirm: () -> Void
+    @ViewBuilder let manualOption: () -> ManualOption
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -29,33 +28,27 @@ struct IdentificationResultView: View {
                     .accessibilityAddTraits(.isHeader)
                 candidate(primary, selection: .primary, badge: "confirmSpecies.primary", identifier: "speciesProposal-primary")
             }
-            if !result.alternatives.isEmpty {
-                Text("identifyCandidates.alternatives").font(.headline)
-                ForEach(Array(result.alternatives.enumerated()), id: \.offset) { index, value in
-                    candidate(value, selection: .alternative(index: index), badge: "confirmSpecies.alternative", identifier: "speciesProposal-alternative-\(index)")
-                }
-            }
             VStack(alignment: .leading, spacing: 12) {
                 Text(result.uncertainty)
                     .accessibilityIdentifier("identificationUncertainty")
-                Divider()
-                Label("identifyCandidates.notConfirmed", systemImage: "info.circle")
-                    .font(.callout)
-                    .foregroundStyle(Color("TextSecondary"))
+                if result.outcome == .proposals {
+                    Divider()
+                    Label("identifyCandidates.notConfirmed", systemImage: "info.circle")
+                        .font(.callout)
+                        .foregroundStyle(Color("TextSecondary"))
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(16)
             .background(Color("Background"), in: RoundedRectangle(cornerRadius: 16))
             if result.outcome == .insufficientEvidence { Text("identifyCandidates.changePhoto") }
-            if result.outcome == .proposals {
-                Button(action: confirm) {
-                    Text("confirmSpecies.confirm").frame(maxWidth: .infinity, minHeight: 44)
-                        .foregroundStyle(canConfirm ? Color("Surface") : Color("TextSecondary"))
+            Text("identifyCandidates.alternatives").font(.headline)
+            if !result.alternatives.isEmpty {
+                ForEach(Array(result.alternatives.enumerated()), id: \.offset) { index, value in
+                    candidate(value, selection: .alternative(index: index), badge: "confirmSpecies.alternative", identifier: "speciesProposal-alternative-\(index)")
                 }
-                .buttonStyle(.borderedProminent).disabled(!canConfirm)
-                .buttonBorderShape(.capsule)
-                .accessibilityIdentifier("confirmSpecies")
             }
+            manualOption()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .foregroundStyle(Color("TextPrimary"))

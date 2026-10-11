@@ -660,6 +660,7 @@
       }
     },
     "identificationPhoto.cancel" : {
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -1011,6 +1012,17 @@
     "Instrumented invocations: %@" : {
 
     },
+    "manualSpecies.cancelEdit" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar edición"
+          }
+        }
+      }
+    },
     "manualSpecies.confirmedProvenance" : {
       "localizations" : {
         "es" : {
@@ -1022,6 +1034,7 @@
       }
     },
     "manualSpecies.currentDraft" : {
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -1032,7 +1045,6 @@
       }
     },
     "manualSpecies.enter" : {
-      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {

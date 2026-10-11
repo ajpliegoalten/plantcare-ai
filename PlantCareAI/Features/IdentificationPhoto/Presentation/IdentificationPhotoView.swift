@@ -13,25 +13,40 @@ struct IdentificationPhotoView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     preview
-                    if let identity = viewModel.confirmedIdentity {
+                    if let identity = viewModel.confirmedIdentity, !viewModel.isSelectingSpecies {
                         ConfirmedSpeciesView(identity: identity, canChange: !viewModel.isBusy && !viewModel.presentsCamera,
                                              change: { viewModel.changeConfirmedSpecies() },
                                              canReturnToAI: viewModel.canReturnToAIProposals,
                                              returnToAI: { viewModel.returnToAIProposals() })
+                        if identity.manualName == nil {
+                            VStack(alignment: .leading, spacing: 16) {
+                                Text("identifyCandidates.alternatives").font(.headline)
+                                manualOption
+                            }
+                        }
                     } else if let result = viewModel.identificationResult, let revision = viewModel.resultID {
                         IdentificationResultView(result: result, selected: viewModel.selectedProposal,
-                            canSelect: viewModel.canSelectProposal, canConfirm: viewModel.canConfirmSpecies,
-                            select: { viewModel.selectProposal($0, resultID: revision) },
-                            confirm: { viewModel.confirmSpecies(resultID: revision) })
+                            canSelect: viewModel.canSelectProposal,
+                            select: { viewModel.selectProposal($0, resultID: revision) }, manualOption: { manualOption })
+                    } else if viewModel.photo != nil {
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("identifyCandidates.alternatives").font(.headline)
+                            manualOption
+                        }.padding(16).background(Color("Surface"), in: RoundedRectangle(cornerRadius: 22))
                     }
                     if viewModel.hasConfirmationError {
                         Text("confirmSpecies.error").accessibilityIdentifier("speciesConfirmationError")
                     }
-                    if viewModel.photo != nil && viewModel.confirmedIdentity?.manualName == nil {
-                        Button("manualSpecies.enter") { viewModel.beginManualSpecies() }
-                            .frame(minHeight: 44).buttonStyle(.bordered)
-                            .disabled(!viewModel.canEnterManualSpecies)
-                            .accessibilityIdentifier("enterManualSpecies")
+                    if viewModel.confirmedIdentity != nil && viewModel.isSelectingSpecies && !viewModel.isEditingManualSpecies {
+                        Button("manualSpecies.cancelEdit") { viewModel.cancelSpeciesSelection() }
+                            .frame(minHeight: 44).accessibilityIdentifier("cancelSpeciesSelection")
+                    }
+                    if viewModel.photo != nil && (viewModel.confirmedIdentity == nil || viewModel.isSelectingSpecies) {
+                        Button { viewModel.confirmSelection() } label: {
+                            Text("confirmSpecies.confirm").frame(maxWidth: .infinity, minHeight: 44)
+                                .foregroundStyle(viewModel.canConfirmSelection ? Color("Surface") : Color("TextSecondary"))
+                        }.buttonStyle(.borderedProminent).buttonBorderShape(.capsule)
+                            .disabled(!viewModel.canConfirmSelection).accessibilityIdentifier("confirmSpecies")
                     }
                     if viewModel.authorizationState == .continuing {
                         ProgressView("identifyCandidates.loading").accessibilityIdentifier("identificationLoading")
@@ -108,6 +123,7 @@ struct IdentificationPhotoView: View {
                 .multilineTextAlignment(.center)
                 .padding(20)
             }
+            .scrollDismissesKeyboard(.interactively)
             .background(Color("Background").ignoresSafeArea())
             .navigationTitle("identificationPhoto.title")
             .navigationBarTitleDisplayMode(.inline)
@@ -119,9 +135,6 @@ struct IdentificationPhotoView: View {
             }
         }
         .tint(Color("PrimaryAction"))
-        .sheet(item: manualBinding) { draft in
-            ManualSpeciesView(viewModel: viewModel, sessionID: draft.id)
-        }
         .sheet(isPresented: Binding(get: { viewModel.authorizationState == .awaitingConfirmation }, set: { showing in
             if !showing, viewModel.authorizationState == .awaitingConfirmation { viewModel.cancelAuthorization() }
         })) {
@@ -217,11 +230,34 @@ struct IdentificationPhotoView: View {
         .clipShape(RoundedRectangle(cornerRadius: 22))
     }
 
-    private var manualBinding: Binding<ManualSpeciesDraft?> {
-        let session = viewModel.manualDraft?.id
-        return Binding(get: { viewModel.manualDraft }, set: { value in
-            if value == nil, let session { viewModel.cancelManualSpecies(sessionID: session) }
-        })
+    private var manualOption: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Button { viewModel.beginManualSpecies() } label: {
+                HStack(alignment: .top, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("manualSpecies.provenance").font(.callout).foregroundStyle(Color("TextSecondary"))
+                        Text("manualSpecies.enter").font(.title3.weight(.semibold))
+                        if viewModel.isEditingManualSpecies {
+                            Text("confirmSpecies.selected").font(.caption.weight(.semibold))
+                                .foregroundStyle(Color("Surface")).padding(.horizontal, 10).padding(.vertical, 5)
+                                .background(Color("PrimaryAction"), in: Capsule())
+                        }
+                    }.frame(maxWidth: .infinity, alignment: .leading)
+                    if viewModel.isEditingManualSpecies {
+                        Image(systemName: "checkmark.circle.fill").font(.title3)
+                            .foregroundStyle(Color("PrimaryAction")).accessibilityHidden(true)
+                    }
+                }.frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                    .foregroundStyle(Color("TextPrimary")).padding(16)
+                    .background(Color("SurfaceMuted"), in: RoundedRectangle(cornerRadius: 16))
+                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(viewModel.isEditingManualSpecies ? Color("Primary") : Color("Outline"), lineWidth: viewModel.isEditingManualSpecies ? 2 : 1))
+            }.buttonStyle(.plain).disabled(!viewModel.canEnterManualSpecies && !viewModel.isEditingManualSpecies)
+                .accessibilityIdentifier("enterManualSpecies")
+                .accessibilityAddTraits(viewModel.isEditingManualSpecies ? .isSelected : [])
+            if let draft = viewModel.manualDraft {
+                ManualSpeciesView(viewModel: viewModel, sessionID: draft.id)
+            }
+        }
     }
 
     private func cameraMessage(_ issue: CameraAccessResult) -> LocalizedStringKey {

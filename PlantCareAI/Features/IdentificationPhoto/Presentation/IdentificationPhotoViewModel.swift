@@ -24,6 +24,8 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
     private let confirmation: any ConfirmSpeciesUseCase
     private let manualConfirmation: any ConfirmManualSpeciesUseCase
     @Published private(set) var manualDraft: ManualSpeciesDraft?
+    private var retainedProposal: SpeciesProposalSelection?
+    @Published private(set) var isSelectingSpecies = false
     @Published private(set) var hasManualConfirmationError = false
     var isEditingManualSpecies: Bool { manualDraft != nil }
     var canEnterManualSpecies: Bool { canIdentify && !isEditingManualSpecies }
@@ -33,10 +35,19 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
         resultID != nil && identificationResult?.outcome == .proposals
     }
     var canSelectProposal: Bool {
-        !closed && !isBusy && !presentsCamera && !isEditingManualSpecies && photo != nil && photo?.id == resultPhotoID &&
-        resultID != nil && identificationResult?.outcome == .proposals && confirmedIdentity == nil
+        !closed && !isBusy && !presentsCamera && photo != nil && photo?.id == resultPhotoID &&
+        resultID != nil && identificationResult?.outcome == .proposals && (confirmedIdentity == nil || isSelectingSpecies)
     }
-    var canConfirmSpecies: Bool { canSelectProposal && selectedProposal != nil }
+    var canConfirmSpecies: Bool { canSelectProposal && !isEditingManualSpecies && selectedProposal != nil }
+    var canConfirmSelection: Bool {
+        if let draft = manualDraft { return validManualSession(draft.id) && !draft.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+        return canConfirmSpecies
+    }
+
+    func confirmSelection() {
+        if let draft = manualDraft { confirmManualSpecies(sessionID: draft.id) }
+        else if let resultID { confirmSpecies(resultID: resultID) }
+    }
     let usesRealRecipient: Bool
     let destinationNotice: ExternalAIDestinationNotice?
     private let configurationIsCurrent: () -> Bool
@@ -84,6 +95,8 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
         case .primary: guard result.primary != nil else { return }
         case .alternative(let index): guard result.alternatives.indices.contains(index) else { return }
         }
+        if let draft = manualDraft { cancelManualSpecies(sessionID: draft.id) }
+        isSelectingSpecies = confirmedIdentity != nil
         selectedProposal = selection
         hasConfirmationError = false
     }
@@ -93,9 +106,9 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
               let result = identificationResult, let selectedProposal else { return }
         do {
             confirmedIdentity = try confirmation.execute(photoID: photoID, resultID: revision, result: result, selection: selectedProposal)
+            isSelectingSpecies = false
             hasConfirmationError = false
         } catch {
-            confirmedIdentity = nil
             hasConfirmationError = true
         }
     }
@@ -114,6 +127,9 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
 
     func beginManualSpecies() {
         guard canEnterManualSpecies, let photo else { return }
+        if selectedProposal != nil { retainedProposal = selectedProposal }
+        selectedProposal = nil
+        isSelectingSpecies = true
         manualDraft = ManualSpeciesDraft(id: UUID(), photoID: photo.id, name: confirmedIdentity?.manualName ?? "")
         hasManualConfirmationError = false
     }
@@ -137,20 +153,34 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
             hasConfirmationError = false
             hasManualConfirmationError = false
             manualDraft = nil
+            isSelectingSpecies = false
         } catch { hasManualConfirmationError = true }
     }
 
     func cancelManualSpecies(sessionID: UUID) {
         guard validManualSession(sessionID) else { return }
         manualDraft = nil
+        selectedProposal = retainedProposal
+        isSelectingSpecies = false
         hasManualConfirmationError = false
     }
 
     func returnToAIProposals() {
         guard canReturnToAIProposals else { return }
         confirmedIdentity = nil
+        selectedProposal = retainedProposal
         hasConfirmationError = false
         hasManualConfirmationError = false
+    }
+
+    func cancelSpeciesSelection() {
+        guard !closed, !isBusy, !presentsCamera, isSelectingSpecies, confirmedIdentity != nil else { return }
+        if let draft = manualDraft { cancelManualSpecies(sessionID: draft.id) }
+        else {
+            selectedProposal = retainedProposal
+            isSelectingSpecies = false
+            hasConfirmationError = false
+        }
     }
 
     private func clearIdentification() {
@@ -158,6 +188,8 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
         resultID = nil
         resultPhotoID = nil
         selectedProposal = nil
+        retainedProposal = nil
+        isSelectingSpecies = false
         confirmedIdentity = nil
         hasConfirmationError = false
         manualDraft = nil

@@ -130,14 +130,22 @@ final class ManualSpeciesViewModelTests: XCTestCase {
         XCTAssertEqual(confirmation.calls, 3)
     }
 
-    func testEditorBlocksAllParentIntentionsAndCloseInvalidatesSession() async {
+    func testEditorBlocksPhotoIntentionsButAllowsExclusiveAISelectionAndCloseInvalidatesSession() async {
         let vm = await make(); await identify(vm); let revision = vm.resultID!, photo = vm.photo
         _ = manual(vm); let identity = vm.confirmedIdentity
         vm.beginManualSpecies(); let session = vm.manualDraft!.id
         vm.select { Data([2]) }; vm.takePhoto(); vm.identifyPhoto(); vm.returnToAIProposals()
-        vm.selectProposal(.primary, resultID: revision); vm.confirmSpecies(resultID: revision); vm.changeConfirmedSpecies()
-        XCTAssertFalse(vm.isBusy); XCTAssertFalse(vm.canIdentify); XCTAssertFalse(vm.canSelectProposal)
+        XCTAssertTrue(vm.canSelectProposal); XCTAssertNil(vm.selectedProposal)
+        XCTAssertFalse(vm.isBusy); XCTAssertFalse(vm.canIdentify)
         XCTAssertEqual(vm.photo, photo); XCTAssertEqual(vm.confirmedIdentity, identity); XCTAssertEqual(vm.manualDraft?.id, session)
+        vm.selectProposal(.primary, resultID: revision)
+        XCTAssertNil(vm.manualDraft); XCTAssertEqual(vm.selectedProposal, .primary)
+        XCTAssertEqual(vm.confirmedIdentity, identity)
+        XCTAssertTrue(vm.canConfirmSpecies)
+        vm.updateManualName("Stale", sessionID: session); vm.confirmManualSpecies(sessionID: session)
+        XCTAssertEqual(vm.confirmedIdentity, identity)
+        vm.confirmSpecies(resultID: revision)
+        XCTAssertEqual(vm.confirmedIdentity?.commonName, "Principal")
         vm.close(); XCTAssertNil(vm.photo); XCTAssertNil(vm.confirmedIdentity); XCTAssertNil(vm.manualDraft)
         vm.updateManualName("Late", sessionID: session); vm.confirmManualSpecies(sessionID: session)
         vm.beginManualSpecies(); XCTAssertNil(vm.manualDraft); XCTAssertNil(vm.confirmedIdentity)
@@ -203,5 +211,34 @@ final class ManualSpeciesViewModelTests: XCTestCase {
         continuation?.resume(returning: .completed(proposals))
         try? await Task.sleep(for: .milliseconds(30))
         XCTAssertEqual(vm.confirmedIdentity, identity); XCTAssertNil(vm.identificationResult); XCTAssertNil(vm.resultID)
+    }
+
+    func testInlineExclusiveSelectionCancelAfterSwitchAndCommonConfirmation() async {
+        var calls = 0; let result = proposals
+        let vm = await make(operation: { _ in calls += 1; return .completed(result) })
+        await identify(vm); let revision = vm.resultID!
+        vm.selectProposal(.alternative(index: 0), resultID: revision)
+        vm.beginManualSpecies(); let session = vm.manualDraft!.id
+        XCTAssertNil(vm.selectedProposal); XCTAssertFalse(vm.canConfirmSelection)
+        vm.updateManualName(" \n ", sessionID: session); XCTAssertFalse(vm.canConfirmSelection)
+        let long = String(repeating: "Árbol común científico ", count: 100) + "fin"
+        vm.updateManualName("  " + long + "\n", sessionID: session)
+        XCTAssertTrue(vm.canConfirmSelection); vm.confirmSelection()
+        let identity = vm.confirmedIdentity
+        XCTAssertEqual(identity?.manualName, long); XCTAssertNil(vm.selectedProposal)
+        vm.changeConfirmedSpecies(); let edited = vm.manualDraft!.id
+        XCTAssertEqual(vm.manualDraft?.name, long)
+        vm.updateManualName("Cambio", sessionID: edited)
+        vm.selectProposal(.primary, resultID: revision)
+        XCTAssertNil(vm.manualDraft); XCTAssertEqual(vm.selectedProposal, .primary)
+        XCTAssertEqual(vm.confirmedIdentity, identity); XCTAssertTrue(vm.isSelectingSpecies)
+        vm.cancelSpeciesSelection()
+        XCTAssertEqual(vm.confirmedIdentity, identity); XCTAssertFalse(vm.isSelectingSpecies)
+        vm.changeConfirmedSpecies(); vm.selectProposal(.primary, resultID: revision)
+        vm.confirmSelection()
+        XCTAssertEqual(vm.confirmedIdentity?.commonName, "Principal")
+        XCTAssertFalse(vm.isSelectingSpecies); XCTAssertEqual(calls, 1)
+        vm.confirmManualSpecies(sessionID: edited)
+        XCTAssertEqual(vm.confirmedIdentity?.commonName, "Principal")
     }
 }
