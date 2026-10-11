@@ -9,15 +9,7 @@ struct IdentificationResultView<ManualOption: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            if result.outcome == .proposals {
-                Text("identifyCandidates.proposal")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Color("PrimaryAction"))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(Color("SurfaceMuted"), in: RoundedRectangle(cornerRadius: 8))
-                    .accessibilityIdentifier("identificationResultHeading")
-            } else {
+            if result.outcome == .insufficientEvidence {
                 Text("identifyCandidates.insufficient")
                     .font(.headline)
                     .accessibilityIdentifier("identificationResultHeading")
@@ -28,19 +20,6 @@ struct IdentificationResultView<ManualOption: View>: View {
                     .accessibilityAddTraits(.isHeader)
                 candidate(primary, selection: .primary, badge: "confirmSpecies.primary", identifier: "speciesProposal-primary")
             }
-            VStack(alignment: .leading, spacing: 12) {
-                Text(result.uncertainty)
-                    .accessibilityIdentifier("identificationUncertainty")
-                if result.outcome == .proposals {
-                    Divider()
-                    Label("identifyCandidates.notConfirmed", systemImage: "info.circle")
-                        .font(.callout)
-                        .foregroundStyle(Color("TextSecondary"))
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(16)
-            .background(Color("Background"), in: RoundedRectangle(cornerRadius: 16))
             if result.outcome == .insufficientEvidence { Text("identifyCandidates.changePhoto") }
             Text("identifyCandidates.alternatives").font(.headline)
             if !result.alternatives.isEmpty {
@@ -64,10 +43,10 @@ struct IdentificationResultView<ManualOption: View>: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(badge).font(.callout).foregroundStyle(Color("TextSecondary"))
                     if let scientific = value.scientificName {
-                        Text(scientific).font(.title3.weight(.semibold))
+                        Text(scientific).font(.headline)
                     }
                     if let common = value.commonName, common != value.scientificName {
-                        Text(common).font(.body)
+                        Text(common).font(value.scientificName == nil ? .headline : .body)
                     }
                     if isSelected {
                         Text("confirmSpecies.selected")

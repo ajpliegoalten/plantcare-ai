@@ -173,6 +173,33 @@
     "depends_on": ["choose-identification-photo"],
     "status": "accepted",
     "active_round": {
+      "id": "manual-species-selection",
+      "spec": "docs/specs/manual-species-selection.md",
+      "base": "ab008dd",
+      "status": "accepted",
+      "independent_validation": "2026-10-11 openai/gpt-6.1-sol validator V3 accept: one final full gate BUILD/TEST SUCCEEDED exit0, 128/128 (100 unit + 28 UI), zero failures/skips, 31m44s. All 85 public source hashes unchanged; V1/V2 failures preserved. docs/validations/manual-species-selection-V3.md. Parent persisted accepted; no further tests or Git publication.",
+      "preview_repair": {
+        "id": "waiting-preview-after-V2",
+        "status": "accepted",
+        "diagnosis": "V2 recording at 15s shows retained preview and cancellation already visible; global swipeDown at activity timestamp 1791716591.689 dismisses native sheet, then collection at 20s. Test overscroll, no demonstrated product defect. Related global downward gestures inspected: collection/detail only; photo content helpers and intentional dismiss gestures unchanged.",
+        "change": "Only failed scenario replaces unconditional app.swipeDown with existing revealAboveInPhoto (target geometry/hittability stop before content drag); adds photo navigation existence assertion. All prior assertions, editor replace helper, product/design/init/scheme/user catalog unchanged.",
+        "verification": "2026-10-11 13:42:11–13:42:58 +0200, caffeinate serial xcodebuild only testIdentificationWaitingCancellationCloseAndRelaunchWithoutDraft: TEST SUCCEEDED exit0 1/1, zero failed/skipped. Same standard iPhone17Pro iOS26.2 00BBB7EC-8DF7-400C-A08A-9D3C8818D886 large/light, Xcode26.2. Public-only sandbox 85 files + empty example config/public Debug plist. New waiting screenshot visually inspected. Helpers unchanged: no additional callers affected; other V2 individual successes reused, failed aggregate never labelled passing.",
+        "evidence": "docs/handoffs/manual-species-selection.md; DerivedData/evidence/manual-species-selection-preview-repair; DerivedData/manual-species-selection-preview-repair-public/focused-preview.xcresult",
+        "pending": "None: independently accepted in V3 final 128/128 gate; waiting and both editor regressions pass. V1/V2 and all prior failures preserved."
+      },
+      "repair": {
+        "id": "editor-replacement-after-V1",
+        "status": "accepted",
+        "diagnosis": "V1 recordings show caret, not full selection, after triple tap; binding/persistence reflect test-entered Ventan/VentanaSalón. Only replace UI helper changed; all scenarios/assertions and product/manual design remain identical to V1.",
+        "change": "Explicit trailing-whitespace caret tap then ordinary backspaces equal to current value character count; new empty-field assertion before typing exact replacement. No selection/menu/modified-key dependency or retry loop.",
+        "verification": "2026-10-11 12:39:14–12:42:12 +0200: serial caffeinate xcodebuild only the two V1 failed editor UI tests, TEST SUCCEEDED exit0 2/2 zero failures/skipped. Fresh public sandbox 85 files + empty example config/public Debug plist, same standard iPhone17Pro iOS26.2 00BBB7EC-8DF7-400C-A08A-9D3C8818D886 normal/light/open host. Root=sandbox hashes; only helper differs vs V1. Static parse/plutil/JSON/diff and real editor/detail screenshots inspected. V1 unaffected 100 unit+26 UI individual successes reused by impact, NOT an aggregate passing gate.",
+        "preserved_failures": "V1 full gate FAILED126/128 exit65 and closed revise report unchanged. Three changed-source repair attempts FAILED0/2,1/2,0/2 retained with diagnoses/logs/xcresults; none relabelled passing or identical-source retry for green.",
+        "evidence": "docs/handoffs/manual-species-selection.md; DerivedData/evidence/manual-species-selection-editor-repair; DerivedData/manual-species-selection-editor-repair-public/focused-editor-caret.xcresult",
+        "pending": "None: both editor scenarios independently pass in V2 and final accepted V3 gate. V1/V2 failures and repair attempts remain preserved; no historical failed aggregate relabelled."
+      },
+      "evidence": "2026-10-11 user explicitly approved final visual behavior before UI; self-verified passing, NOT accepted. 22/22 unit reused/corroborated from DerivedData/identification-success-focused-khzp441x/focused-unit.xcresult (14 ManualSpecies + 8 ConfirmSpecies VM), relevant Swift/project/shared scheme/public example hashes identical. 11 distinct affected UI/direct regressions now passing: 10 green in focused-ui-prepared.xcresult + only previously failed scenario repaired and passed 1/1 in focused-ui-fixture-repair.xcresult, zero skipped. Initial sandbox build failure exit65 (missing public Debug plist, no tests executed) and prepared UI FAILED 10/11 with 2 assertions preserved, never relabelled. Repair only test expectation: process-scoped error fixture fails invocation1, third invocation after reopening succeeds; first-error coverage retained, counter strengthened; no product/helpers/harness change. Exact commands/impact mapping in docs/handoffs/manual-species-selection.md; logs/bundles in DerivedData/selection-ui-public-ebmlh7b1, summaries/tests/8 visually inspected screenshots/hashes/static in DerivedData/evidence/manual-species-selection. 84 final public hashes root=sandbox, historical specs/reports/handoffs and user catalog stale/EOF diff unchanged. Xcode26.2/17C52, iPhone17Pro iOS26.2/23C54 00BBB7EC-8DF7-400C-A08A-9D3C8818D886 normal large/light, serial/caffeinate/open host, no active tests at handoff. Public sandbox empty example config only; no private config/xcuserdata read/copy/API. No init/full gate/baseline/retries/stage/commit/push/PR or validator spawn. Parent may route independent validator now; full final gate remains validator-owned."
+    },
+    "prior_inline_round": {
       "id": "manual-species-inline",
       "spec": "docs/specs/manual-species-inline.md",
       "base": "3cdbc15",

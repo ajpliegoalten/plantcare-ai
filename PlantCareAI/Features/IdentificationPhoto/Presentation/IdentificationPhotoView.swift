@@ -28,11 +28,6 @@ struct IdentificationPhotoView: View {
                         IdentificationResultView(result: result, selected: viewModel.selectedProposal,
                             canSelect: viewModel.canSelectProposal,
                             select: { viewModel.selectProposal($0, resultID: revision) }, manualOption: { manualOption })
-                    } else if viewModel.photo != nil {
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text("identifyCandidates.alternatives").font(.headline)
-                            manualOption
-                        }.padding(16).background(Color("Surface"), in: RoundedRectangle(cornerRadius: 22))
                     }
                     if viewModel.hasConfirmationError {
                         Text("confirmSpecies.error").accessibilityIdentifier("speciesConfirmationError")
@@ -41,7 +36,7 @@ struct IdentificationPhotoView: View {
                         Button("manualSpecies.cancelEdit") { viewModel.cancelSpeciesSelection() }
                             .frame(minHeight: 44).accessibilityIdentifier("cancelSpeciesSelection")
                     }
-                    if viewModel.photo != nil && (viewModel.confirmedIdentity == nil || viewModel.isSelectingSpecies) {
+                    if viewModel.hasSuccessfulIdentification && (viewModel.confirmedIdentity == nil || viewModel.isSelectingSpecies) {
                         Button { viewModel.confirmSelection() } label: {
                             Text("confirmSpecies.confirm").frame(maxWidth: .infinity, minHeight: 44)
                                 .foregroundStyle(viewModel.canConfirmSelection ? Color("Surface") : Color("TextSecondary"))
@@ -232,11 +227,11 @@ struct IdentificationPhotoView: View {
 
     private var manualOption: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Button { viewModel.beginManualSpecies() } label: {
+            Button { viewModel.toggleManualSpecies() } label: {
                 HStack(alignment: .top, spacing: 12) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("manualSpecies.provenance").font(.callout).foregroundStyle(Color("TextSecondary"))
-                        Text("manualSpecies.enter").font(.title3.weight(.semibold))
+                        Text("manualSpecies.enter").font(.headline)
                         if viewModel.isEditingManualSpecies {
                             Text("confirmSpecies.selected").font(.caption.weight(.semibold))
                                 .foregroundStyle(Color("Surface")).padding(.horizontal, 10).padding(.vertical, 5)
@@ -248,9 +243,7 @@ struct IdentificationPhotoView: View {
                             .foregroundStyle(Color("PrimaryAction")).accessibilityHidden(true)
                     }
                 }.frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                    .foregroundStyle(Color("TextPrimary")).padding(16)
-                    .background(Color("SurfaceMuted"), in: RoundedRectangle(cornerRadius: 16))
-                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(viewModel.isEditingManualSpecies ? Color("Primary") : Color("Outline"), lineWidth: viewModel.isEditingManualSpecies ? 2 : 1))
+                    .foregroundStyle(Color("TextPrimary"))
             }.buttonStyle(.plain).disabled(!viewModel.canEnterManualSpecies && !viewModel.isEditingManualSpecies)
                 .accessibilityIdentifier("enterManualSpecies")
                 .accessibilityAddTraits(viewModel.isEditingManualSpecies ? .isSelected : [])
@@ -258,6 +251,9 @@ struct IdentificationPhotoView: View {
                 ManualSpeciesView(viewModel: viewModel, sessionID: draft.id)
             }
         }
+        .padding(16)
+        .background(Color("SurfaceMuted"), in: RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(viewModel.isEditingManualSpecies ? Color("Primary") : Color("Outline"), lineWidth: viewModel.isEditingManualSpecies ? 2 : 1))
     }
 
     private func cameraMessage(_ issue: CameraAccessResult) -> LocalizedStringKey {

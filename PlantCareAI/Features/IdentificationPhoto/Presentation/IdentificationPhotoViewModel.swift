@@ -28,7 +28,11 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
     @Published private(set) var isSelectingSpecies = false
     @Published private(set) var hasManualConfirmationError = false
     var isEditingManualSpecies: Bool { manualDraft != nil }
-    var canEnterManualSpecies: Bool { canIdentify && !isEditingManualSpecies }
+    var hasSuccessfulIdentification: Bool {
+        identificationResult != nil && resultID != nil && photo != nil &&
+        photo?.id == resultPhotoID && identificationError == nil
+    }
+    var canEnterManualSpecies: Bool { canIdentify && hasSuccessfulIdentification }
     var canReturnToAIProposals: Bool {
         !closed && !isBusy && !presentsCamera && !isEditingManualSpecies &&
         confirmedIdentity?.manualName != nil && photo?.id == resultPhotoID &&
@@ -95,9 +99,11 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
         case .primary: guard result.primary != nil else { return }
         case .alternative(let index): guard result.alternatives.indices.contains(index) else { return }
         }
-        if let draft = manualDraft { cancelManualSpecies(sessionID: draft.id) }
+        let wasSelected = selectedProposal == selection
+        manualDraft = nil
+        hasManualConfirmationError = false
         isSelectingSpecies = confirmedIdentity != nil
-        selectedProposal = selection
+        selectedProposal = wasSelected ? nil : selection
         hasConfirmationError = false
     }
 
@@ -127,11 +133,25 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
 
     func beginManualSpecies() {
         guard canEnterManualSpecies, let photo else { return }
-        if selectedProposal != nil { retainedProposal = selectedProposal }
+        if selectedProposal != nil || confirmedIdentity == nil { retainedProposal = selectedProposal }
         selectedProposal = nil
         isSelectingSpecies = true
         manualDraft = ManualSpeciesDraft(id: UUID(), photoID: photo.id, name: confirmedIdentity?.manualName ?? "")
         hasManualConfirmationError = false
+    }
+
+    func toggleManualSpecies() {
+        if let draft = manualDraft {
+            guard validManualSession(draft.id) else { return }
+            manualDraft = nil
+            selectedProposal = nil
+            retainedProposal = nil
+            isSelectingSpecies = confirmedIdentity != nil
+            hasManualConfirmationError = false
+            hasConfirmationError = false
+        } else {
+            beginManualSpecies()
+        }
     }
 
     private func validManualSession(_ sessionID: UUID) -> Bool {

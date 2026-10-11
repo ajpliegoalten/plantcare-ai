@@ -946,6 +946,7 @@
       }
     },
     "identifyCandidates.proposal" : {
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
