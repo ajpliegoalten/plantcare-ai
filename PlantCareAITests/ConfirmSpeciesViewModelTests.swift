@@ -64,8 +64,9 @@ final class ConfirmSpeciesViewModelTests: XCTestCase {
         vm.confirmSpecies(resultID: revision); vm.selectProposal(.primary, resultID: revision)
         XCTAssertEqual(vm.confirmedIdentity, identity); XCTAssertEqual(vm.resultID, revision); XCTAssertEqual(calls, 1)
         vm.changeConfirmedSpecies()
-        XCTAssertNil(vm.confirmedIdentity); XCTAssertEqual(vm.selectedProposal, .alternative(index: 0))
-        vm.selectProposal(.primary, resultID: revision); XCTAssertNil(vm.confirmedIdentity)
+        XCTAssertEqual(vm.confirmedIdentity, identity); XCTAssertTrue(vm.isSelectingSpecies)
+        XCTAssertEqual(vm.selectedProposal, .alternative(index: 0))
+        vm.selectProposal(.primary, resultID: revision); XCTAssertEqual(vm.confirmedIdentity, identity)
         vm.confirmSpecies(resultID: revision); XCTAssertEqual(vm.confirmedIdentity?.commonName, "Principal")
         XCTAssertEqual(calls, 1)
     }
