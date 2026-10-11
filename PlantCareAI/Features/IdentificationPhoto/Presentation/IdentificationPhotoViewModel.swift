@@ -1,5 +1,11 @@
 import Foundation
 
+struct ManualSpeciesDraft: Identifiable, Equatable {
+    let id: UUID
+    let photoID: UUID
+    var name: String
+}
+
 @MainActor
 final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
     let id = UUID()
@@ -16,8 +22,18 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
     @Published private(set) var hasConfirmationError = false
     private var resultPhotoID: UUID?
     private let confirmation: any ConfirmSpeciesUseCase
+    private let manualConfirmation: any ConfirmManualSpeciesUseCase
+    @Published private(set) var manualDraft: ManualSpeciesDraft?
+    @Published private(set) var hasManualConfirmationError = false
+    var isEditingManualSpecies: Bool { manualDraft != nil }
+    var canEnterManualSpecies: Bool { canIdentify && !isEditingManualSpecies }
+    var canReturnToAIProposals: Bool {
+        !closed && !isBusy && !presentsCamera && !isEditingManualSpecies &&
+        confirmedIdentity?.manualName != nil && photo?.id == resultPhotoID &&
+        resultID != nil && identificationResult?.outcome == .proposals
+    }
     var canSelectProposal: Bool {
-        !closed && !isBusy && !presentsCamera && photo != nil && photo?.id == resultPhotoID &&
+        !closed && !isBusy && !presentsCamera && !isEditingManualSpecies && photo != nil && photo?.id == resultPhotoID &&
         resultID != nil && identificationResult?.outcome == .proposals && confirmedIdentity == nil
     }
     var canConfirmSpecies: Bool { canSelectProposal && selectedProposal != nil }
@@ -27,7 +43,7 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
     private let identificationAvailable: Bool
     var isAuthorizing: Bool { [.checkingAuthorization, .awaitingConfirmation, .continuing].contains(authorizationState) }
     var isBusy: Bool { isLoading || isCheckingCamera || isAuthorizing }
-    var canIdentify: Bool { photo != nil && !isBusy && !presentsCamera && !closed }
+    var canIdentify: Bool { photo != nil && !isBusy && !presentsCamera && !closed && !isEditingManualSpecies }
     private let authorize: AuthorizeExternalAIOperation
     private let identify: (IdentificationPhoto) async throws -> IdentificationContinuationResult
     private var authorizationTask: Task<Void, Never>?
@@ -47,12 +63,13 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
     @Published private(set) var invocationCount = 0
     #endif
 
-    init(prepare: PrepareIdentificationPhoto, camera: CheckCameraAccess, authorize: AuthorizeExternalAIOperation, confirmSpecies: any ConfirmSpeciesUseCase = ConfirmSpecies(), usesRealRecipient: Bool = false, destinationNotice: ExternalAIDestinationNotice? = nil, identificationAvailable: Bool = true, configurationIsCurrent: @escaping () -> Bool = { true }, identify: @escaping (IdentificationPhoto) async throws -> IdentificationContinuationResult = { _ in .unavailable }) {
+    init(prepare: PrepareIdentificationPhoto, camera: CheckCameraAccess, authorize: AuthorizeExternalAIOperation, confirmSpecies: any ConfirmSpeciesUseCase = ConfirmSpecies(), confirmManualSpecies: any ConfirmManualSpeciesUseCase = ConfirmManualSpecies(), usesRealRecipient: Bool = false, destinationNotice: ExternalAIDestinationNotice? = nil, identificationAvailable: Bool = true, configurationIsCurrent: @escaping () -> Bool = { true }, identify: @escaping (IdentificationPhoto) async throws -> IdentificationContinuationResult = { _ in .unavailable }) {
         self.prepare = prepare
         self.camera = camera
         self.authorize = authorize
         self.identify = identify
         self.confirmation = confirmSpecies
+        self.manualConfirmation = confirmManualSpecies
         self.usesRealRecipient = usesRealRecipient
         self.destinationNotice = destinationNotice
         self.identificationAvailable = identificationAvailable && (!usesRealRecipient || destinationNotice != nil)
@@ -84,10 +101,56 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
     }
 
     func changeConfirmedSpecies() {
-        guard !closed, !isBusy, !presentsCamera, let identity = confirmedIdentity,
-              identity.photoID == photo?.id, identity.resultID == resultID else { return }
+        guard !closed, !isBusy, !presentsCamera, !isEditingManualSpecies, let identity = confirmedIdentity,
+              identity.photoID == photo?.id else { return }
+        switch identity.source {
+        case .manual: beginManualSpecies()
+        case .aiProposal(let revision, _, _, _):
+            guard revision == resultID else { return }
+            confirmedIdentity = nil
+            hasConfirmationError = false
+        }
+    }
+
+    func beginManualSpecies() {
+        guard canEnterManualSpecies, let photo else { return }
+        manualDraft = ManualSpeciesDraft(id: UUID(), photoID: photo.id, name: confirmedIdentity?.manualName ?? "")
+        hasManualConfirmationError = false
+    }
+
+    private func validManualSession(_ sessionID: UUID) -> Bool {
+        !closed && !isBusy && !presentsCamera && manualDraft?.id == sessionID &&
+        photo != nil && manualDraft?.photoID == photo?.id
+    }
+
+    func updateManualName(_ name: String, sessionID: UUID) {
+        guard validManualSession(sessionID) else { return }
+        manualDraft?.name = name
+        hasManualConfirmationError = false
+    }
+
+    func confirmManualSpecies(sessionID: UUID) {
+        guard validManualSession(sessionID), let draft = manualDraft else { return }
+        do {
+            let identity = try manualConfirmation.execute(photoID: draft.photoID, name: draft.name)
+            confirmedIdentity = identity
+            hasConfirmationError = false
+            hasManualConfirmationError = false
+            manualDraft = nil
+        } catch { hasManualConfirmationError = true }
+    }
+
+    func cancelManualSpecies(sessionID: UUID) {
+        guard validManualSession(sessionID) else { return }
+        manualDraft = nil
+        hasManualConfirmationError = false
+    }
+
+    func returnToAIProposals() {
+        guard canReturnToAIProposals else { return }
         confirmedIdentity = nil
         hasConfirmationError = false
+        hasManualConfirmationError = false
     }
 
     private func clearIdentification() {
@@ -97,6 +160,8 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
         selectedProposal = nil
         confirmedIdentity = nil
         hasConfirmationError = false
+        manualDraft = nil
+        hasManualConfirmationError = false
     }
 
     func identifyPhoto() {
@@ -185,7 +250,7 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
 
     /// Transfer closure belongs to Presentation; neither PhotosPickerItem nor UIImage crosses Domain.
     func select(load: @escaping @Sendable () async throws -> Data?) {
-        guard !closed, !isBusy else { return }
+        guard !closed, !isBusy, !isEditingManualSpecies else { return }
         generation += 1
         let request = generation
         isLoading = true
@@ -212,7 +277,7 @@ final class IdentificationPhotoViewModel: ObservableObject, Identifiable {
     }
 
     func takePhoto() {
-        guard !closed, !isBusy else { return }
+        guard !closed, !isBusy, !presentsCamera, !isEditingManualSpecies else { return }
         generation += 1
         let request = generation
         isCheckingCamera = true

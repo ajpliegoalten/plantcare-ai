@@ -15,7 +15,9 @@ struct IdentificationPhotoView: View {
                     preview
                     if let identity = viewModel.confirmedIdentity {
                         ConfirmedSpeciesView(identity: identity, canChange: !viewModel.isBusy && !viewModel.presentsCamera,
-                                             change: { viewModel.changeConfirmedSpecies() })
+                                             change: { viewModel.changeConfirmedSpecies() },
+                                             canReturnToAI: viewModel.canReturnToAIProposals,
+                                             returnToAI: { viewModel.returnToAIProposals() })
                     } else if let result = viewModel.identificationResult, let revision = viewModel.resultID {
                         IdentificationResultView(result: result, selected: viewModel.selectedProposal,
                             canSelect: viewModel.canSelectProposal, canConfirm: viewModel.canConfirmSpecies,
@@ -24,6 +26,12 @@ struct IdentificationPhotoView: View {
                     }
                     if viewModel.hasConfirmationError {
                         Text("confirmSpecies.error").accessibilityIdentifier("speciesConfirmationError")
+                    }
+                    if viewModel.photo != nil && viewModel.confirmedIdentity?.manualName == nil {
+                        Button("manualSpecies.enter") { viewModel.beginManualSpecies() }
+                            .frame(minHeight: 44).buttonStyle(.bordered)
+                            .disabled(!viewModel.canEnterManualSpecies)
+                            .accessibilityIdentifier("enterManualSpecies")
                     }
                     if viewModel.authorizationState == .continuing {
                         ProgressView("identifyCandidates.loading").accessibilityIdentifier("identificationLoading")
@@ -50,7 +58,7 @@ struct IdentificationPhotoView: View {
                             }.frame(minHeight: 44)
                         }
                     }
-                    if viewModel.identificationResult != nil {
+                    if viewModel.identificationResult != nil || viewModel.confirmedIdentity != nil {
                         HStack(spacing: 12) {
                             Rectangle()
                                 .fill(Color("Outline"))
@@ -111,6 +119,9 @@ struct IdentificationPhotoView: View {
             }
         }
         .tint(Color("PrimaryAction"))
+        .sheet(item: manualBinding) { draft in
+            ManualSpeciesView(viewModel: viewModel, sessionID: draft.id)
+        }
         .sheet(isPresented: Binding(get: { viewModel.authorizationState == .awaitingConfirmation }, set: { showing in
             if !showing, viewModel.authorizationState == .awaitingConfirmation { viewModel.cancelAuthorization() }
         })) {
@@ -136,7 +147,7 @@ struct IdentificationPhotoView: View {
 
     private var photoActions: some View {
         VStack(spacing: 16) {
-            if viewModel.identificationResult != nil {
+            if viewModel.identificationResult != nil || viewModel.confirmedIdentity != nil {
                 VStack(alignment: .leading, spacing: 8) {
                     Label("identificationPhoto.retrySection.title", systemImage: "arrow.clockwise")
                         .font(.headline)
@@ -157,7 +168,7 @@ struct IdentificationPhotoView: View {
             .buttonStyle(.borderedProminent)
             .buttonBorderShape(.capsule)
             .accessibilityIdentifier("chooseGalleryPhoto")
-            .disabled(viewModel.isBusy)
+            .disabled(viewModel.isBusy || viewModel.isEditingManualSpecies || viewModel.presentsCamera)
             Button { viewModel.takePhoto() } label: {
                 Label("identificationPhoto.camera", systemImage: "camera")
                     .frame(maxWidth: .infinity, minHeight: 44)
@@ -165,7 +176,7 @@ struct IdentificationPhotoView: View {
             .buttonStyle(.bordered)
             .buttonBorderShape(.capsule)
             .accessibilityIdentifier("takePlantPhoto")
-            .disabled(viewModel.isBusy)
+            .disabled(viewModel.isBusy || viewModel.isEditingManualSpecies || viewModel.presentsCamera)
             Button { viewModel.identifyPhoto() } label: {
                 Text("identificationPhoto.identify")
                     .frame(maxWidth: .infinity, minHeight: 44)
@@ -204,6 +215,13 @@ struct IdentificationPhotoView: View {
         }
         .aspectRatio(4 / 3, contentMode: .fit)
         .clipShape(RoundedRectangle(cornerRadius: 22))
+    }
+
+    private var manualBinding: Binding<ManualSpeciesDraft?> {
+        let session = viewModel.manualDraft?.id
+        return Binding(get: { viewModel.manualDraft }, set: { value in
+            if value == nil, let session { viewModel.cancelManualSpecies(sessionID: session) }
+        })
     }
 
     private func cameraMessage(_ issue: CameraAccessResult) -> LocalizedStringKey {

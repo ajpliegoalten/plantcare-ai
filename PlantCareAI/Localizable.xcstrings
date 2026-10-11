@@ -660,7 +660,6 @@
       }
     },
     "identificationPhoto.cancel" : {
-      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -1011,6 +1010,120 @@
     },
     "Instrumented invocations: %@" : {
 
+    },
+    "manualSpecies.confirmedProvenance" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Identificación manual aportada por ti (no generada por IA)"
+          }
+        }
+      }
+    },
+    "manualSpecies.currentDraft" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrador actual"
+          }
+        }
+      }
+    },
+    "manualSpecies.enter" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Introducir especie conocida"
+          }
+        }
+      }
+    },
+    "manualSpecies.error" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo confirmar el nombre. Revisa la especie e inténtalo de nuevo."
+          }
+        }
+      }
+    },
+    "manualSpecies.help" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Introduce un nombre común o científico. Solo se eliminan los espacios de los extremos; no se comprueba la especie."
+          }
+        }
+      }
+    },
+    "manualSpecies.notice" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta acción solo confirma la identidad del borrador. No guarda la planta ni genera cuidados todavía."
+          }
+        }
+      }
+    },
+    "manualSpecies.placeholder" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ficus lyrata, Potus, Costilla de Adán"
+          }
+        }
+      }
+    },
+    "manualSpecies.provenance" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aportada por ti"
+          }
+        }
+      }
+    },
+    "manualSpecies.returnToAI" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elegir propuesta de IA"
+          }
+        }
+      }
+    },
+    "manualSpecies.species" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Especie"
+          }
+        }
+      }
+    },
+    "manualSpecies.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Introduce la especie"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

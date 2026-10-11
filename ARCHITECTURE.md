@@ -9,7 +9,7 @@ Organizar el código **por funcionalidad**, y dentro de cada funcionalidad separ
 - **Data**: implementaciones de los protocolos del dominio (almacenamiento local o adaptadores futuros). Ningún tipo de `Data` se importa en `Domain` o en las vistas.
 - **Composición**: `PlantCareAIApp.swift` elige las implementaciones concretas e inyecta el caso de uso en el ViewModel. `ContentView` solo delega en la vista raíz de la funcionalidad; no alberga la pantalla «Mis plantas». Las dependencias apuntan `Presentation → Domain ← Data` y la composición conecta las capas.
 
-La separación no autoriza a adelantar comportamiento: existe persistencia local, consulta de ficha por UUID, edición de nombre/ubicación, selección/captura efímera, identificación orientativa configurada para demo Debug y confirmación humana de especie en el borrador, pero no alta desde UI ni historial. Los contratos de IO son asíncronos y propagadores de errores; un fallo no representa una colección vacía.
+La separación no autoriza a adelantar comportamiento: existe persistencia local, consulta de ficha por UUID, edición de nombre/ubicación, selección/captura efímera, identificación orientativa configurada para demo Debug y confirmación humana de especie por propuesta o nombre manual en el borrador, pero no alta desde UI ni historial. Los contratos de IO son asíncronos y propagadores de errores; un fallo no representa una colección vacía.
 
 ## Implementación actual: `PlantList`, `PlantDetail` y `EditPlant`
 
@@ -94,7 +94,15 @@ URLSession efímera, sin cache/cookies/credenciales persistentes, POST único co
 
 Cada resultado publicado obtiene revisión UUID nueva. La vista captura esa revisión en acciones; VM exige foto/revisión vigentes y disponibilidad (abierto, no busy/cámara). Seleccionar no confirma, confirmar es idempotente, y `ConfirmedSpeciesView` muestra un resumen humano separado de la propuesta, no cuidados/alta. Cambiar especie borra confirmación y conserva selección para reconfirmación explícita.
 
-Iniciar identificación limpia resultado/revisión/selección/identidad antes de configuración/aviso; cancelar/fallar no los restaura. Sustituir foto solo limpia al publicar B con éxito, incluso si bytes/recurso iguales; fallo/cancelación/cámara denegada conservan A. Cerrar elimina todo. Generaciones existentes bloquean continuaciones obsoletas. La futura generación de cuidados deberá consumir foto e identidad del mismo VM comprobando photoID; manual-species definirá su procedencia, save-plant mapeará/persistirá. No se activan aquí (ADR 005).
+Iniciar identificación limpia resultado/revisión/selección/identidad antes de configuración/aviso; cancelar/fallar no los restaura. Sustituir foto solo limpia al publicar B con éxito, incluso si bytes/recurso iguales; fallo/cancelación/cámara denegada conservan A. Cerrar elimina todo. Generaciones existentes bloquean continuaciones obsoletas. La futura generación de cuidados deberá consumir foto e identidad del mismo VM comprobando photoID; manual-species aporta la procedencia descrita debajo, save-plant mapeará/persistirá. Cuidados/alta no se activan aquí (ADR 005).
+
+## Identidad manual local: `ManualSpecies` (2026-10-11)
+
+`ManualSpeciesView → IdentificationPhotoViewModel → ConfirmManualSpeciesUseCase ← ConfirmManualSpecies` confirma texto humano mediante un caso puro/síncrono inyectado desde App. No hay Data, IO, aviso de consentimiento ni consulta IA para esta vía. `ConfirmedDraftIdentity.Source` discrimina `.aiProposal(resultID:selection:commonName:scientificName:)` y `.manual(name:)`; los accesores IA son opcionales y devuelven nil para manual. No se infiere ningún nombre complementario ni revisión IA.
+
+El VM existente posee `ManualSpeciesDraft` (UUID de sesión, photoID y texto) y error local separado. La sheet captura su sesión: editar/confirmar/cancelar exigen sesión y foto actuales, borrador abierto y ausencia de operación/cámara. El editor excluye las intenciones del padre; cancelarlo solo descarta texto, no identidad/resultado/selección. Reabrir precarga exclusivamente la identidad manual vigente. Confirmar reemplaza la única identidad activa y termina sesión; callbacks antiguos/dobles no operan. El resultado IA permanece como opción inactiva: volver a propuestas borra solo la confirmación manual y exige reconfirmar sin consultar.
+
+Reidentificar invalida identidad desde el inicio; publicar B limpia identidad y sesión, incluso con mismos bytes; fallo/cancelación mantiene A. Cerrar libera foto/texto/identidad. Generaciones de autorización impiden que una respuesta cancelada tardía sustituya una identidad manual de la misma foto. `generate-care-sheet` consumirá foto + identidad comprobando photoID, tratará manual como dato humano no confiable para prompts y usará su propia intención con consentimiento; `save-plant` decidirá mapeo y persistencia. Ninguna está implementada en esta slice.
 
 ## Recursos y comprobación
 
