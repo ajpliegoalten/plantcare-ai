@@ -34,7 +34,7 @@ final class PlantCareAIUITests: XCTestCase {
         XCTAssertTrue(element.isHittable)
     }
 
-    private func revealInPhoto(_ element: XCUIElement, app: XCUIApplication) {
+    private func revealInPhoto(_ element: XCUIElement, app: XCUIApplication, gutterX: CGFloat = 0.95) {
         // isHittable alone can report a target behind UISheet's top overlay. Move
         // in either direction until its real tap center is in unobscured content.
         let bar = app.navigationBars["Foto de tu planta"]
@@ -43,8 +43,8 @@ final class PlantCareAIUITests: XCTestCase {
             let y = element.frame.midY
             if element.isHittable && y > bar.frame.maxY + 60 && y < app.frame.maxY - 70 { break }
             let down = y <= bar.frame.maxY + 60
-            let origin = app.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: down ? 0.4 : 0.7))
-            let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: down ? 0.62 : 0.48))
+            let origin = app.coordinate(withNormalizedOffset: CGVector(dx: gutterX, dy: down ? 0.4 : 0.7))
+            let end = app.coordinate(withNormalizedOffset: CGVector(dx: gutterX, dy: down ? 0.62 : 0.48))
             origin.press(forDuration: 0.05, thenDragTo: end)
         }
         XCTAssertTrue(element.isHittable)
@@ -255,6 +255,8 @@ final class PlantCareAIUITests: XCTestCase {
         XCTAssertFalse(app.navigationBars["Antes de usar IA externa"].exists)
         let unavailable = app.staticTexts["externalAIUnavailable"]
         XCTAssertTrue(unavailable.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["enterManualSpecies"].exists)
+        XCTAssertFalse(app.buttons["confirmSpecies"].exists)
         reveal(unavailable, in: app)
         XCTAssertEqual(unavailable.label, "La configuración de identificación no es válida o está incompleta. No se ha enviado ninguna foto.")
         XCTAssertFalse(app.staticTexts["externalAIInvocationCount"].exists)
@@ -272,11 +274,13 @@ final class PlantCareAIUITests: XCTestCase {
         let id = isolatedID()
         app.launchArguments = ["--storage-test-id", id, "--consent-test-id", id, "--consent-fail-read", "--consent-spy", "--identification-photo-fixture"]
         app.launch(); prepareConsentPhoto(app)
+        XCTAssertFalse(app.buttons["enterManualSpecies"].exists)
         let identify = app.buttons["identifyPhoto"]
         reveal(identify, in: app); identify.tap()
         let error = app.staticTexts["externalAIConsentError"]
         XCTAssertTrue(error.waitForExistence(timeout: 5)); reveal(error, in: app)
         XCTAssertTrue(error.label.contains("No se ha enviado ninguna foto."))
+        XCTAssertFalse(app.buttons["enterManualSpecies"].exists)
         assertInvocations(0, app: app)
         XCTAssertEqual(app.images["identificationPhotoPreview"].value as? String, "120 × 80")
         capture("consent-read-error", app: app)
@@ -305,11 +309,11 @@ final class PlantCareAIUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Costilla de Adán"].waitForExistence(timeout: 8))
         XCTAssertTrue(app.staticTexts["Otras posibilidades"].exists)
         XCTAssertTrue(app.staticTexts["Philodendron bipinnatifidum"].exists)
-        XCTAssertTrue(app.staticTexts["Es una propuesta de IA, no una especie confirmada."].exists)
+        XCTAssertFalse(app.staticTexts["Es una propuesta de IA, no una especie confirmada."].firstMatch.exists)
         XCTAssertTrue(app.buttons["confirmSpecies"].exists)
         XCTAssertFalse(app.buttons["confirmSpecies"].isEnabled)
         XCTAssertFalse(app.staticTexts["confirmedSpeciesHeading"].exists)
-        XCTAssertFalse(app.staticTexts["identificationUncertainty"].label.contains("%"))
+        XCTAssertFalse(app.staticTexts["identificationUncertainty"].exists)
         capture("identify-proposals", app: app); assertInvocations(1, app: app)
         let invalid = app.buttons["fixture-photo-failure"]; reveal(invalid, in: app); invalid.tap()
         XCTAssertTrue(app.staticTexts["photoError"].waitForExistence(timeout: 8))
@@ -334,6 +338,7 @@ final class PlantCareAIUITests: XCTestCase {
                 XCTAssertTrue(error.waitForExistence(timeout: 8)); reveal(error, in: app)
                 XCTAssertTrue(error.label.contains("limitado")); XCTAssertFalse(app.staticTexts["No hay evidencia suficiente"].exists)
                 XCTAssertFalse(app.buttons["confirmSpecies"].exists)
+                XCTAssertFalse(app.buttons["enterManualSpecies"].exists)
                 capture("identify-error", app: app); assertInvocations(1, app: app)
                 let identify = app.buttons["identifyPhoto"]; reveal(identify, in: app); identify.tap()
                 XCTAssertTrue(app.staticTexts["Monstera deliciosa"].waitForExistence(timeout: 8))
@@ -342,13 +347,24 @@ final class PlantCareAIUITests: XCTestCase {
                 XCTAssertTrue(app.staticTexts["No hay evidencia suficiente"].waitForExistence(timeout: 8))
                 XCTAssertFalse(app.staticTexts["Monstera deliciosa"].exists)
                 XCTAssertTrue(app.staticTexts["Elige otra foto en la que se vean las hojas y el tallo."].exists)
+                XCTAssertFalse(app.staticTexts["Es una propuesta de IA, no una especie confirmada."].firstMatch.exists)
                 capture("identify-insufficient", app: app)
-                XCTAssertFalse(app.buttons["confirmSpecies"].exists)
+                XCTAssertTrue(app.buttons["confirmSpecies"].exists)
+                XCTAssertFalse(app.buttons["confirmSpecies"].isEnabled)
+                XCTAssertTrue(app.buttons["enterManualSpecies"].exists)
                 XCTAssertFalse(app.buttons["speciesProposal-primary"].exists)
             } else if mode == "no-alternatives" {
                 XCTAssertTrue(app.staticTexts["Monstera deliciosa"].waitForExistence(timeout: 8))
-                XCTAssertFalse(app.staticTexts["Otras posibilidades"].exists)
+                XCTAssertTrue(app.staticTexts["Otras posibilidades"].exists)
+                XCTAssertTrue(app.buttons["enterManualSpecies"].exists)
+                XCTAssertFalse(app.buttons["speciesProposal-alternative-0"].exists)
                 capture("identify-no-alternatives", app: app)
+                openManual(app); typeManual("Potus", app: app); confirmManual(app)
+                XCTAssertEqual(app.staticTexts["confirmedManualName"].label, "Potus")
+                assertInvocations(1, app: app)
+                let returnToAI = app.buttons["returnToAIProposals"]
+                revealInPhoto(returnToAI, app: app); returnToAI.tap()
+                XCTAssertFalse(app.buttons["confirmSpecies"].isEnabled)
                 let primary = app.buttons["speciesProposal-primary"]; revealInPhoto(primary, app: app); primary.tap()
                 let confirm = app.buttons["confirmSpecies"]; reveal(confirm, in: app); confirm.tap()
                 XCTAssertTrue(app.staticTexts["confirmedSpeciesHeading"].waitForExistence(timeout: 5))
@@ -363,13 +379,13 @@ final class PlantCareAIUITests: XCTestCase {
                 XCTAssertTrue(app.staticTexts["confirmedSpeciesHeading"].waitForExistence(timeout: 5))
                 XCTAssertEqual(app.staticTexts["confirmedScientificName"].label, "Monstera deliciosa")
                 assertInvocations(1, app: app)
-                // Restore proposals for the original shared uncertainty assertion below.
+                // Restore proposals for the shared hidden-analysis assertion below.
                 revealInPhoto(change, app: app); change.tap()
                 XCTAssertFalse(app.staticTexts["confirmedSpeciesHeading"].exists)
                 XCTAssertTrue(primary.isSelected)
             } else {
-                XCTAssertTrue(app.staticTexts["identificationUncertainty"].waitForExistence(timeout: 8))
-                XCTAssertEqual(app.staticTexts["identificationUncertainty"].label.count, 1000)
+                XCTAssertTrue(app.buttons["speciesProposal-primary"].waitForExistence(timeout: 8))
+                XCTAssertFalse(app.staticTexts["identificationUncertainty"].exists)
                 capture("identify-long-result", app: app)
                 let primary = app.buttons["speciesProposal-primary"]
                 revealAboveInPhoto(primary, app: app); primary.tap()
@@ -379,13 +395,13 @@ final class PlantCareAIUITests: XCTestCase {
                 XCTAssertEqual(app.staticTexts["confirmedCommonName"].label.count, 160)
                 let change = app.buttons["changeConfirmedSpecies"]; revealInPhoto(change, app: app)
                 capture("confirm-long-summary", app: app); change.tap()
-                XCTAssertTrue(app.staticTexts["identificationUncertainty"].exists)
+                XCTAssertFalse(app.staticTexts["identificationUncertainty"].exists)
                 let identify = app.buttons["identifyPhoto"]; reveal(identify, in: app)
                 XCTAssertTrue(identify.isHittable); XCTAssertTrue(identify.isEnabled)
                 capture("identify-long-result-actions", app: app)
             }
             XCTAssertEqual(app.images["identificationPhotoPreview"].value as? String, "120 × 80")
-            XCTAssertFalse(app.staticTexts["identificationUncertainty"].label.contains("%"))
+            XCTAssertFalse(app.staticTexts["identificationUncertainty"].exists)
             app.terminate()
         }
     }
@@ -400,10 +416,17 @@ final class PlantCareAIUITests: XCTestCase {
         XCTAssertEqual(app.images["identificationPhotoPreview"].value as? String, "120 × 80")
         XCTAssertFalse(app.buttons["identifyPhoto"].isEnabled)
         XCTAssertFalse(app.buttons["confirmSpecies"].exists)
-        app.swipeDown() // Bring the retained preview back into the viewport after fixture selection.
+        XCTAssertFalse(app.buttons["enterManualSpecies"].exists)
+        // The waiting state can already put the preview at the scroll view's top.
+        // Reveal only if its actual geometry requires it; an unconditional downward
+        // application swipe here becomes UISheet's native dismissal gesture.
+        revealAboveInPhoto(app.images["identificationPhotoPreview"], app: app)
+        XCTAssertTrue(app.navigationBars["Foto de tu planta"].exists)
         XCTAssertTrue(app.images["identificationPhotoPreview"].isHittable)
         capture("identify-waiting", app: app); reveal(cancel, in: app); cancel.tap()
         XCTAssertTrue(cancel.waitForNonExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["enterManualSpecies"].exists)
+        XCTAssertFalse(app.buttons["confirmSpecies"].exists)
         XCTAssertEqual(app.images["identificationPhotoPreview"].value as? String, "120 × 80")
         XCTAssertFalse(app.staticTexts["Monstera deliciosa"].exists)
         let identify = app.buttons["identifyPhoto"]; reveal(identify, in: app); identify.tap()
@@ -415,6 +438,209 @@ final class PlantCareAIUITests: XCTestCase {
         XCTAssertFalse(app.images["identificationPhotoPreview"].exists)
         XCTAssertFalse(app.staticTexts["Monstera deliciosa"].exists)
         assertInvocations(0, app: app)
+    }
+
+    private func openManual(_ app: XCUIApplication, changing: Bool = false) {
+        let button = app.buttons[changing ? "changeConfirmedSpecies" : "enterManualSpecies"]
+        revealInPhoto(button, app: app); button.tap()
+        XCTAssertTrue(manualField(app).waitForExistence(timeout: 5))
+        XCTAssertFalse(app.navigationBars["Introduce la especie"].exists)
+        XCTAssertTrue(app.buttons["enterManualSpecies"].isSelected)
+    }
+
+    private func manualField(_ app: XCUIApplication) -> XCUIElement {
+        app.textViews["manualSpeciesName"].exists ? app.textViews["manualSpeciesName"] : app.textFields["manualSpeciesName"]
+    }
+
+    private func typeManual(_ name: String, app: XCUIApplication) {
+        let field = manualField(app)
+        XCTAssertTrue(field.waitForExistence(timeout: 5)); revealInPhoto(field, app: app); field.tap()
+        if !(field.value as? String ?? "").isEmpty && field.value as? String != field.placeholderValue {
+            field.tap(withNumberOfTaps: 3, numberOfTouches: 1)
+        }
+        field.typeText(name)
+        capture("manual-keyboard", app: app)
+        app.buttons["dismissManualSpeciesKeyboard"].tap()
+    }
+
+    private func confirmManual(_ app: XCUIApplication) {
+        let button = app.buttons["confirmSpecies"]
+        revealInPhoto(button, app: app); XCTAssertTrue(button.isEnabled); button.tap()
+        XCTAssertTrue(manualField(app).waitForNonExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["confirmedManualName"].waitForExistence(timeout: 5))
+    }
+
+    func testManualSpeciesAfterZeroCandidatesAndCancelEdit() {
+        let app = XCUIApplication(), id = isolatedID()
+        app.launchArguments = ["--storage-test-id", id, "--consent-test-id", id,
+                               "--identification-candidates-fixture", "insufficient", "--identification-photo-fixture", "-AppleLanguages", "(es)"]
+        app.launch(); prepareConsentPhoto(app)
+        XCTAssertFalse(app.buttons["enterManualSpecies"].exists)
+        requestConsent(app)
+        let accept = app.buttons["acceptExternalAIConsent"]; reveal(accept, in: app); accept.tap()
+        XCTAssertTrue(app.staticTexts["No hay evidencia suficiente"].waitForExistence(timeout: 8))
+        openManual(app)
+        XCTAssertFalse(app.buttons["confirmSpecies"].isEnabled)
+        capture("manual-empty", app: app)
+        typeManual("   ", app: app); XCTAssertFalse(app.buttons["confirmSpecies"].isEnabled)
+        let manual = app.buttons["enterManualSpecies"]
+        revealInPhoto(manual, app: app); manual.tap()
+        XCTAssertFalse(manual.isSelected); XCTAssertFalse(manualField(app).exists)
+        XCTAssertTrue(app.buttons["chooseGalleryPhoto"].isEnabled)
+        XCTAssertTrue(app.buttons["takePlantPhoto"].isEnabled)
+        XCTAssertTrue(app.buttons["identifyPhoto"].isEnabled)
+        openManual(app)
+        let emptyValue = manualField(app).value as? String ?? ""
+        XCTAssertTrue(emptyValue.isEmpty || emptyValue == manualField(app).placeholderValue)
+        app.buttons["cancelManualSpecies"].tap(); openManual(app)
+        XCTAssertFalse(app.buttons["confirmSpecies"].isEnabled)
+        typeManual("  Ficus lyrata  ", app: app); capture("manual-filled", app: app); confirmManual(app)
+        XCTAssertEqual(app.staticTexts["confirmedManualName"].label, "Ficus lyrata")
+        XCTAssertTrue(app.staticTexts["manualSpeciesProvenance"].label.contains("no generada por IA"))
+        XCTAssertFalse(app.staticTexts["confirmedScientificName"].exists)
+        XCTAssertFalse(app.buttons["returnToAIProposals"].exists)
+        assertInvocations(1, app: app); capture("manual-summary", app: app)
+        openManual(app, changing: true)
+        XCTAssertEqual(manualField(app).value as? String, "Ficus lyrata")
+        typeManual(" cancelado", app: app); app.buttons["cancelManualSpecies"].tap()
+        XCTAssertEqual(app.staticTexts["confirmedManualName"].label, "Ficus lyrata")
+        openManual(app, changing: true)
+        XCTAssertEqual(manualField(app).value as? String, "Ficus lyrata")
+        let cancelEdit = app.buttons["cancelManualSpecies"]
+        revealInPhoto(cancelEdit, app: app); cancelEdit.tap()
+        XCTAssertTrue(manualField(app).waitForNonExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars["Foto de tu planta"].exists)
+        XCTAssertEqual(app.staticTexts["confirmedManualName"].label, "Ficus lyrata")
+        openManual(app, changing: true); typeManual("Ficus nuevo", app: app); confirmManual(app)
+        XCTAssertEqual(app.staticTexts["confirmedManualName"].label, "Ficus nuevo")
+        assertInvocations(1, app: app)
+    }
+
+    func testManualSpeciesFromProposalsAndReturn() {
+        let app = XCUIApplication(), id = isolatedID()
+        app.launchArguments = ["--storage-test-id", id, "--consent-test-id", id, "--identification-photo-fixture",
+                               "--identification-candidates-fixture", "proposals", "-AppleLanguages", "(es)"]
+        app.launch(); prepareConsentPhoto(app); requestConsent(app)
+        let accept = app.buttons["acceptExternalAIConsent"]; reveal(accept, in: app); accept.tap()
+        let alternative = app.buttons["speciesProposal-alternative-0"]
+        XCTAssertTrue(alternative.waitForExistence(timeout: 8)); revealInPhoto(alternative, app: app); alternative.tap()
+        XCTAssertFalse(app.staticTexts["Es una propuesta de IA, no una especie confirmada."].firstMatch.exists)
+        openManual(app); typeManual("Sin confirmar", app: app)
+        XCTAssertFalse(alternative.isSelected)
+        XCTAssertTrue(app.buttons["enterManualSpecies"].isSelected)
+        XCTAssertEqual(app.buttons.matching(identifier: "confirmSpecies").count, 1)
+        revealInPhoto(alternative, app: app); alternative.tap()
+        XCTAssertFalse(manualField(app).exists); XCTAssertFalse(app.buttons["enterManualSpecies"].isSelected)
+        XCTAssertTrue(alternative.isSelected); XCTAssertFalse(app.staticTexts["confirmedSpeciesHeading"].exists)
+        revealInPhoto(alternative, app: app); alternative.tap()
+        XCTAssertFalse(alternative.isSelected); XCTAssertFalse(app.buttons["confirmSpecies"].isEnabled)
+        alternative.tap(); XCTAssertTrue(alternative.isSelected)
+        assertInvocations(1, app: app); capture("inline-ai-exclusive", app: app)
+        openManual(app)
+        let fieldValue = manualField(app).value as? String ?? ""
+        XCTAssertTrue(fieldValue.isEmpty || fieldValue == manualField(app).placeholderValue)
+        typeManual("Cancelado", app: app); app.buttons["cancelManualSpecies"].tap()
+        XCTAssertTrue(alternative.isSelected); XCTAssertFalse(app.staticTexts["confirmedSpeciesHeading"].exists)
+        let confirm = app.buttons["confirmSpecies"]; revealInPhoto(confirm, app: app); confirm.tap()
+        let previous = app.staticTexts["confirmedScientificName"].label
+        openManual(app); typeManual("Cancelado", app: app); app.buttons["cancelManualSpecies"].tap()
+        XCTAssertEqual(app.staticTexts["confirmedScientificName"].label, previous)
+        openManual(app); typeManual("Potus", app: app); confirmManual(app)
+        XCTAssertFalse(app.staticTexts["confirmedScientificName"].exists); assertInvocations(1, app: app)
+        let back = app.buttons["returnToAIProposals"]; revealInPhoto(back, app: app); back.tap()
+        XCTAssertFalse(app.staticTexts["confirmedSpeciesHeading"].exists); XCTAssertTrue(alternative.isSelected)
+        XCTAssertTrue(confirm.isEnabled); capture("manual-return-to-ai", app: app)
+        revealInPhoto(confirm, app: app); confirm.tap()
+        XCTAssertEqual(app.staticTexts["confirmedScientificName"].label, previous); assertInvocations(1, app: app)
+    }
+
+    func testManualSpeciesInvalidationCloseAndStorageIsolation() {
+        let app = XCUIApplication(), id = isolatedID()
+        app.launchArguments = ["--storage-test-id", id, "--storage-seed", "--consent-test-id", id,
+                               "--identification-candidates-fixture", "insufficient", "--identification-photo-fixture", "-AppleLanguages", "(es)"]
+        app.launch(); assertCards(app); prepareConsentPhoto(app); requestConsent(app)
+        let accept = app.buttons["acceptExternalAIConsent"]; reveal(accept, in: app); accept.tap()
+        XCTAssertTrue(app.staticTexts["No hay evidencia suficiente"].waitForExistence(timeout: 8))
+        openManual(app)
+        let long = String(repeating: "Planta conocida ", count: 20) + "fin"
+        typeManual(long, app: app); capture("manual-long-editor", app: app); confirmManual(app)
+        XCTAssertEqual(app.staticTexts["confirmedManualName"].label, long)
+        let failure = app.buttons["fixture-photo-failure"]; revealInPhoto(failure, app: app); failure.tap()
+        XCTAssertTrue(app.staticTexts["photoError"].waitForExistence(timeout: 8))
+        XCTAssertEqual(app.staticTexts["confirmedManualName"].label, long)
+        let b = app.buttons["fixture-photo-B"]; revealInPhoto(b, app: app); b.tap()
+        expectation(for: NSPredicate(format: "value == %@", "80 × 120"), evaluatedWith: app.images["identificationPhotoPreview"])
+        waitForExpectations(timeout: 10); XCTAssertFalse(app.staticTexts["confirmedManualName"].exists)
+        XCTAssertFalse(app.buttons["enterManualSpecies"].exists)
+        capture("manual-new-photo-cleared", app: app)
+        let identify = app.buttons["identifyPhoto"]; revealInPhoto(identify, app: app); identify.tap()
+        XCTAssertTrue(app.staticTexts["No hay evidencia suficiente"].waitForExistence(timeout: 8))
+        openManual(app); typeManual("Potus", app: app); confirmManual(app)
+        revealInPhoto(identify, app: app); identify.tap()
+        XCTAssertFalse(app.staticTexts["confirmedManualName"].exists)
+        XCTAssertTrue(app.staticTexts["No hay evidencia suficiente"].waitForExistence(timeout: 8))
+        assertInvocations(3, app: app)
+        openManual(app); typeManual("Potus", app: app); confirmManual(app)
+        let bar = app.navigationBars["Foto de tu planta"]
+        bar.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.5)).press(forDuration: 0.05,
+            thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.9)))
+        XCTAssertTrue(bar.waitForNonExistence(timeout: 5))
+        app.buttons["addPlantHeader"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["identificationPhotoPlaceholder"].firstMatch.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["confirmedManualName"].exists); XCTAssertFalse(app.buttons["enterManualSpecies"].exists)
+        app.buttons["cancelIdentificationPhoto"].tap()
+        app.terminate(); app.launchArguments.removeAll { $0 == "--storage-seed" }; app.launchArguments += ["--storage-verify"]
+        app.launch(); assertCards(app); openAndCheckBothDetails(app)
+        app.buttons["addPlantHeader"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["identificationPhotoPlaceholder"].firstMatch.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["confirmedManualName"].exists)
+    }
+
+    func testManualSpeciesAfterInsufficientAndErrorAndUnconfirmedClose() {
+        for mode in ["insufficient", "error"] {
+            let app = XCUIApplication(), id = isolatedID()
+            app.launchArguments = ["--storage-test-id", id, "--consent-test-id", id, "--identification-photo-fixture",
+                                   "--identification-candidates-fixture", mode, "-AppleLanguages", "(es)"]
+            app.launch(); prepareConsentPhoto(app); requestConsent(app)
+            let accept = app.buttons["acceptExternalAIConsent"]; reveal(accept, in: app); accept.tap()
+            let result = app.staticTexts[mode == "error" ? "identificationError" : "identificationResultHeading"]
+            XCTAssertTrue(result.waitForExistence(timeout: 8))
+            if mode == "error" {
+                XCTAssertFalse(app.buttons["enterManualSpecies"].exists)
+                let identify = app.buttons["identifyPhoto"]; revealInPhoto(identify, app: app); identify.tap()
+                XCTAssertTrue(app.buttons["speciesProposal-primary"].waitForExistence(timeout: 8))
+            }
+            openManual(app); typeManual("Potus", app: app); confirmManual(app)
+            XCTAssertEqual(app.buttons["returnToAIProposals"].exists, mode == "error")
+            assertInvocations(mode == "error" ? 2 : 1, app: app)
+            openManual(app, changing: true); typeManual("Descartar gesto", app: app)
+            let cancelEdit = app.buttons["cancelManualSpecies"]
+            revealInPhoto(cancelEdit, app: app); cancelEdit.tap()
+            XCTAssertTrue(manualField(app).waitForNonExistence(timeout: 5))
+            XCTAssertEqual(app.staticTexts["confirmedManualName"].label, "Potus")
+            app.buttons["cancelIdentificationPhoto"].tap()
+            app.buttons["addPlantHeader"].tap()
+            XCTAssertTrue(app.descendants(matching: .any)["identificationPhotoPlaceholder"].firstMatch.waitForExistence(timeout: 5))
+            XCTAssertFalse(app.staticTexts["confirmedManualName"].exists)
+            app.buttons["cancelIdentificationPhoto"].tap()
+            prepareConsentPhoto(app)
+            XCTAssertFalse(app.buttons["enterManualSpecies"].exists)
+            let identify = app.buttons["identifyPhoto"]; revealInPhoto(identify, app: app); identify.tap()
+            if mode == "error" {
+                // The process-scoped fixture fails only its first invocation, already checked above.
+                XCTAssertTrue(app.buttons["speciesProposal-primary"].waitForExistence(timeout: 8))
+                XCTAssertFalse(app.staticTexts["identificationError"].exists)
+            }
+            XCTAssertTrue(app.buttons["enterManualSpecies"].waitForExistence(timeout: 8))
+            assertInvocations(mode == "error" ? 3 : 2, app: app)
+            openManual(app); typeManual("Sin confirmar", app: app)
+            app.terminate(); app.launch()
+            app.buttons["addPlantHeader"].tap()
+            XCTAssertTrue(app.descendants(matching: .any)["identificationPhotoPlaceholder"].firstMatch.waitForExistence(timeout: 5))
+            XCTAssertFalse(app.navigationBars["Introduce la especie"].exists)
+            XCTAssertFalse(app.staticTexts["confirmedManualName"].exists)
+            app.terminate()
+        }
     }
 
     func testConfirmSpeciesAlternativeAndDraftInvalidation() {
@@ -467,7 +693,8 @@ final class PlantCareAIUITests: XCTestCase {
         expectation(for: NSPredicate(format: "value == %@", "80 × 120"), evaluatedWith: app.images["identificationPhotoPreview"])
         waitForExpectations(timeout: 10)
         XCTAssertFalse(app.staticTexts["confirmedSpeciesHeading"].exists)
-        XCTAssertFalse(primary.exists); XCTAssertFalse(confirm.exists); assertInvocations(1, app: app)
+        XCTAssertFalse(primary.exists); XCTAssertFalse(confirm.exists)
+        XCTAssertFalse(app.buttons["enterManualSpecies"].exists); assertInvocations(1, app: app)
         revealAboveInPhoto(app.images["identificationPhotoPreview"], app: app)
         capture("confirm-new-photo-no-identity", app: app)
         let identify = app.buttons["identifyPhoto"]; reveal(identify, in: app); identify.tap()
@@ -552,7 +779,13 @@ final class PlantCareAIUITests: XCTestCase {
 
     private func assertRetryLayout(after action: XCUIElement, app: XCUIApplication) {
         let gallery = app.buttons["chooseGalleryPhoto"], camera = app.buttons["takePlantPhoto"], identify = app.buttons["identifyPhoto"]
-        revealInPhoto(gallery, app: app)
+        // Use the viewport's outer gutter: the 95% path can intersect the manual
+        // option's expanded touch target while scrolling the taller selector.
+        // A layout inspection must not change the selected option.
+        let manual = app.buttons["enterManualSpecies"]
+        XCTAssertFalse(manual.isSelected)
+        revealInPhoto(gallery, app: app, gutterX: 0.99)
+        XCTAssertFalse(manual.isSelected)
         let separator = app.staticTexts["identificationRetrySeparator"]
         let heading = app.staticTexts["identificationRetryHeading"]
         XCTAssertTrue(separator.exists); XCTAssertTrue(heading.exists)
@@ -566,7 +799,8 @@ final class PlantCareAIUITests: XCTestCase {
         XCTAssertGreaterThanOrEqual(gallery.frame.height, 44)
         XCTAssertGreaterThan(camera.frame.minY, gallery.frame.maxY)
         XCTAssertGreaterThan(identify.frame.minY, camera.frame.maxY)
-        revealInPhoto(identify, app: app)
+        revealInPhoto(identify, app: app, gutterX: 0.99)
+        XCTAssertFalse(manual.isSelected)
         XCTAssertTrue(identify.isEnabled)
     }
 
@@ -676,10 +910,14 @@ final class PlantCareAIUITests: XCTestCase {
         XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5))
         let old = field.value as? String ?? ""
         if !old.isEmpty {
-            // Native triple tap selects the fixture's single text paragraph.
-            field.tap(withNumberOfTaps: 3, numberOfTouches: 1)
-            field.typeText(value.isEmpty ? XCUIKeyboardKey.delete.rawValue : value)
-        } else { field.typeText(value) }
+            // Native selection gestures/modified keys need not select all.
+            // Tap trailing whitespace explicitly to place the caret at the end,
+            // then delete the known current value using ordinary text events.
+            field.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
+            field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: old.count))
+            XCTAssertEqual(field.value as? String, "")
+        }
+        if !value.isEmpty { field.typeText(value) }
         XCTAssertEqual(field.value as? String, value)
     }
 

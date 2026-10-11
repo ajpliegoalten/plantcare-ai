@@ -64,7 +64,7 @@ struct PlantCareAIApp: App {
             #endif
             let authorization = AuthorizeExternalAIOperation(repository: consentRepository, scope: scope)
             let identify = configuration.map { IdentifyCandidates(repository: OpenAICompatibleSpeciesIdentificationRepository(configuration: $0)) }
-            let draft = IdentificationPhotoViewModel(prepare: PrepareIdentificationPhoto(preparer: LocalIdentificationPhotoPreparer()), camera: CheckCameraAccess(access: SystemCameraAccess()), authorize: authorization, confirmSpecies: ConfirmSpecies(), usesRealRecipient: realRecipient, destinationNotice: destinationNotice, identificationAvailable: available, configurationIsCurrent: {
+            let draft = IdentificationPhotoViewModel(prepare: PrepareIdentificationPhoto(preparer: LocalIdentificationPhotoPreparer()), camera: CheckCameraAccess(access: SystemCameraAccess()), authorize: authorization, confirmSpecies: ConfirmSpecies(), confirmManualSpecies: ConfirmManualSpecies(), usesRealRecipient: realRecipient, destinationNotice: destinationNotice, identificationAvailable: available, configurationIsCurrent: {
                 #if DEBUG && targetEnvironment(simulator)
                 if consentFixture != nil || candidatesFixture != nil { return true }
                 #endif

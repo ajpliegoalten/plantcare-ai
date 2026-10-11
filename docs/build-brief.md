@@ -20,6 +20,8 @@ Fotografiar o elegir imagen → obtener especie candidata, alternativas y confia
 
 ## Fuente de conocimiento y límites de IA
 
+Refinamiento autorizado vigente 2026-10-11: en identificación se muestran opciones, sin texto libre del análisis/incertidumbre ni indicadores/avisos de propuesta IA. Se conserva el estado explícito de evidencia insuficiente y la confirmación humana; selección reversible y manual dentro de su tarjeta solo tras éxito con cero o más candidatas, no antes del intento ni ante error (`docs/specs/manual-species-selection.md`). Esta decisión de presentación prevalece sobre las menciones anteriores de incertidumbre visible o manual antes de identificar.
+
 La API externa compatible con OpenAI genera cuidados usando conocimiento del modelo. La ficha se guarda localmente al confirmar la especie, como información orientativa, sin RAG ni fuentes verificadas en este MVP. La IA propone identificaciones, cuidados, observaciones y respuestas; el usuario confirma especie, alta, registros y persistencia de análisis. Ante evidencia insuficiente, no se presenta certeza ficticia: ofrecer alternativas u otra foto. El nombre manual de una especie conocida permite solicitar cuidados a la IA, no saltarse la generación de ficha. Si identificación o generación de cuidados falla, reintentar; no dar de alta una planta incompleta mientras la API no responda.
 
 ## Fuera del MVP

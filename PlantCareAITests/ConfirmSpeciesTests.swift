@@ -11,8 +11,8 @@ final class ConfirmSpeciesTests: XCTestCase {
     func testPrimaryAndAlternativesCopyExactNamesAndTokens() throws {
         let photo = UUID(), revision = UUID()
         let identity = try ConfirmSpecies().execute(photoID: photo, resultID: revision, result: result(), selection: .primary)
-        XCTAssertEqual(identity, ConfirmedDraftIdentity(photoID: photo, resultID: revision,
-            commonName: primary.commonName, scientificName: primary.scientificName, proposal: .primary))
+        XCTAssertEqual(identity, ConfirmedDraftIdentity(photoID: photo, source: .aiProposal(resultID: revision,
+            selection: .primary, commonName: primary.commonName, scientificName: primary.scientificName)))
         for candidate in [SpeciesCandidate(commonName: "Solo común", scientificName: nil),
                           SpeciesCandidate(commonName: nil, scientificName: "Solo científico"),
                           SpeciesCandidate(commonName: " Nombre literal ", scientificName: "Nombre distinto")] {

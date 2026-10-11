@@ -27,8 +27,8 @@ struct ConfirmSpecies: ConfirmSpeciesUseCase {
             guard result.alternatives.indices.contains(index) else { throw ConfirmSpeciesError.invalidSelection }
             candidate = result.alternatives[index]
         }
-        return ConfirmedDraftIdentity(photoID: photoID, resultID: resultID,
-                                      commonName: candidate.commonName, scientificName: candidate.scientificName,
-                                      proposal: selection)
+        return ConfirmedDraftIdentity(photoID: photoID, source: .aiProposal(resultID: resultID,
+                                      selection: selection, commonName: candidate.commonName,
+                                      scientificName: candidate.scientificName))
     }
 }

@@ -13,17 +13,35 @@ struct IdentificationPhotoView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     preview
-                    if let identity = viewModel.confirmedIdentity {
+                    if let identity = viewModel.confirmedIdentity, !viewModel.isSelectingSpecies {
                         ConfirmedSpeciesView(identity: identity, canChange: !viewModel.isBusy && !viewModel.presentsCamera,
-                                             change: { viewModel.changeConfirmedSpecies() })
+                                             change: { viewModel.changeConfirmedSpecies() },
+                                             canReturnToAI: viewModel.canReturnToAIProposals,
+                                             returnToAI: { viewModel.returnToAIProposals() })
+                        if identity.manualName == nil {
+                            VStack(alignment: .leading, spacing: 16) {
+                                Text("identifyCandidates.alternatives").font(.headline)
+                                manualOption
+                            }
+                        }
                     } else if let result = viewModel.identificationResult, let revision = viewModel.resultID {
                         IdentificationResultView(result: result, selected: viewModel.selectedProposal,
-                            canSelect: viewModel.canSelectProposal, canConfirm: viewModel.canConfirmSpecies,
-                            select: { viewModel.selectProposal($0, resultID: revision) },
-                            confirm: { viewModel.confirmSpecies(resultID: revision) })
+                            canSelect: viewModel.canSelectProposal,
+                            select: { viewModel.selectProposal($0, resultID: revision) }, manualOption: { manualOption })
                     }
                     if viewModel.hasConfirmationError {
                         Text("confirmSpecies.error").accessibilityIdentifier("speciesConfirmationError")
+                    }
+                    if viewModel.confirmedIdentity != nil && viewModel.isSelectingSpecies && !viewModel.isEditingManualSpecies {
+                        Button("manualSpecies.cancelEdit") { viewModel.cancelSpeciesSelection() }
+                            .frame(minHeight: 44).accessibilityIdentifier("cancelSpeciesSelection")
+                    }
+                    if viewModel.hasSuccessfulIdentification && (viewModel.confirmedIdentity == nil || viewModel.isSelectingSpecies) {
+                        Button { viewModel.confirmSelection() } label: {
+                            Text("confirmSpecies.confirm").frame(maxWidth: .infinity, minHeight: 44)
+                                .foregroundStyle(viewModel.canConfirmSelection ? Color("Surface") : Color("TextSecondary"))
+                        }.buttonStyle(.borderedProminent).buttonBorderShape(.capsule)
+                            .disabled(!viewModel.canConfirmSelection).accessibilityIdentifier("confirmSpecies")
                     }
                     if viewModel.authorizationState == .continuing {
                         ProgressView("identifyCandidates.loading").accessibilityIdentifier("identificationLoading")
@@ -50,7 +68,7 @@ struct IdentificationPhotoView: View {
                             }.frame(minHeight: 44)
                         }
                     }
-                    if viewModel.identificationResult != nil {
+                    if viewModel.identificationResult != nil || viewModel.confirmedIdentity != nil {
                         HStack(spacing: 12) {
                             Rectangle()
                                 .fill(Color("Outline"))
@@ -100,6 +118,7 @@ struct IdentificationPhotoView: View {
                 .multilineTextAlignment(.center)
                 .padding(20)
             }
+            .scrollDismissesKeyboard(.interactively)
             .background(Color("Background").ignoresSafeArea())
             .navigationTitle("identificationPhoto.title")
             .navigationBarTitleDisplayMode(.inline)
@@ -136,7 +155,7 @@ struct IdentificationPhotoView: View {
 
     private var photoActions: some View {
         VStack(spacing: 16) {
-            if viewModel.identificationResult != nil {
+            if viewModel.identificationResult != nil || viewModel.confirmedIdentity != nil {
                 VStack(alignment: .leading, spacing: 8) {
                     Label("identificationPhoto.retrySection.title", systemImage: "arrow.clockwise")
                         .font(.headline)
@@ -157,7 +176,7 @@ struct IdentificationPhotoView: View {
             .buttonStyle(.borderedProminent)
             .buttonBorderShape(.capsule)
             .accessibilityIdentifier("chooseGalleryPhoto")
-            .disabled(viewModel.isBusy)
+            .disabled(viewModel.isBusy || viewModel.isEditingManualSpecies || viewModel.presentsCamera)
             Button { viewModel.takePhoto() } label: {
                 Label("identificationPhoto.camera", systemImage: "camera")
                     .frame(maxWidth: .infinity, minHeight: 44)
@@ -165,7 +184,7 @@ struct IdentificationPhotoView: View {
             .buttonStyle(.bordered)
             .buttonBorderShape(.capsule)
             .accessibilityIdentifier("takePlantPhoto")
-            .disabled(viewModel.isBusy)
+            .disabled(viewModel.isBusy || viewModel.isEditingManualSpecies || viewModel.presentsCamera)
             Button { viewModel.identifyPhoto() } label: {
                 Text("identificationPhoto.identify")
                     .frame(maxWidth: .infinity, minHeight: 44)
@@ -204,6 +223,37 @@ struct IdentificationPhotoView: View {
         }
         .aspectRatio(4 / 3, contentMode: .fit)
         .clipShape(RoundedRectangle(cornerRadius: 22))
+    }
+
+    private var manualOption: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Button { viewModel.toggleManualSpecies() } label: {
+                HStack(alignment: .top, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("manualSpecies.provenance").font(.callout).foregroundStyle(Color("TextSecondary"))
+                        Text("manualSpecies.enter").font(.headline)
+                        if viewModel.isEditingManualSpecies {
+                            Text("confirmSpecies.selected").font(.caption.weight(.semibold))
+                                .foregroundStyle(Color("Surface")).padding(.horizontal, 10).padding(.vertical, 5)
+                                .background(Color("PrimaryAction"), in: Capsule())
+                        }
+                    }.frame(maxWidth: .infinity, alignment: .leading)
+                    if viewModel.isEditingManualSpecies {
+                        Image(systemName: "checkmark.circle.fill").font(.title3)
+                            .foregroundStyle(Color("PrimaryAction")).accessibilityHidden(true)
+                    }
+                }.frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                    .foregroundStyle(Color("TextPrimary"))
+            }.buttonStyle(.plain).disabled(!viewModel.canEnterManualSpecies && !viewModel.isEditingManualSpecies)
+                .accessibilityIdentifier("enterManualSpecies")
+                .accessibilityAddTraits(viewModel.isEditingManualSpecies ? .isSelected : [])
+            if let draft = viewModel.manualDraft {
+                ManualSpeciesView(viewModel: viewModel, sessionID: draft.id)
+            }
+        }
+        .padding(16)
+        .background(Color("SurfaceMuted"), in: RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(viewModel.isEditingManualSpecies ? Color("Primary") : Color("Outline"), lineWidth: viewModel.isEditingManualSpecies ? 2 : 1))
     }
 
     private func cameraMessage(_ issue: CameraAccessResult) -> LocalizedStringKey {
