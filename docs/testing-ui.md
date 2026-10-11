@@ -93,6 +93,7 @@ Los nombres de métodos siguientes llevan el prefijo `test` en el código.
 | SavePlantUITests | SavePlantLocalFailureRetryWithoutNewCareRequest | Error real de commit, editar/cancelar restaura error, retry local no solicita IA y persiste una sola alta. |
 | SavePlantUITests | SavePlantCommitLocksDismissalAndHasNoReview | Commit observable impide cerrar; sin review/formulario; termina en colección y sigue allí al relanzar. |
 | StoredCollectionUITests | StoredCollectionSurvivesProcessRelaunch | Disco verifica dos modelos/JPEG exactos; único recorrido canónico de ambos detalles completos tras relanzar. |
+| StoredCollectionUITests | DetailRedesignCareGridAndUnavailableWatering | Ronda visual: dos columnas iguales y tres filas de misma altura; riego explícitamente deshabilitado/Próximamente, sin hechos inventados ni barra inferior; lectura conserva modelos y JPEG al relanzar. Tres capturas solo si se selecciona este escenario con opt-in. |
 | EditPlantUITests | EditPersistsAndRefreshesOnlySelectedPlant | Editar nombre/ubicación refresca tarjeta/detalle/precarga solo propios; disco completo y segundo UUID intactos tras relanzar. |
 | EditPlantUITests | CancelGestureValidationAndOptionalLocationWithMissingPhoto | Botón/gesto descartan; blanco no guarda; quitar/añadir ubicación funciona incluso con foto ausente. |
 | PlantCardsUITests | PlantCardsSelectCorrectIdentity | A→B→A por regiones de foto/contenido y Atrás conserva navegación UUID; no vuelve a comprobar seis campos en cada salto. |
@@ -110,3 +111,7 @@ La validación anterior comprobó selectores/clones/limpieza/fixtures/gestos, pe
 Antes de aceptar: ejecutar **un** gate final sobre fuentes reparadas, comprobar descubrimiento de 125 unitarias + 37 UI en la fase paralela y 1 UI en la fase Fotos. Usar solo simulador estándar/texto normal/una apariencia. No hay presupuesto de tiempo garantizado. La prohibición original de ejecución fue levantada para la validación posterior; el gate fallido y sus hallazgos se conservan en `docs/validations/ui-test-performance.md`.
 
 Los CSV e informes detallados de tiempos/orden/duplicados fueron solicitados **una sola vez**, como referencia orientativa. Se conservan sin regenerar en ejecuciones futuras. El gate no llama a los extractores de esa auditoría; solo produce resultados estándar xcresult y estado de salida. La reparación sigue registrando comando, selección, resultado y pendientes en PROGRESS, sin nuevas tablas/cronologías.
+
+## Delta actual: rediseño de detalle
+
+El refactor anterior de 38 escenarios y sus conteos son históricos. `plant-detail-redesign` añade uno a StoredCollectionUITests, sin consolidaciones ni retirada de assertions: **39 UI actuales = 38 paralelas + 1 Fotos serial**, mismas 14 clases y 125 unitarias. El gate final de esta ronda debe descubrir 164 tests en total; no se ha ejecutado por el implementer. Verificación focalizada y estado en PROGRESS y `docs/specs/plant-detail-redesign.md`.

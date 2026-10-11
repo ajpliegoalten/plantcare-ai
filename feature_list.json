@@ -68,6 +68,15 @@
     "user_visible_behavior": "Desde su tarjeta se ven foto, especie confirmada, ubicación opcional y cuidados guardados de esa planta.",
     "depends_on": ["plant-cards"],
     "status": "accepted",
+    "active_round": {
+      "id": "plant-detail-redesign",
+      "spec": "docs/specs/plant-detail-redesign.md",
+      "base": "9908cd7",
+      "status": "accepted",
+      "notes": "Rediseño autorizado según HTML: identidad y seis cuidados completos en dos columnas; riego solo visual/deshabilitado, sin barra inferior, eventos ni IA nueva. Worktree design/plant-detail. Aceptación independiente de la ronda; aceptación histórica intacta. Entrega commit/push/PR autorizada hacia main, sin merge.",
+      "independent_validation": "2026-10-11 validator independiente accept: único caffeinate -dius ./init.sh BUILD/ambas fases TEST EXECUTE SUCCEEDED exit0, 164/164=125unit+38UIparallel+1Fotosserial, cero failed/skipped/expected failures;106 inputs públicos idénticos raíz/sandbox/antes/después. Revisión visual/arquitectura/seguridad/docs conforme, focalizadas21 y capturas finales reutilizadas. docs/validations/plant-detail-redesign.md. Orquestador persiste accepted sin nuevas pruebas ni cambios ejecutables.",
+      "evidence": "2026-10-11 Xcode26.2/17C52, iPhone17Pro iOS26.2/23C54 normal/claro: 21 escenarios distintos PASS =12unit +9UI. Regresiones20/20 exit0, visual final1/1 exit0 tras reparar símbolo decorativo vacío con leaf.fill; no sumar la ejecución visual inicial como test adicional. Tres capturas finales abiertas/inspeccionadas; Grid/placeholder/identidad correctos, textos1000/edición/foto fallida/aislamiento/fallback cubiertos. 101 inputs públicos iguales antes/después del build/test final y checkout; traducciones previas intactas, catálogo previo solo reserializado/extractionState. JSON/plutil/Swift parse/diff correctos. docs/handoffs/plant-detail-redesign.md, DerivedData/evidence/plant-detail-redesign y DerivedData/DetailRedesign/{visual,regressions,visual-repair}.xcresult. Passing no accepted; sin init/gate completo/API real/Git publicación."
+    },
     "verification": ["Abrir dos plantas con fichas diferentes y comprobar que cada detalle presenta solo los datos propios; gate estándar."],
     "evidence": [
       "2026-10-10 implementer self-verification, not independent acceptance: approved spec unchanged SHA256 c2274119abf370e6dffeeea113cede684bbd12558620c49f7ea90bc2f140371d. Baseline ./init.sh BUILD SUCCEEDED / TEST SUCCEEDED, 14 unit + 8 UI (detail-baseline.log). Final ./init.sh BUILD SUCCEEDED / TEST SUCCEEDED, 25 unit + 8 UI; DerivedData/evidence/detail-gate-final.log, xcresult DerivedData/Logs/Test/Test-PlantCareAI-2026.10.10_01-35-39-+0200.xcresult. Xcode 26.2, iPhone 17 Pro iOS 26.2 00BBB7EC-8DF7-400C-A08A-9D3C8818D886 light/large.",

@@ -3,6 +3,7 @@ import SwiftUI
 struct PlantDetailView: View {
     @StateObject private var viewModel: PlantDetailViewModel
     @State private var editor: EditPlantViewModel?
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     init(viewModel: PlantDetailViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -21,28 +22,8 @@ struct PlantDetailView: View {
                 case .loaded(let plant):
                     photo
                     identity(plant)
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("detail.care.title").font(.title2.weight(.semibold)).accessibilityAddTraits(.isHeader)
-                        Text("detail.care.subtitle").foregroundStyle(Color("TextSecondary"))
-                        VStack(alignment: .leading, spacing: 16) {
-                            careRow("light", "sun.max", plant.careSheet.light)
-                            separator
-                            careRow("watering", "drop", plant.careSheet.watering)
-                            separator
-                            careRow("humidity", "humidity", plant.careSheet.humidity)
-                            separator
-                            careRow("temperature", "thermometer", plant.careSheet.temperature)
-                            separator
-                            careRow("substrate", "leaf", plant.careSheet.substrate)
-                            separator
-                            careRow("fertilizer", "leaf.circle", plant.careSheet.fertilizer)
-                        }
-                        .padding(16)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color("Surface"), in: RoundedRectangle(cornerRadius: 22))
-                        Text("detail.care.disclaimer").foregroundStyle(Color("TextSecondary"))
-                            .accessibilityIdentifier("detailDisclaimer")
-                    }
+                    wateringPreview
+                    careSheet(plant.careSheet)
                 }
             }
             .font(.body)
@@ -68,14 +49,23 @@ struct PlantDetailView: View {
         .onDisappear { viewModel.cancelLoading() }
     }
 
-    private var separator: some View { Color("Outline").frame(height: 0.5).accessibilityHidden(true) }
-
     private func identity(_ plant: Plant) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(plant.name).font(.title2.weight(.semibold)).accessibilityAddTraits(.isHeader)
-                .accessibilityIdentifier("selectedPlant-\(plant.id)")
-            Text(plant.confirmedSpecies).italic().foregroundStyle(Color("TextSecondary"))
-                .accessibilityIdentifier("detailSpecies-\(plant.id)")
+            HStack(alignment: .top, spacing: 12) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(plant.name).font(.title2.weight(.semibold)).accessibilityAddTraits(.isHeader)
+                        .accessibilityIdentifier("selectedPlant-\(plant.id)")
+                    Text(plant.confirmedSpecies).font(.subheadline).italic().foregroundStyle(Color("TextSecondary"))
+                        .accessibilityIdentifier("detailSpecies-\(plant.id)")
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                Image(systemName: "leaf.fill")
+                    .font(.title3)
+                    .foregroundStyle(Color("Primary"))
+                    .frame(width: 40, height: 40)
+                    .background(Color("SurfaceMuted"), in: Circle())
+                    .accessibilityHidden(true)
+            }
             if let location = PlantDetailViewModel.visibleLocation(plant.location) {
                 HStack(alignment: .top) {
                     Image(systemName: "mappin.and.ellipse").accessibilityHidden(true)
@@ -84,26 +74,130 @@ struct PlantDetailView: View {
                 .accessibilityElement(children: .combine)
                 .accessibilityIdentifier("detailLocation-\(plant.id)")
             }
-            Text("detail.createdAt \(PlantDetailViewModel.formattedDate(plant.createdAt))")
-                .foregroundStyle(Color("TextSecondary"))
-                .accessibilityIdentifier("detailCreatedAt-\(plant.id)")
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Image(systemName: "calendar").accessibilityHidden(true)
+                Text("detail.createdAt \(PlantDetailViewModel.formattedDate(plant.createdAt))")
+                    .accessibilityIdentifier("detailCreatedAt-\(plant.id)")
+            }
+            .font(.footnote)
+            .foregroundStyle(Color("TextSecondary"))
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color("SurfaceMuted"), in: RoundedRectangle(cornerRadius: 12))
         }
         .fixedSize(horizontal: false, vertical: true)
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color("Surface"), in: RoundedRectangle(cornerRadius: 22))
+        .shadow(color: Color("Primary").opacity(0.04), radius: 10, y: 3)
     }
 
-    private func careRow(_ field: String, _ symbol: String, _ value: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .top) {
-                Image(systemName: symbol).foregroundStyle(Color("Primary")).accessibilityHidden(true)
-                Text(LocalizedStringKey("detail.care." + field)).font(.body.weight(.semibold))
+    // A visual placeholder only. Quick-watering will own real dates and writes.
+    private var wateringPreview: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Label("detail.watering.title", systemImage: "drop.fill")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color("CareTerracotta"))
+                Spacer(minLength: 0)
+                Text("detail.watering.soon")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color("TextSecondary"))
+                    .padding(.horizontal, 8).padding(.vertical, 4)
+                    .background(Color("SurfaceMuted"), in: Capsule())
+                    .accessibilityIdentifier("detailWateringComingSoon")
             }
-            Text(value)
+            Text("detail.watering.unavailable")
+                .font(.subheadline)
+                .foregroundStyle(Color("TextSecondary"))
+                .accessibilityIdentifier("detailWateringUnavailable")
+            Button {} label: {
+                Label("detail.watering.register", systemImage: "drop.fill")
+                    .font(.body.weight(.semibold))
+                    .frame(maxWidth: .infinity, minHeight: 52)
+                    .foregroundStyle(Color("Primary"))
+                    .background(Color("CareMint"), in: Capsule())
+            }
+            .buttonStyle(.plain)
+            .disabled(true)
+            .accessibilityHint(Text("detail.watering.unavailable"))
+            .accessibilityIdentifier("detailRegisterWatering-\(viewModel.id)")
+            Text("detail.watering.checkSubstrate")
+                .font(.footnote)
+                .foregroundStyle(Color("TextSecondary"))
         }
         .fixedSize(horizontal: false, vertical: true)
+        .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color("Surface"), in: RoundedRectangle(cornerRadius: 22))
+        .shadow(color: Color("Primary").opacity(0.04), radius: 10, y: 3)
+    }
+
+    private func careSheet(_ sheet: CareSheet) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Label("detail.care.title", systemImage: "sparkles")
+                    .font(.headline)
+                    .accessibilityAddTraits(.isHeader)
+                Text("detail.care.subtitle")
+                    .font(.footnote)
+                    .foregroundStyle(Color("TextSecondary"))
+            }
+            // Eager Grid keeps every saved field available to accessibility,
+            // including long text; equal columns and row heights on normal text.
+            Grid(alignment: .topLeading, horizontalSpacing: 8, verticalSpacing: 8) {
+                if dynamicTypeSize.isAccessibilitySize {
+                    careCard("light", "sun.max.fill", sheet.light, tint: "CareOchre", background: "CareHoney")
+                    careCard("watering", "drop.fill", sheet.watering, tint: "Primary", background: "CareMint")
+                    careCard("humidity", "humidity", sheet.humidity, tint: "Primary", background: "SurfaceMuted")
+                    careCard("temperature", "thermometer.medium", sheet.temperature, tint: "CareTerracotta", background: "CarePeach")
+                    careCard("substrate", "leaf.fill", sheet.substrate, tint: "Primary", background: "SurfaceMuted")
+                    careCard("fertilizer", "flask.fill", sheet.fertilizer, tint: "CareOchre", background: "CareHoney")
+                } else {
+                    GridRow {
+                        careCard("light", "sun.max.fill", sheet.light, tint: "CareOchre", background: "CareHoney")
+                        careCard("watering", "drop.fill", sheet.watering, tint: "Primary", background: "CareMint")
+                    }
+                    GridRow {
+                        careCard("humidity", "humidity", sheet.humidity, tint: "Primary", background: "SurfaceMuted")
+                        careCard("temperature", "thermometer.medium", sheet.temperature, tint: "CareTerracotta", background: "CarePeach")
+                    }
+                    GridRow {
+                        careCard("substrate", "leaf.fill", sheet.substrate, tint: "Primary", background: "SurfaceMuted")
+                        careCard("fertilizer", "flask.fill", sheet.fertilizer, tint: "CareOchre", background: "CareHoney")
+                    }
+                }
+            }
+            Text("detail.care.disclaimer")
+                .font(.footnote)
+                .foregroundStyle(Color("TextSecondary"))
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .padding(.top, 4)
+                .accessibilityIdentifier("detailDisclaimer")
+        }
+    }
+
+    private func careCard(_ field: String, _ symbol: String, _ value: String, tint: String, background: String) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .center, spacing: 6) {
+                Text(LocalizedStringKey("detail.care." + field)).font(.footnote.weight(.semibold))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Image(systemName: symbol)
+                    .font(.body)
+                    .foregroundStyle(Color(tint))
+                    .frame(width: 32, height: 32)
+                    .background(Color(background), in: Circle())
+                    .accessibilityHidden(true)
+            }
+            Text(value).font(.subheadline).foregroundStyle(Color("TextSecondary"))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .padding(12)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(Color("Surface"), in: RoundedRectangle(cornerRadius: 16))
+        .shadow(color: Color("Primary").opacity(0.04), radius: 4, y: 2)
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("detailCare-\(field)-\(viewModel.id)")
     }
