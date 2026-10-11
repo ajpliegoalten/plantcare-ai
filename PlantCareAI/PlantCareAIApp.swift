@@ -14,6 +14,10 @@ struct PlantCareAIApp: App {
            arguments.indices.contains(position + 1), let id = UUID(uuidString: arguments[position + 1]) {
             let testRoot = URL.applicationSupportDirectory.appendingPathComponent("StorageTests").appendingPathComponent(id.uuidString)
             repository = LocalPlantRepository(root: testRoot)
+            if let position = arguments.firstIndex(of: "--plant-creation-fixture"), arguments.indices.contains(position + 1) {
+                let fixture = PlantCreationTestFixture(mode: arguments[position + 1])
+                repository = LocalPlantRepository(root: testRoot, beforeCommit: { try fixture.beforeCommit() })
+            }
             load = StorageFixtureLoad(root: testRoot, repository: repository, seed: arguments.contains("--storage-seed"), corrupt: arguments.contains("--storage-corrupt"))
         }
         #endif
@@ -40,7 +44,7 @@ struct PlantCareAIApp: App {
             candidatesFixture = IdentificationCandidatesTestFixture(mode: arguments[position + 1])
         }
         #endif
-        viewModel.makeIdentificationPhoto = {
+        viewModel.makeIdentificationPhoto = { [weak viewModel] in
             // Snapshot once per draft; recheck the same configuration before acceptance and transport.
             let configuration = IdentificationAPIConfiguration.localDemo()
             var scope = configuration?.scope ?? ExternalAIConsent(recipient: "unconfigured-identification", noticeVersion: 4)
@@ -75,7 +79,13 @@ struct PlantCareAIApp: App {
                 care = GenerateCareSheet(repository: fixture)
             }
             #endif
-            let draft = IdentificationPhotoViewModel(prepare: PrepareIdentificationPhoto(preparer: LocalIdentificationPhotoPreparer()), camera: CheckCameraAccess(access: SystemCameraAccess()), authorize: authorization, confirmSpecies: ConfirmSpecies(), confirmManualSpecies: ConfirmManualSpecies(), generateCare: care, usesRealRecipient: realRecipient, destinationNotice: destinationNotice, identificationAvailable: available, configurationIsCurrent: {
+            let draft = IdentificationPhotoViewModel(prepare: PrepareIdentificationPhoto(preparer: LocalIdentificationPhotoPreparer()), camera: CheckCameraAccess(access: SystemCameraAccess()), authorize: authorization, confirmSpecies: ConfirmSpecies(), confirmManualSpecies: ConfirmManualSpecies(), generateCare: care, saveConfirmedPlant: SaveConfirmedPlant(repository: repository, photoValidator: LocalPreparedPlantPhotoValidator()), onSaved: { [weak viewModel] plant in
+                #if DEBUG && targetEnvironment(simulator)
+                viewModel?.lastCareInvocationCount = careFixture?.invocations
+                viewModel?.lastIdentificationInvocationCount = candidatesFixture?.invocations
+                #endif
+                viewModel?.applyCreatedPlant(plant)
+            }, usesRealRecipient: realRecipient, destinationNotice: destinationNotice, identificationAvailable: available, configurationIsCurrent: {
                 #if DEBUG && targetEnvironment(simulator)
                 if consentFixture != nil || candidatesFixture != nil { return true }
                 #endif
