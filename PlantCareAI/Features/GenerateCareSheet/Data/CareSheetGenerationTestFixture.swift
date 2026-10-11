@@ -10,6 +10,7 @@ final class CareSheetGenerationTestFixture: CareSheetGenerationRepository {
     func generate(identity: ConfirmedDraftIdentity) async throws -> CareSheet {
         invocations += 1
         let invocation = invocations
+        if mode == "retained-error" { throw CareSheetGenerationError.network }
         if mode == "waiting" {
             // Deliberately uncooperative response tests the draft token, not just Task cancellation.
             try? await Task.sleep(for: .seconds(20))
@@ -21,7 +22,7 @@ final class CareSheetGenerationTestFixture: CareSheetGenerationRepository {
         let name = identity.manualName ?? identity.scientificName ?? identity.commonName ?? ""
         func text(_ field: String) -> String {
             let text = "\(field) para \(name). Comprueba las condiciones de tu planta."
-            return mode == "long" ? text + String(repeating: " Consejo orientativo según el sustrato.", count: 15) : text
+            return mode == "long" ? String((text + String(repeating: " Consejo orientativo según el sustrato.", count: 30)).prefix(999)) + "." : text
         }
         return CareSheet(light: text("Luz"), watering: text("Riego"), humidity: text("Humedad"), temperature: text("Temperatura"), substrate: text("Sustrato"), fertilizer: text("Abonado"))
     }

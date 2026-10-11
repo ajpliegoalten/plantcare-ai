@@ -46,7 +46,7 @@ actor LocalPlantRepository: PlantRepository {
     func loadPlants() async throws -> [Plant] {
         do {
             return try store().fetch(FetchDescriptor<PersistedPlant>()).map { try $0.domain() }
-                .sorted { $0.createdAt < $1.createdAt }
+                .sorted { $0.createdAt == $1.createdAt ? $0.id.uuidString < $1.id.uuidString : $0.createdAt < $1.createdAt }
         } catch { throw PlantStorageError.storage }
     }
 

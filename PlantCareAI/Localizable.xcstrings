@@ -1,6 +1,11 @@
 {
   "sourceLanguage" : "es",
   "strings" : {
+    "savePlant.loading" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Guardando planta…" } } } },
+    "savePlant.error" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No pudimos guardar tu planta" } } } },
+    "savePlant.retry" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Reintentar guardado" } } } },
+    "savePlant.retryRead" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Reintentar lectura" } } } },
+    "savePlant.intent" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Al confirmar, generaremos los cuidados y añadiremos tu planta si la ficha está completa" } } } },
     "careSheet.aiIdentity" : {
       "localizations" : {
         "es" : {
@@ -398,7 +403,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Guía orientativa guardada para este ejemplar"
+            "value" : "Cuidados orientativos generados por IA para este ejemplar"
           }
         }
       }

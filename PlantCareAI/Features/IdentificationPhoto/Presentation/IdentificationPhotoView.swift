@@ -13,8 +13,8 @@ struct IdentificationPhotoView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     preview
-                    if let identity = viewModel.confirmedIdentity, !viewModel.isSelectingSpecies {
-                        CareSheetReviewView(viewModel: viewModel, identity: identity)
+                    if viewModel.confirmedIdentity != nil, !viewModel.isSelectingSpecies {
+                        PlantCreationStatusView(viewModel: viewModel)
                     } else if let result = viewModel.identificationResult, let revision = viewModel.resultID {
                         IdentificationResultView(result: result, selected: viewModel.selectedProposal,
                             canSelect: viewModel.canSelectProposal,
@@ -28,6 +28,8 @@ struct IdentificationPhotoView: View {
                             .frame(minHeight: 44).accessibilityIdentifier("cancelSpeciesSelection")
                     }
                     if viewModel.hasSuccessfulIdentification && (viewModel.confirmedIdentity == nil || viewModel.isSelectingSpecies) {
+                        Text("savePlant.intent")
+                            .font(.footnote).accessibilityIdentifier("plantCreationIntent")
                         Button { viewModel.confirmSelection() } label: {
                             Text("confirmSpecies.confirm").frame(maxWidth: .infinity, minHeight: 44)
                                 .foregroundStyle(viewModel.canConfirmSelection ? Color("Surface") : Color("TextSecondary"))
@@ -118,12 +120,17 @@ struct IdentificationPhotoView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("identificationPhoto.cancel") { viewModel.close(); dismiss() }
+                    Button("identificationPhoto.cancel") { if viewModel.canClose { viewModel.close(); dismiss() } }
+                        .disabled(!viewModel.canClose)
                         .accessibilityIdentifier("cancelIdentificationPhoto")
                 }
             }
         }
         .tint(Color("PrimaryAction"))
+        .interactiveDismissDisabled(!viewModel.canClose)
+        .onChange(of: viewModel.creationState) { _, state in
+            if state == .saved { dismiss() }
+        }
         .sheet(isPresented: Binding(get: { viewModel.authorizationState == .awaitingConfirmation }, set: { showing in
             if !showing, viewModel.authorizationState == .awaitingConfirmation { viewModel.cancelAuthorization() }
         })) {

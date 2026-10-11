@@ -6,8 +6,53 @@ private struct ListResult: LoadPlantsUseCase {
     func execute() async throws -> [Plant] { try result.get() }
 }
 
+private actor CreationListLoader: LoadPlantsUseCase {
+    let plants: [Plant]
+    var calls = 0
+    var held: CheckedContinuation<[Plant], Never>?
+    init(plants: [Plant]) { self.plants = plants }
+    func execute() async throws -> [Plant] {
+        calls += 1
+        if calls == 1 { return await withCheckedContinuation { held = $0 } }
+        return plants
+    }
+    func release() { held?.resume(returning: []); held = nil }
+}
+
 @MainActor
 final class PlantListViewModelTests: XCTestCase {
+    func testCreatedPlantKeepsExistingCardsAndPhotoStatesOrdersAndDeduplicatesCallback() async {
+        let repository = CardPhotoRepository()
+        let plants = (1...2).map(StorageTestFixture.plant)
+        let model = PlantListViewModel(loadPlants: ListResult(result: .success(plants)), loadPhoto: LoadInitialPlantPhoto(repository: repository), loadDetail: LoadPlantDetail(repository: repository), update: UpdatePlant(repository: repository))
+        await model.load()
+        let originals = model.cards
+        let photoTask = Task { await originals[0].load() }
+        await repository.waitForRequests(1)
+        await repository.resolve(0, .failure(PlantStorageError.photoMissing))
+        await photoTask.value
+        let added = Plant(id: UUID(), name: "Ficus", confirmedSpecies: "Ficus", createdAt: plants[0].createdAt.addingTimeInterval(-1), location: nil, careSheet: plants[0].careSheet)
+        model.applyCreatedPlant(added); model.applyCreatedPlant(added)
+        XCTAssertEqual(model.cards.map(\.id), [added.id] + plants.map(\.id))
+        XCTAssertTrue(model.cards[1] === originals[0]); XCTAssertTrue(model.cards[2] === originals[1])
+        guard case .failed = originals[0].photoState else { return XCTFail("Photo state reset") }
+        let reads = await repository.ids(); XCTAssertEqual(reads, [plants[0].id])
+        XCTAssertEqual(model.newlyAddedPlantID, added.id)
+    }
+
+    func testCommitWhileInitialLoadPendingRefreshesFullMetadataAndRejectsLateEmptyResult() async {
+        let plants = (1...2).map(StorageTestFixture.plant)
+        let loader = CreationListLoader(plants: plants), repository = CardPhotoRepository()
+        let model = PlantListViewModel(loadPlants: loader, loadPhoto: LoadInitialPlantPhoto(repository: repository), loadDetail: LoadPlantDetail(repository: repository), update: UpdatePlant(repository: repository))
+        let initial = Task { await model.load() }
+        for _ in 0..<100 { if await loader.calls == 1 { break }; await Task.yield() }
+        model.applyCreatedPlant(plants[1])
+        for _ in 0..<1000 { if model.cards.count == 2 { break }; try? await Task.sleep(for: .milliseconds(2)) }
+        XCTAssertEqual(model.cards.map(\.id), plants.map(\.id))
+        await loader.release(); await initial.value
+        XCTAssertEqual(model.cards.map(\.id), plants.map(\.id))
+        let reads = await repository.ids(); XCTAssertTrue(reads.isEmpty)
+    }
     func testConfirmedUpdateChangesOnlyMatchingSnapshotAndKeepsCardAndImage() async throws {
         let repository = EditRepository()
         let plants = (1...2).map(StorageTestFixture.plant)

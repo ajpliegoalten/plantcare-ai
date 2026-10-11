@@ -13,6 +13,7 @@ struct PlantListView: View {
                     .padding(.bottom, 20)
 
                 GeometryReader { geometry in
+                    ScrollViewReader { proxy in
                     ScrollView {
                         VStack(spacing: 24) {
                             switch viewModel.state {
@@ -24,10 +25,12 @@ struct PlantListView: View {
                                 LazyVStack(spacing: 24) {
                                     ForEach(viewModel.cards) { card in
                                         PlantCardView(viewModel: card)
+                                            .id(card.id)
                                     }
                                 }
                             case .failed:
                                 statusMessage("collection.storageError", identifier: "storageErrorMessage")
+                                Button("savePlant.retryRead") { Task { await viewModel.retryLoad() } }
                             }
                         }
                         .frame(maxWidth: .infinity)
@@ -36,15 +39,33 @@ struct PlantListView: View {
                         .frame(minHeight: geometry.size.height, alignment: contentAlignment)
                     }
                     .accessibilityIdentifier("collectionViewport")
+                    .onChange(of: photoDraft == nil) { _, closed in
+                        if closed, let id = viewModel.newlyAddedPlantID { proxy.scrollTo(id, anchor: .bottom) }
+                    }
+                    .onChange(of: viewModel.cards.count) { _, _ in
+                        if photoDraft == nil, let id = viewModel.newlyAddedPlantID { proxy.scrollTo(id, anchor: .bottom) }
+                    }
+                    }
                 }
             }
             .background(Color("Background").ignoresSafeArea())
+            .overlay(alignment: .bottom) {
+                #if DEBUG && targetEnvironment(simulator)
+                if photoDraft == nil {
+                    VStack {
+                        if let count = viewModel.lastCareInvocationCount { Text("Care invocations: \(count)").accessibilityIdentifier("careSheetInvocationCount") }
+                        if let count = viewModel.lastIdentificationInvocationCount { Text("Instrumented invocations: \(count)").accessibilityIdentifier("externalAIInvocationCount") }
+                    }
+                }
+                #endif
+            }
             .task { await viewModel.load() }
             .navigationDestination(for: UUID.self) { id in
                 PlantDetailView(viewModel: viewModel.detailViewModel(id: id)).id(id)
             }
             .sheet(item: Binding(get: { photoDraft }, set: { newValue in
                 if newValue == nil { photoDraft?.close() }
+                if newValue == nil, photoDraft?.canClose == false { return }
                 photoDraft = newValue
             })) { draft in
                 IdentificationPhotoView(viewModel: draft)
