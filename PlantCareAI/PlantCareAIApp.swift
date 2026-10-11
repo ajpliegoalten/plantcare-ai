@@ -10,6 +10,18 @@ struct PlantCareAIApp: App {
         var load: any LoadPlantsUseCase = LoadPlants(repository: repository)
         #if DEBUG && targetEnvironment(simulator)
         let arguments = ProcessInfo.processInfo.arguments
+        // Batch cleanup only accepts UUID-scoped test namespaces, never PlantStore
+        // or standard preferences. One cleanup launch suffices for every scenario.
+        if let position = arguments.firstIndex(of: "--test-cleanup-ids"),
+           arguments.indices.contains(position + 1) {
+            for value in arguments[position + 1].split(separator: ",") {
+                guard let id = UUID(uuidString: String(value)) else { continue }
+                let testRoot = URL.applicationSupportDirectory.appendingPathComponent("StorageTests").appendingPathComponent(id.uuidString)
+                try? FileManager.default.removeItem(at: testRoot)
+                let suite = "ExternalAIConsentTests.\(id.uuidString)"
+                UserDefaults(suiteName: suite)?.removePersistentDomain(forName: suite)
+            }
+        }
         if let position = arguments.firstIndex(of: "--storage-test-id"),
            arguments.indices.contains(position + 1), let id = UUID(uuidString: arguments[position + 1]) {
             let testRoot = URL.applicationSupportDirectory.appendingPathComponent("StorageTests").appendingPathComponent(id.uuidString)

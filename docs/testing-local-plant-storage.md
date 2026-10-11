@@ -4,7 +4,7 @@ Desde la raíz del worktree, Xcode 26.2 / iPhone Simulator instalado:
 
 Verificación habitual: un único iPhone Simulator estándar, tamaño de texto normal y una sola apariencia. Mantener `./init.sh`, pruebas unitarias y UI funcionales, escenarios de persistencia/aislamiento/reapertura e inspección visual básica. No lanzar ejecuciones duplicadas con la sesión activa. SE/pantallas pequeñas, Dynamic Type aumentado/máximo, VoiceOver/Accessibility Inspector y matrices adicionales de apariencia quedan fuera de esta rutina y **solo se ejecutan si el usuario las solicita expresamente**. Conservar soporte y aserciones funcionales; no declarar aprobadas comprobaciones no ejecutadas.
 
-En portátil, mantener la tapa abierta durante toda la prueba. Puede ejecutarse `caffeinate -dius ./init.sh` para impedir suspensión por inactividad; no evita necesariamente el cierre de tapa en batería. Ejecutar una sola prueba/simulador por vez. Ante pausas de ~900 s en eventos/capturas, cotejar `pmset -g log` antes de atribuirlas a la app. No apagar/reiniciar el simulador en uso.
+En portátil, mantener la tapa abierta durante toda la prueba. Puede ejecutarse `caffeinate -dius ./init.sh` para impedir suspensión por inactividad; no evita necesariamente el cierre de tapa en batería. Una sola sesión de xcodebuild, con clones aislados gestionados por XCTest (5 workers por defecto), no procesos competidores. Ante pausas de ~900 s en eventos/capturas, cotejar `pmset -g log` antes de atribuirlas a la app. No apagar/reiniciar el simulador en uso. Selección/cobertura vigente: `docs/testing-ui.md`. Los siguientes comandos son alternativas por impacto, no pasos que deban repetirse después del gate.
 
 ```sh
 ./init.sh
@@ -14,14 +14,15 @@ xcodebuild -project PlantCareAI.xcodeproj -scheme PlantCareAI \
   -parallel-testing-enabled NO '-only-testing:PlantCareAITests/LocalPlantRepositoryTests' test
 xcodebuild -project PlantCareAI.xcodeproj -scheme PlantCareAI \
   -destination "platform=iOS Simulator,id=$UDID" -derivedDataPath "$PWD/DerivedData" \
-  -parallel-testing-enabled NO '-only-testing:PlantCareAIUITests/PlantCareAIUITests/testStoredCollectionSurvivesProcessRelaunch' test
+  -parallel-testing-enabled YES -parallel-testing-worker-count 5 '-only-testing:PlantCareAIUITests/StoredCollectionUITests/testStoredCollectionSurvivesProcessRelaunch' test
 xcodebuild -project PlantCareAI.xcodeproj -scheme PlantCareAI \
   -destination "platform=iOS Simulator,id=$UDID" -derivedDataPath "$PWD/DerivedData" \
-  -parallel-testing-enabled NO '-only-testing:PlantCareAITests/PlantCardViewModelTests' \
+  -parallel-testing-enabled YES -parallel-testing-worker-count 5 '-only-testing:PlantCareAITests/PlantCardViewModelTests' \
   '-only-testing:PlantCareAITests/PlantListViewModelTests' \
   '-only-testing:PlantCareAITests/LoadPlantDetailTests' \
   '-only-testing:PlantCareAITests/PlantDetailViewModelTests' \
-  '-only-testing:PlantCareAIUITests/PlantCareAIUITests' test
+  '-only-testing:PlantCareAIUITests/PlantCardsUITests' \
+  '-only-testing:PlantCareAIUITests/StoredCollectionUITests' test
 ```
 
 Los tests de repositorio usan disco temporal y lo limpian. Los UI tests usan `Application Support/StorageTests/<UUID>` y limpian al terminar. El relanzamiento verifica exactamente los dos modelos completos y los bytes JPEG propios antes de mostrar las tarjetas; no basta con contar plantas. No se desinstala entre lanzamientos.
@@ -83,6 +84,6 @@ xcrun simctl terminate "$UDID" org.plantcareai.prototype
 
 No usar `--storage-verify` original tras editar: sigue exigiendo valores originales. Para otros nombres/ubicaciones, relanzar solo con `--storage-test-id "$FIXTURE"` (sin seed/verify) y comprobar manualmente. Nunca resembrar para demostrar persistencia. Todos los flags están compilados solo en Debug Simulator; sin flags se usa PlantStore real.
 
-Pruebas focalizadas: `xcodebuild` con destino anterior y `-parallel-testing-enabled NO '-only-testing:PlantCareAITests/UpdatePlantTests' '-only-testing:PlantCareAITests/EditPlantViewModelTests' '-only-testing:PlantCareAITests/LocalPlantRepositoryTests' '-only-testing:PlantCareAIUITests/PlantCareAIUITests/testEditPersistsAndRefreshesOnlySelectedPlant' '-only-testing:PlantCareAIUITests/PlantCareAIUITests/testCancelGestureValidationAndOptionalLocationWithMissingPhoto' test`.
+Pruebas focalizadas: `xcodebuild` con destino anterior y `-parallel-testing-enabled YES -parallel-testing-worker-count 5 '-only-testing:PlantCareAITests/UpdatePlantTests' '-only-testing:PlantCareAITests/EditPlantViewModelTests' '-only-testing:PlantCareAITests/LocalPlantRepositoryTests' '-only-testing:PlantCareAIUITests/EditPlantUITests' test`.
 
 Comprobar manualmente teclado, nombre blanco (Guardar deshabilitado/exposición del error), quitar/añadir ubicación, nombres largos/emoji, Cancelar/descarte y nueva precarga en el único simulador estándar con texto normal. Durante guardar no se puede cancelar ni editar; fallo mantiene textos y permite reintento. El fallo de escritura se inyecta en pruebas unitarias/integración, no con corrupción en producción. Repeticiones en pantallas pequeñas, texto aumentado/máximo, VoiceOver/Accessibility Inspector y otras apariencias solo bajo petición expresa; fuera de la verificación habitual, no se declaran superadas.

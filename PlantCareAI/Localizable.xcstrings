@@ -1,12 +1,11 @@
 {
   "sourceLanguage" : "es",
   "strings" : {
-    "savePlant.loading" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Guardando planta…" } } } },
-    "savePlant.error" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No pudimos guardar tu planta" } } } },
-    "savePlant.retry" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Reintentar guardado" } } } },
-    "savePlant.retryRead" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Reintentar lectura" } } } },
-    "savePlant.intent" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Al confirmar, generaremos los cuidados y añadiremos tu planta si la ficha está completa" } } } },
+    "Care invocations: %@" : {
+
+    },
     "careSheet.aiIdentity" : {
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -83,6 +82,7 @@
       }
     },
     "careSheet.orientation" : {
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -1125,7 +1125,9 @@
         }
       }
     },
-    "Instrumented invocations: %@" : {},
+    "Instrumented invocations: %@" : {
+
+    },
     "manualSpecies.cancelEdit" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1138,6 +1140,7 @@
       }
     },
     "manualSpecies.confirmedProvenance" : {
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -1247,6 +1250,58 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Introduce la especie"
+          }
+        }
+      }
+    },
+    "savePlant.error" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No pudimos guardar tu planta"
+          }
+        }
+      }
+    },
+    "savePlant.intent" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Al confirmar, generaremos los cuidados y añadiremos tu planta si la ficha está completa"
+          }
+        }
+      }
+    },
+    "savePlant.loading" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardando planta…"
+          }
+        }
+      }
+    },
+    "savePlant.retry" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reintentar guardado"
+          }
+        }
+      }
+    },
+    "savePlant.retryRead" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reintentar lectura"
           }
         }
       }

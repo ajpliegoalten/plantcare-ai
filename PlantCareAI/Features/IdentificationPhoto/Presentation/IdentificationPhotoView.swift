@@ -101,7 +101,11 @@ struct IdentificationPhotoView: View {
                             Button("Test \(name)") {
                                 let bytes = viewModel.testSelections[name]
                                 viewModel.select {
-                                    try await Task.sleep(for: .seconds(2))
+                                    // Other scenarios need prepared bytes, not an
+                                    // artificial two-second wait on every selection.
+                                    if ProcessInfo.processInfo.arguments.contains("--photo-fixture-delay") {
+                                        try await Task.sleep(for: .seconds(2))
+                                    }
                                     return bytes
                                 }
                             }.frame(minHeight: 44).disabled(viewModel.isBusy)

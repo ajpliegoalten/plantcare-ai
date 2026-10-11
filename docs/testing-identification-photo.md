@@ -4,7 +4,7 @@ Feature `choose-identification-photo`; spec aprobada intacta en `docs/specs/choo
 
 ## Gate y simulador
 
-Coordinar primero: una sola ejecución y un iPhone estándar, texto normal/una apariencia, tapa abierta. Ejecutar `caffeinate -dius ./init.sh`. El gate genera `DerivedData/IdentificationPhotoMedia/picker-A.png` (verde, 160×80) y `picker-B.png` (naranja, 80×160), con esquina blanca superior izquierda, e importa ambas con `simctl addmedia` antes de UI tests. Son imágenes sintéticas locales, sin datos privados ni descarga. Cada ejecución añade dos recursos a Fotos del simulador; no modifica el almacenamiento de plantas. Para limpiar, eliminarlos desde Fotos (no borrar fotos ajenas ni resetear simulador compartido).
+Coordinar primero: una sola sesión y un modelo/runtime iPhone estándar, texto normal/una apariencia, tapa abierta. Ejecutar `caffeinate -dius ./init.sh`: fixtures/unitarias paralelos en clones, PhotosPicker real aparte y serial. El gate genera `DerivedData/IdentificationPhotoMedia/picker-A.png` (verde, 160×80) y `picker-B.png` (naranja, 80×160), con esquina blanca superior izquierda, e importa ambas con `simctl addmedia` antes del test del picker. Son imágenes sintéticas locales, sin datos privados ni descarga. Cada ejecución añade dos recursos a Fotos del simulador; no modifica el almacenamiento de plantas. Para limpiar, eliminarlos desde Fotos (no borrar fotos ajenas ni resetear simulador compartido). Véase `docs/testing-ui.md`.
 
 Seed independiente, antes de pruebas focalizadas del picker:
 
@@ -18,14 +18,15 @@ xcodebuild -project PlantCareAI.xcodeproj -scheme PlantCareAI \
   -only-testing:PlantCareAITests/IdentificationPhotoPreparationTests \
   -only-testing:PlantCareAITests/IdentificationPhotoViewModelTests \
   -only-testing:PlantCareAITests/CameraAccessTests \
-  -only-testing:PlantCareAIUITests/PlantCareAIUITests test
+  -only-testing:PlantCareAIUITests/IdentificationPhotoUITests \
+  -only-testing:PlantCareAIUITests/SystemGalleryUITests test
 ```
 
 ## Flujo real y seam determinista
 
 Instalar app Debug y lanzar sin seam para galería real. Desde Añadir o Añadir mi primera planta: abrir Elegir de galería, elegir una imagen sintética reciente, comprobar imagen completa/orientación y dimensiones. Repetir con la otra; cancelar el picker mantiene A y no produce error; volver a elegir el mismo recurso es posible. Cerrar con Cancelar/gesto, reabrir y relanzar no restaura foto. Tomar foto en simulador muestra indisponibilidad, no captura ficticia. Ninguno de estos pasos debe alterar colección vacía/ejemplares.
 
-`--identification-photo-fixture` habilita controles Test A/B/failure **solo Debug Simulator**: imágenes verde horizontal 120×80/naranja vertical 80×120 y bytes inválidos, con 2 s de transferencia para observar progreso/cancelación. Usa el preparador real, no el picker. No sirve como evidencia de cámara ni de integración Photos. La suite mantiene además selección real en PhotosPicker y cancelación nativa.
+`--identification-photo-fixture` habilita controles Test A/B/failure **solo Debug Simulator**: imágenes verde horizontal 120×80/naranja vertical 80×120 y bytes inválidos. Sin demora artificial por defecto; añadir `--photo-fixture-delay` para los 2 s de transferencia que permiten observar progreso/cancelación. Usa el preparador real, no el picker. No sirve como evidencia de cámara ni de integración Photos. La suite mantiene además selección real en PhotosPicker y cancelación nativa en `SystemGalleryUITests`.
 
 Para fixture de dos ejemplares, seguir `docs/testing-local-plant-storage.md`: `--storage-test-id <UUID> --storage-seed`, después relanzar sin seed con `--storage-verify` (comprueba modelos/bytes completos). Seleccionar/cambiar/cancelar foto no llama a repositorio; no crea JPEG de borrador en PlantStore. Cleanup del fixture según esa guía; no desinstalar entre seed y verify.
 

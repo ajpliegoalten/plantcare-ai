@@ -10,7 +10,7 @@ final class IdentificationCandidatesTestFixture {
 
     func identify(_ photo: IdentificationPhoto) async throws -> IdentificationContinuationResult {
         invocations += 1
-        try await Task.sleep(for: .seconds(mode == "slow" ? 30 : 1))
+        if mode == "slow" { try await Task.sleep(for: .seconds(30)) }
         if mode == "error" && invocations == 1 { throw SpeciesIdentificationError.rateLimited }
         if mode == "insufficient" {
             return .completed(IdentificationResult(outcome: .insufficientEvidence, primary: nil, alternatives: [], uncertainty: "No se distinguen hojas ni otros rasgos suficientes para proponer una especie."))
