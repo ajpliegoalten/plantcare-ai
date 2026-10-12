@@ -4,16 +4,20 @@ import ImageIO
 import UniformTypeIdentifiers
 
 // One instance per store, composed by the app. Its actor serializes duplicate checks and publication.
-actor LocalPlantRepository: PlantRepository {
+actor LocalPlantRepository: PlantRepository, CareEventRepository {
     private let root: URL
     private var container: ModelContainer?
     private var context: ModelContext?
     // Internal fault seam: tests can fail after mutation/publication, before metadata commit.
     private let beforeCommit: @Sendable () throws -> Void
+    private let now: @Sendable () -> Date
+    private let beforeCareCommit: @Sendable (CareEvent) throws -> Void
 
-    init(root: URL, beforeCommit: @escaping @Sendable () throws -> Void = {}) {
+    init(root: URL, beforeCommit: @escaping @Sendable () throws -> Void = {}, now: @escaping @Sendable () -> Date = { Date() }, beforeCareCommit: @escaping @Sendable (CareEvent) throws -> Void = { _ in }) {
         self.root = root
         self.beforeCommit = beforeCommit
+        self.now = now
+        self.beforeCareCommit = beforeCareCommit
     }
 
     private var photos: URL { root.appendingPathComponent("Photos", isDirectory: true) }
@@ -23,7 +27,7 @@ actor LocalPlantRepository: PlantRepository {
         do {
             try FileManager.default.createDirectory(at: photos, withIntermediateDirectories: true)
             let configuration = ModelConfiguration(url: root.appendingPathComponent("Plants.store"))
-            let container = try ModelContainer(for: PersistedPlant.self, configurations: configuration)
+            let container = try ModelContainer(for: PersistedPlant.self, PersistedCareEvent.self, configurations: configuration)
             let context = ModelContext(container)
             context.autosaveEnabled = false
             // Fetch must succeed before cleanup: unreadable metadata must never erase referenced photos.
@@ -32,6 +36,8 @@ actor LocalPlantRepository: PlantRepository {
                 _ = try record.domain()
                 return record.photoReference
             })
+            // Validate the additive entity too before any orphan cleanup.
+            for event in try context.fetch(FetchDescriptor<PersistedCareEvent>()) { _ = try event.domain() }
             for file in try FileManager.default.contentsOfDirectory(at: photos, includingPropertiesForKeys: nil) {
                 if file.pathExtension == "pending" || (file.pathExtension == "jpg" && !references.contains(file.lastPathComponent)) {
                     try FileManager.default.removeItem(at: file)
@@ -48,6 +54,49 @@ actor LocalPlantRepository: PlantRepository {
             return try store().fetch(FetchDescriptor<PersistedPlant>()).map { try $0.domain() }
                 .sorted { $0.createdAt == $1.createdAt ? $0.id.uuidString < $1.id.uuidString : $0.createdAt < $1.createdAt }
         } catch { throw PlantStorageError.storage }
+    }
+
+    func saveCareEvent(_ event: CareEvent) async throws -> CareEvent {
+        let event = RegisterWatering.normalized(event)
+        try RegisterWatering.validateStructure(event)
+        let context: ModelContext
+        do { context = try store() } catch { throw CareEventError.storage }
+        do {
+            guard let plant = try context.fetch(FetchDescriptor<PersistedPlant>()).first(where: { $0.id == event.plantID }) else {
+                throw CareEventError.plantNotFound
+            }
+            _ = try plant.domain()
+            if let existing = try context.fetch(FetchDescriptor<PersistedCareEvent>()).first(where: { $0.id == event.id }) {
+                let confirmed = try existing.domain()
+                guard confirmed == event else { throw CareEventError.conflict }
+                return confirmed
+            }
+            try RegisterWatering.validateInsertion(event, now: now())
+            context.insert(PersistedCareEvent(event))
+            try beforeCareCommit(event)
+            try beforeCommit()
+            try context.save()
+            return event
+        } catch {
+            context.rollback()
+            throw (error as? CareEventError) ?? .storage
+        }
+    }
+
+    func loadCareEvents(for plantID: UUID) async throws -> [CareEvent] {
+        do {
+            let context = try store()
+            guard let plant = try context.fetch(FetchDescriptor<PersistedPlant>()).first(where: { $0.id == plantID }) else {
+                throw CareEventError.plantNotFound
+            }
+            _ = try plant.domain()
+            return try context.fetch(FetchDescriptor<PersistedCareEvent>()).filter { $0.plantID == plantID }
+                .map { try $0.domain() }.sorted {
+                    if $0.occurredAt != $1.occurredAt { return $0.occurredAt > $1.occurredAt }
+                    if $0.createdAt != $1.createdAt { return $0.createdAt > $1.createdAt }
+                    return $0.id.uuidString < $1.id.uuidString
+                }
+        } catch { throw (error as? CareEventError) ?? .storage }
     }
 
     func savePlant(_ plant: Plant, initialPhoto: Data) async throws {

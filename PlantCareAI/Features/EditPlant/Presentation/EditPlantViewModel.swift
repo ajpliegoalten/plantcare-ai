@@ -1,17 +1,22 @@
 import Foundation
+import UIKit
 
 @MainActor
 final class EditPlantViewModel: ObservableObject, Identifiable {
     enum State: Equatable { case editing, saving, error(PlantStorageError), saved }
     let id: UUID
+    let originalName: String
+    let species: String
+    let photo: UIImage?
     @Published var name: String
     @Published var location: String
     @Published private(set) var state: State = .editing
     private let update: UpdatePlant
     private let onSaved: @MainActor (Plant) -> Void
 
-    init(plant: Plant, update: UpdatePlant, onSaved: @escaping @MainActor (Plant) -> Void) {
+    init(plant: Plant, photo: UIImage? = nil, update: UpdatePlant, onSaved: @escaping @MainActor (Plant) -> Void) {
         id = plant.id
+        originalName = plant.name; species = plant.confirmedSpecies; self.photo = photo
         name = plant.name
         location = plant.location ?? ""
         self.update = update

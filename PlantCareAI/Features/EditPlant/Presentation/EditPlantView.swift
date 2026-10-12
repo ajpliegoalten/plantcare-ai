@@ -8,8 +8,10 @@ struct EditPlantView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section {
+            ScrollView {
+              VStack(alignment: .leading, spacing: 16) {
+                PlantFormHeader(name: viewModel.originalName, subtitle: viewModel.species, photo: viewModel.photo)
+                VStack(alignment: .leading, spacing: 16) {
                     VStack(alignment: .leading) {
                         Text("edit.name")
                         TextField("", text: $viewModel.name, axis: .vertical)
@@ -18,6 +20,7 @@ struct EditPlantView: View {
                             .focused($focus, equals: .name).submitLabel(.next)
                             .onSubmit { focus = .location }
                             .frame(minHeight: 44)
+                            .padding(12).background(Color("Surface"), in: RoundedRectangle(cornerRadius: 12))
                     }
                     VStack(alignment: .leading) {
                         Text("edit.location")
@@ -27,9 +30,10 @@ struct EditPlantView: View {
                             .focused($focus, equals: .location).submitLabel(.done)
                             .onSubmit { focus = nil }
                             .frame(minHeight: 44)
+                            .padding(12).background(Color("Surface"), in: RoundedRectangle(cornerRadius: 12))
                     }
                 }
-                .listRowBackground(Color("Surface"))
+                .padding(16).background(Color("SurfaceMuted"), in: RoundedRectangle(cornerRadius: 16))
                 .disabled(viewModel.isSaving)
                 if !viewModel.isValid {
                     Text("edit.validation").accessibilityIdentifier("editPlantValidation")
@@ -41,25 +45,28 @@ struct EditPlantView: View {
                         .listRowBackground(Color("Surface"))
                 }
                 if viewModel.isSaving { ProgressView("edit.saving").listRowBackground(Color("Surface")) }
+                Button { Task { await viewModel.save() } } label: {
+                    Text("edit.save").font(.body.weight(.semibold)).frame(maxWidth: .infinity, minHeight: 50)
+                        .foregroundStyle(.white).background(Color("PrimaryAction"), in: Capsule())
+                }
+                .buttonStyle(.plain)
+                .disabled(!viewModel.isValid || viewModel.isSaving || viewModel.state == .saved)
+                .accessibilityIdentifier("saveEditPlant")
+              }.padding(20)
             }
             .scrollContentBackground(.hidden)
             .scrollDismissesKeyboard(.immediately)
-            .background(Color("Background"))
+            .background(Color("Surface"))
             .foregroundStyle(Color("TextPrimary"))
             .navigationTitle(Text("edit.title"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color("Background"), for: .navigationBar)
+            .toolbarBackground(Color("Surface"), for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarColorScheme(.light, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button { dismiss() } label: { Text("edit.cancel").frame(minWidth: 44, minHeight: 44) }
                         .disabled(viewModel.isSaving).accessibilityIdentifier("cancelEditPlant")
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button { Task { await viewModel.save() } } label: { Text("edit.save").frame(minWidth: 44, minHeight: 44) }
-                        .disabled(!viewModel.isValid || viewModel.isSaving || viewModel.state == .saved)
-                        .accessibilityIdentifier("saveEditPlant")
                 }
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
@@ -73,6 +80,7 @@ struct EditPlantView: View {
         .interactiveDismissDisabled(viewModel.isSaving)
         .presentationDetents([.fraction(0.95)])
         .presentationDragIndicator(.visible)
+        .presentationCornerRadius(24)
         .onChange(of: viewModel.state) { _, state in if state == .saved { dismiss() } }
     }
 }
