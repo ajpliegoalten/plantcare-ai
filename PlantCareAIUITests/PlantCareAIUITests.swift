@@ -2138,6 +2138,13 @@ final class AddPlantPhotoUITests: PlantCareAIUITestCase {
         pager.swipeRight(); XCTAssertTrue(date.label.hasPrefix("Foto inicial")); XCTAssertFalse(previous.isEnabled)
         pager.swipeLeft(); XCTAssertFalse(date.label.hasPrefix("Foto inicial"))
         pager.swipeLeft(); XCTAssertEqual(date.label, pastLabel); XCTAssertFalse(next.isEnabled)
+        // A newly committed retroactive page must survive the new push, not just sheets.
+        let history = app.buttons["detailHistory-\(plantID(1))"]; reveal(history, in: app); history.tap()
+        XCTAssertTrue(app.navigationBars["Historial de cuidados"].waitForExistence(timeout: 5))
+        let historyBack = app.navigationBars["Historial de cuidados"].buttons["BackButton"]
+        XCTAssertTrue(historyBack.exists); historyBack.tap()
+        XCTAssertTrue(app.navigationBars["Historial de cuidados"].waitForNonExistence(timeout: 5))
+        XCTAssertEqual(date.label, pastLabel)
         back(app)
         let second = app.buttons["plantCard-\(plantID(2))"]; reveal(second, in: app); second.tap()
         XCTAssertTrue(app.staticTexts["selectedPlant-\(plantID(2))"].waitForExistence(timeout: 5))
@@ -2224,6 +2231,200 @@ final class AddPlantPhotoUITests: PlantCareAIUITestCase {
         open(app); XCTAssertTrue(app.descendants(matching: .any)["additionalPhotoPlaceholder"].firstMatch.exists); app.buttons["cancelAdditionalPhoto"].tap()
         app.terminate(); app.launchArguments = ["--storage-test-id", id, "--storage-verify", "--storage-long-text", "--photo-verify", ";", "-AppleLanguages", "(es)"]
         app.launch(); XCTAssertTrue(app.buttons["plantCard-\(plantID(1))"].waitForExistence(timeout: 10))
+    }
+}
+
+final class PlantTimelineUITests: PlantCareAIUITestCase {
+    private func timelineBack(_ app: XCUIApplication) {
+        let native = app.navigationBars["Historial de cuidados"].buttons["BackButton"]
+        XCTAssertTrue(native.exists); XCTAssertEqual(native.label, "Detalle de planta"); native.tap()
+        XCTAssertTrue(app.navigationBars["Historial de cuidados"].waitForNonExistence(timeout: 5))
+    }
+    private func key(_ number: Int, type: String = "care") -> String {
+        type + "-" + String(format: "10000000-0000-0000-0000-%012d", number)
+    }
+    private func launch(_ app: XCUIApplication, id: String, seed: Bool = true, mode: String? = "mixed", extra: [String] = []) {
+        app.launchArguments = ["--storage-test-id", id, "-AppleLanguages", "(es)"]
+            + (seed ? ["--storage-seed"] : []) + (mode.map { ["--timeline-fixture", $0] } ?? []) + extra
+        app.launch()
+        let card = app.buttons["plantCard-\(plantID(1))"]
+        XCTAssertTrue(card.waitForExistence(timeout: 10)); card.tap()
+        XCTAssertTrue(app.staticTexts["selectedPlant-\(plantID(1))"].waitForExistence(timeout: 5))
+    }
+    private func open(_ app: XCUIApplication, index: Int = 1) {
+        let link = app.buttons["detailHistory-\(plantID(index))"]
+        reveal(link, in: app); XCTAssertEqual(link.label, "Ver historial, Cuidados y fotografías")
+        capture("timeline-detail-box", app: app); link.tap()
+        XCTAssertTrue(app.navigationBars["Historial de cuidados"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["Cancelar"].exists)
+    }
+    private func entry(_ stableKey: String, app: XCUIApplication) -> XCUIElement {
+        app.descendants(matching: .any)["timelineEntry-" + stableKey].firstMatch
+    }
+    private func assertNoCardDate(_ row: XCUIElement) {
+        XCTAssertTrue(row.exists)
+        let elements = row.descendants(matching: .any).allElementsBoundByIndex
+        let labels = [row.label] + elements.map(\.label) + elements.compactMap { $0.value as? String }
+        XCTAssertFalse(labels.contains { $0.contains("enero de 1970") || $0.contains("diciembre de 1969") || $0 == "Hoy" || $0 == "Ayer" })
+        XCTAssertFalse(labels.contains { $0.contains("createdAt") || $0.contains("00:") })
+    }
+    private func stableHistory(_ app: XCUIApplication) {
+        let native = app.navigationBars["Historial de cuidados"].buttons["BackButton"]
+        expectation(for: NSPredicate(format: "hittable == true"), evaluatedWith: native)
+        waitForExpectations(timeout: 5)
+    }
+    private func assertSingleDay(_ timestamp: TimeInterval, app: XCUIApplication) -> String {
+        let formatter = DateFormatter(); formatter.locale = Locale(identifier: "es_ES")
+        formatter.calendar = Calendar(identifier: .gregorian); formatter.timeZone = .current
+        formatter.dateFormat = "yyyy-MM-dd"
+        let day = formatter.string(from: Date(timeIntervalSince1970: timestamp))
+        XCTAssertEqual(app.staticTexts.matching(identifier: "timelineDay-" + day).count, 1)
+        let title = DateFormatter(); title.locale = Locale(identifier: "es_ES")
+        title.calendar = formatter.calendar; title.timeZone = formatter.timeZone
+        title.dateStyle = .long; title.timeStyle = .none
+        let text = title.string(from: Date(timeIntervalSince1970: timestamp))
+        XCTAssertEqual(app.staticTexts.matching(NSPredicate(format: "label == %@", text)).count, 1)
+        return day
+    }
+    func testMixedRealStoreOrderSingleHeadersLongNotePreOriginIsolationAndRelaunch() {
+        let app = XCUIApplication(), id = isolatedID(); launch(app, id: id); open(app)
+        let photo = entry(key(10, type: "additional"), app: app)
+        XCTAssertTrue(photo.waitForExistence(timeout: 5)); assertNoCardDate(photo)
+        var observedDays = [assertSingleDay(86400, app: app)]
+        let transplant = entry(key(4), app: app), pruning = entry(key(3), app: app)
+        reveal(transplant, in: app); XCTAssertLessThan(photo.frame.minY, transplant.frame.minY)
+        reveal(pruning, in: app); XCTAssertLessThan(transplant.frame.minY, pruning.frame.minY)
+        assertNoCardDate(transplant); assertNoCardDate(pruning)
+        let long = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Nota literal:")).firstMatch
+        XCTAssertTrue(long.exists); XCTAssertTrue(long.label.hasSuffix("FINAL DE LA NOTA")); capture("timeline-long-note", app: app)
+        let fertilizer = entry(key(2), app: app), watering = entry(key(1), app: app)
+        reveal(fertilizer, in: app); reveal(watering, in: app)
+        XCTAssertLessThan(pruning.frame.minY, fertilizer.frame.minY); XCTAssertLessThan(fertilizer.frame.minY, watering.frame.minY)
+        assertNoCardDate(fertilizer); assertNoCardDate(watering)
+        let initial = entry("initial-" + plantID(1), app: app), other = entry(key(5), app: app)
+        reveal(initial, in: app); assertNoCardDate(initial)
+        observedDays.append(assertSingleDay(1000, app: app)); capture("timeline-origin-prealta", app: app)
+        reveal(other, in: app); XCTAssertLessThan(initial.frame.minY, other.frame.minY); assertNoCardDate(other)
+        observedDays.append(assertSingleDay(-86400, app: app))
+        let footer = app.staticTexts["timelineOriginFooter"]; reveal(footer, in: app)
+        XCTAssertEqual(footer.label, "Has llegado al primer registro de este ejemplar")
+        capture("timeline-prealta-footer", app: app)
+        XCTAssertFalse(app.staticTexts["SOLO PLANTA B"].exists)
+        let days = app.staticTexts.matching(NSPredicate(format: "identifier BEGINSWITH %@", "timelineDay-")).allElementsBoundByIndex
+        XCTAssertEqual(Set(days.map(\.identifier)).count, days.count)
+        // LazyVStack virtualizes earlier headers at the bottom: verify all three
+        // as they are visited, not a fictitious simultaneously mounted tree.
+        XCTAssertEqual(Set(observedDays).count, 3)
+        XCTAssertEqual(observedDays, observedDays.sorted(by: >))
+        timelineBack(app); back(app)
+        let b = app.buttons["plantCard-\(plantID(2))"]; reveal(b, in: app); b.tap(); open(app, index: 2)
+        XCTAssertTrue(app.staticTexts["SOLO PLANTA B"].waitForExistence(timeout: 5)); XCTAssertFalse(entry(key(10, type: "additional"), app: app).exists)
+        app.terminate(); launch(app, id: id, seed: false); open(app)
+        XCTAssertTrue(entry(key(10, type: "additional"), app: app).waitForExistence(timeout: 5))
+        XCTAssertEqual(app.descendants(matching: .any).matching(identifier: "timelineEntry-" + key(10, type: "additional")).count, 1)
+        capture("timeline-mixed-relaunch", app: app)
+    }
+    func testOnlyInitialMissingImageAndEnglishFallbackNotGlobalEmptyOrRepeatedDate() {
+        let app = XCUIApplication(); launch(app, id: isolatedID(), mode: nil, extra: ["--storage-photo-missing", "-AppleLanguages", "(en)"])
+        open(app)
+        XCTAssertTrue(app.staticTexts["timelineNoRecords"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["timelineNoRecords"].label, "Aún no hay cuidados ni fotografías adicionales")
+        let initial = entry("initial-" + plantID(1), app: app)
+        XCTAssertTrue(initial.exists); assertNoCardDate(initial)
+        let error = app.staticTexts["timelinePhotoError-initial-" + plantID(1)]
+        XCTAssertTrue(error.waitForExistence(timeout: 5)); XCTAssertEqual(error.label, "No pudimos cargar esta foto")
+        let retry = app.buttons["retryTimelinePhoto-initial-" + plantID(1)]
+        XCTAssertGreaterThanOrEqual(retry.frame.height, 44); retry.tap(); XCTAssertTrue(error.waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["timelineOriginFooter"].label, "Has llegado al origen de este ejemplar")
+        capture("timeline-only-initial-error", app: app)
+    }
+    func testPhotosOnlyMetadataGlobalRetryAndOwnImageRetryKeepGroup() {
+        let app = XCUIApplication(); launch(app, id: isolatedID(), mode: "photosOnly",
+            extra: ["--timeline-read-error", "--additional-photo-read-fixture", "imageErrorOnce"])
+        open(app)
+        XCTAssertTrue(app.staticTexts["timelineError"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["timelineNoRecords"].exists); XCTAssertFalse(app.staticTexts["timelineOriginFooter"].exists)
+        stableHistory(app); capture("timeline-metadata-error", app: app); app.buttons["retryTimeline"].tap()
+        let error = app.staticTexts["timelinePhotoError-" + key(10, type: "additional")]
+        XCTAssertTrue(error.waitForExistence(timeout: 5)); XCTAssertTrue(app.staticTexts["Sin cuidados registrados"].exists)
+        let row = entry(key(10, type: "additional"), app: app); assertNoCardDate(row)
+        stableHistory(app); capture("timeline-own-image-error", app: app)
+        let retry = app.buttons["retryTimelinePhoto-" + key(10, type: "additional")]
+        XCTAssertGreaterThanOrEqual(retry.frame.height, 44); retry.tap()
+        XCTAssertTrue(error.waitForNonExistence(timeout: 5)); XCTAssertTrue(row.exists)
+        capture("timeline-photo-recovered", app: app)
+    }
+    func testEightPhotosScrollBothDirectionsReloadsActualImagesWithoutLeavingHistory() {
+        let app = XCUIApplication(), id = isolatedID()
+        launch(app, id: id, mode: "scrollPhotos"); open(app); stableHistory(app)
+        func showPhoto(_ identity: String, goingDown: Bool) {
+            let photo = app.descendants(matching: .any)["timelinePhoto-" + identity].firstMatch
+            let top = app.navigationBars["Historial de cuidados"].frame.maxY + 10
+            let bottom = app.frame.maxY - 50
+            for _ in 0..<24 {
+                if photo.exists && photo.frame.midY > top && photo.frame.midY < bottom { break }
+                app.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: goingDown ? 0.75 : 0.4))
+                    .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: goingDown ? 0.45 : 0.7)))
+            }
+            XCTAssertTrue(photo.exists); XCTAssertGreaterThan(photo.frame.midY, top); XCTAssertLessThan(photo.frame.midY, bottom)
+            // Existence alone also passes for placeholders: demand the actual decoded image.
+            expectation(for: NSPredicate(format: "value == %@", "Foto cargada"), evaluatedWith: photo)
+            waitForExpectations(timeout: 5)
+            XCTAssertFalse(app.staticTexts["timelinePhotoError-" + identity].exists)
+        }
+        for number in stride(from: 17, through: 10, by: -1) { showPhoto(key(number, type: "additional"), goingDown: true) }
+        showPhoto("initial-" + plantID(1), goingDown: true)
+        capture("timeline-scroll-eight-bottom", app: app)
+        for number in 10...17 { showPhoto(key(number, type: "additional"), goingDown: false) }
+        capture("timeline-scroll-eight-return-top", app: app)
+        // Rapid reversal while asynchronous reads can still be cancelled/draining.
+        for _ in 0..<3 { app.swipeUp() }
+        for _ in 0..<3 { app.swipeDown() }
+        showPhoto(key(17, type: "additional"), goingDown: false)
+        XCTAssertTrue(app.navigationBars["Historial de cuidados"].exists)
+        timelineBack(app); back(app)
+        let other = app.buttons["plantCard-\(plantID(2))"]; reveal(other, in: app); other.tap(); open(app, index: 2)
+        XCTAssertTrue(app.staticTexts["timelineNoRecords"].waitForExistence(timeout: 5))
+        XCTAssertFalse(entry(key(17, type: "additional"), app: app).exists)
+    }
+    func testPushNativeBackAndGesturePreserveAdditionalSelectionRealExitResets() {
+        let app = XCUIApplication(); launch(app, id: isolatedID(), mode: "photosOnly")
+        let next = app.buttons["plantPhotoNext-\(plantID(1))"]; XCTAssertTrue(next.waitForExistence(timeout: 5)); next.tap()
+        let date = app.staticTexts["plantPhotoDate-\(plantID(1))"], selected = date.label
+        XCTAssertFalse(selected.hasPrefix("Foto inicial")); open(app); timelineBack(app)
+        XCTAssertEqual(date.label, selected)
+        let care = app.buttons["detailRegisterCare-\(plantID(1))"]
+        for _ in 0..<8 where !care.isHittable { app.swipeDown() }
+        XCTAssertTrue(care.isHittable); care.tap()
+        XCTAssertTrue(app.staticTexts["plantFormName"].waitForExistence(timeout: 5))
+        capture("timeline-return-care-initial-snapshot", app: app); app.buttons["cancelCare"].tap()
+        app.buttons["editPlant-\(plantID(1))"].tap()
+        XCTAssertTrue(app.textFields["editPlantName"].waitForExistence(timeout: 5))
+        capture("timeline-return-edit-initial-snapshot", app: app); app.buttons["cancelEditPlant"].tap()
+        let add = app.buttons["detailAddPhoto-\(plantID(1))"]
+        for _ in 0..<8 where !add.isHittable { app.swipeDown() }
+        XCTAssertTrue(add.isHittable); add.tap()
+        XCTAssertTrue(app.navigationBars["Añadir foto"].waitForExistence(timeout: 5))
+        capture("timeline-return-add-initial-snapshot", app: app); app.buttons["cancelAdditionalPhoto"].tap()
+        XCTAssertEqual(date.label, selected)
+        open(app)
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.01, dy: 0.5)).press(forDuration: 0.05,
+            thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)))
+        XCTAssertTrue(app.navigationBars["Historial de cuidados"].waitForNonExistence(timeout: 5)); XCTAssertEqual(date.label, selected)
+        back(app); let card = app.buttons["plantCard-\(plantID(1))"]; reveal(card, in: app); card.tap()
+        XCTAssertTrue(date.waitForExistence(timeout: 5)); XCTAssertTrue(date.label.hasPrefix("Foto inicial"))
+        open(app); timelineBack(app); XCTAssertTrue(date.label.hasPrefix("Foto inicial"))
+    }
+    func testCommitAndCancelCareReopenRefreshExactlyOnce() {
+        let app = XCUIApplication(), id = isolatedID(); launch(app, id: id, mode: nil); open(app); timelineBack(app)
+        let care = app.buttons["detailRegisterCare-\(plantID(1))"]; reveal(care, in: app); care.tap()
+        app.buttons["careKind-watering"].tap(); app.buttons["saveCare"].tap()
+        XCTAssertTrue(app.navigationBars["Registrar cuidado"].waitForNonExistence(timeout: 10)); open(app)
+        let careRows = app.descendants(matching: .any).matching(NSPredicate(format: "identifier BEGINSWITH %@", "timelineEntry-care-"))
+        XCTAssertEqual(careRows.count, 1); XCTAssertFalse(app.staticTexts["timelineNoRecords"].exists)
+        timelineBack(app); reveal(care, in: app); care.tap(); app.buttons["careKind-other"].tap(); app.buttons["cancelCare"].tap()
+        open(app); XCTAssertEqual(careRows.count, 1)
+        app.terminate(); launch(app, id: id, seed: false, mode: nil); open(app); XCTAssertEqual(careRows.count, 1)
     }
 }
 

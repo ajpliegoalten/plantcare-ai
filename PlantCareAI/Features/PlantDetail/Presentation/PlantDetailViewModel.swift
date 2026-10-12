@@ -141,8 +141,8 @@ final class PlantDetailViewModel: ObservableObject {
         await loadImage()
     }
 
-    func cancelLoading() {
-        photoPager?.disappear()
+    func cancelLoading(preservingPhotoSelection: Bool = false) {
+        photoPager?.disappear(preservingSelection: preservingPhotoSelection)
         photoConfirmation = nil
         photoSession = nil
         lastWatering.disappear()

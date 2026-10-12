@@ -125,11 +125,14 @@ final class PlantPhotoPagerViewModel: ObservableObject {
         }
     }
 
-    func disappear() {
+    func disappear(preservingSelection: Bool = false) {
         active = false; metadataGeneration += 1; imageGeneration += 1
         metadataTask?.cancel(); imageTask?.cancel(); metadataTask = nil; imageTask = nil
-        selected = .initial(plant.id); imageState = .idle
-        cache.removeAll(); lru.removeAll()
+        if !preservingSelection { selected = .initial(plant.id) }
+        imageState = .idle
+        // A push covers this detail, it does not abandon it. Keep its bounded
+        // thumbnails, particularly the initial snapshot used by all three sheets.
+        if !preservingSelection { cache.removeAll(); lru.removeAll() }
         if !isComplete { metadataState = .idle }
     }
 }

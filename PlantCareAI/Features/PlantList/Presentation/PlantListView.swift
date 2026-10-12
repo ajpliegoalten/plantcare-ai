@@ -3,10 +3,11 @@ import SwiftUI
 struct PlantListView: View {
     @ObservedObject var viewModel: PlantListViewModel
     @State private var photoDraft: IdentificationPhotoViewModel?
+    @State private var path = NavigationPath()
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             VStack(spacing: 0) {
                 header
                     .padding(.horizontal, 20)
@@ -61,7 +62,12 @@ struct PlantListView: View {
             }
             .task { await viewModel.load() }
             .navigationDestination(for: UUID.self) { id in
-                PlantDetailView(viewModel: viewModel.detailViewModel(id: id)).id(id)
+                PlantDetailView(viewModel: viewModel.detailViewModel(id: id), isCoveredByHistory: { path.count > 1 }).id(id)
+            }
+            .navigationDestination(for: PlantTimelineRoute.self) { route in
+                if let timeline = viewModel.makeTimeline?(route.plantID) {
+                    PlantTimelineView(viewModel: timeline).id(route.plantID)
+                }
             }
             .sheet(item: Binding(get: { photoDraft }, set: { newValue in
                 if newValue == nil { photoDraft?.close() }

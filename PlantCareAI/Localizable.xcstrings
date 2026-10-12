@@ -1,6 +1,22 @@
 {
   "sourceLanguage" : "es",
   "strings" : {
+    "timeline.open" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Ver historial" } } } },
+    "timeline.subtitle" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Cuidados y fotografías" } } } },
+    "timeline.title" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Historial de cuidados" } } } },
+    "timeline.today" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Hoy" } } } },
+    "timeline.yesterday" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Ayer" } } } },
+    "timeline.noRecords" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Aún no hay cuidados ni fotografías adicionales" } } } },
+    "timeline.noCare" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin cuidados registrados" } } } },
+    "timeline.added" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Planta añadida" } } } },
+    "timeline.initial" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Incorporada a PlantCare AI con foto inicial" } } } },
+    "timeline.start" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Inicio del seguimiento" } } } },
+    "timeline.photograph" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Fotografía" } } } },
+    "timeline.error" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No pudimos cargar el historial" } } } },
+    "timeline.photoError" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No pudimos cargar esta foto" } } } },
+    "timeline.retry" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Reintentar" } } } },
+    "timeline.origin" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Has llegado al origen de este ejemplar" } } } },
+    "timeline.first" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Has llegado al primer registro de este ejemplar" } } } },
     "%@ / %@" : {
       "localizations" : {
         "es" : {
