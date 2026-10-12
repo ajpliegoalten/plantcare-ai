@@ -49,7 +49,7 @@ final class PlantDetailViewModel: ObservableObject {
         self.onWatering = onWatering
     }
 
-    private var formPhoto: UIImage? {
+    var formPhoto: UIImage? {
         if let photoPager { return photoPager.initialImage }
         if case .loaded(let image) = photoState { return image }; return nil
     }

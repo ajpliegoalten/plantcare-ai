@@ -38,6 +38,12 @@ final class PlantPhotoPagerViewModel: ObservableObject {
     var cachedImageCount: Int { cache.count }
     var initialImage: UIImage? { cache[.initial(plant.id)] }
 
+    func imageState(for identity: PlantPhotoIdentity) -> ImageState {
+        if identity == selected { return imageState }
+        if let image = cache[identity] { return .loaded(image) }
+        return .idle
+    }
+
     func appear() {
         refreshDisplayZone()
         active = true

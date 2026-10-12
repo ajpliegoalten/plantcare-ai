@@ -1,0 +1,44 @@
+# add-plant-photo — refinamiento de modal y carrusel
+
+## Cierre independiente posterior
+
+Usuario da OK manual y autoriza gate/commit local; validatorV1 BLOCK por bootstrap de infraestructura preservado. Recuperación dirigida documentada en add-plant-photo-refinement-recovery.md y validatorV2 **ACCEPT234/234**, informe `docs/validations/add-plant-photo-refinement-V2.md`.140inputs exactos; fuentes/specs intactas, no repetir gate por status/docs. Ronda accepted registrada por orquestador, commit local autorizado sin push/PR/merge. Las notas de passing/no autorización posteriores son antecedente de este handoff, no estado vigente.
+
+Mismo worktree/rama, base local `cdea7b1`. Petición de implementación directa posterior a aceptación histórica; spec original SHA256 `2923282365edeaa511672dc14dc79bc85d1cc8dd49f59c0aa104d87c55db37b0` intacta. Delta `docs/specs/add-plant-photo-refinement.md`; no commit/publicación autorizados en esta ronda.
+
+## Impacto y selección
+
+| Archivos/cambio | Riesgo | Selección |
+| --- | --- | --- |
+| Domain/PlantPhoto orden createdAt asc | Fechas humanas inversas, empates/identidad | LoadPlantPhotosTests + AddPlantPhotoTests |
+| Pager View/VM TabView page y imágenes de cache por identidad | Desplazamiento, vecinos, selección/generaciones/error/cancel/cache≤3 | PlantPhotoPagerViewModelTests + AddPlantPhotoUITests |
+| DetailView lifecycle/estilo/header snapshot | Sheet no invalida callback/selección; salida real limpia; edición/cuidado inicial | PlantDetailViewModelTests + UI adicionales y editor/cuidado |
+| Shared PhotoSelectionComponents, IdentificationPhotoView y AddPlantPhotoView | Placeholder/acciones/IDs/fallback/galería/cámara/busy/scroll | AddPlantPhotoViewModelTests + UI adicional + identificación/localización/Fotos serial |
+| Registro PBX/catalog2claves | Compilación/recursos previos | build-for-testing, plutil/JSONúnico/traducciones anteriores/Domain Foundation |
+
+Sin modificaciones de Data/schema/contratos/actor/bytes ni nuevas escrituras al paginar. No repetir migración/suite completa como baseline. Componente compartido Presentation sin IO; snapshot inicial acotado para cabecera, nunca página adicional ni portada como borrador. TabView usa tags por identidad y binding único, vecinos cache/placeholder sin tareas de IO por página.
+
+## Verificación
+
+**Cierre implementer: passing, NO accepted.** 41 escenarios distintos seleccionados con último resultado Passed =25unit+16UI (6adicional+8regresiones+2Fotos); labels-final sustituye2escenarios anteriores, no sumar repeticiones. Ningún fallo de tests en esta ronda; aviso de aislamiento de labels reparado explícitamente y recompilado/verificado por impacto.
+
+- Destino único iPhone17Pro iOS26.2/23C54 `00BBB7EC-8DF7-400C-A08A-9D3C8818D886`, normal/large, claro; sin competidores antes de build/tests. Otro simulador booted no usado. Xcode CLI por ausencia de herramientas XcodeBuildMCP en catálogo; skill cargada, sin modificar MCP.
+- Build-for-testing con proyecto/scheme PlantCareAI, derivedDataPath `DerivedData/PhotoRefinement`, CODE_SIGNING_ALLOWED=NO. Log `DerivedData/evidence/add-plant-photo-refinement/build.log`, ejecución completada correctamente.
+- `scripts/configure-ui-test-environment.py .../Build/Products 1`, xctestrun-path.txt. Selección unit `LoadPlantPhotosTests`, `AddPlantPhotoTests`, `AddPlantPhotoViewModelTests`, `PlantPhotoPagerViewModelTests`, `PlantDetailViewModelTests`, serial sobre mismo destino: `unit.xcresult`, unit.log/unit.exit, **25/25 Passed**, exit0, cero skips/fallos.
+- AddPlantPhotoUITests serial con mismo xctestrun y recordVideo sobre UDID real: ui.log/ui.exit/ui.xcresult y pager-ui.mp4. **6/6 Passed**, exit0, cero skips/fallos. Calendario/futuras/fecha antigua/última posición/nueva visible/swipe/botones/extremos/initial después de relaunch y aislamiento de JPEGs exactos pasan sin reparar/repetir escenarios.
+- Inspección visual realmente ejecutada: siete PNG exportados (empty57E140, preview9AC156, retroactiveCD8FB2, long4D85D9, busy193616, imageError76C043 y saveErrorBAB453) desde ui-attachments/manifest.json. Cabecera real, nombre largo completo, hoja/texto centrado y botones verticales con colores/iconos coherentes; CTA/error/busy accesibles por scroll. Imágenes sintéticas llamativas solo fixtures opt-in, no assets de producto.
+- Carrusel verificado además en video original: helper macOS AVFoundation/AppKit (ignorados, no producto) extrajo frames227–237s cada0.1s. Abierta `swipe-frames/sheet-0.png` con48frames227–231.7s: se ven salidas/entradas simultáneas entre naranja/verde/portada, transición continua y orden3→2→1→2→3. No simple sustitución instantánea ni nueva ejecución para capturas. Duración video267.85s; warnings de API deprecated solo helper de evidencia macOS, no app.
+- Regresiones UI seleccionadas: **8/8 Passed**, exit0/cero skips/fallos sobre mismo modelo/runtime con5workers XCTest. IdentificationPhoto, layout de alternativas/acciones, dos EditPlant, busy CareEvents con portada ausente, PhotoFailure cards, Localization y LastWatering principal. `regressions.xcresult`/log/exit originales conservados; capturas0, sin duplicar escenarios para screenshots.
+- Revisión de build detectó avisos MainActor→Sendable en labels de PhotosPicker (dos vistas). Reparación mínima: capturar `!viewModel.isBusy` como Bool en body/photoActions antes de closure Sendable; acción/disabled/VM/callback/orden/pager y componentes compartidos idénticos. Fuentes cambiadas solo IdentificationPhotoView/AddPlantPhotoView; no fallos de tests ni motivo para repetir25unit o toda UI. Build final y2callers UI (busy adicional +layout identificación) vuelven a verificar label/estado/acciones, después2Fotos seriales sobre fuentes finales. Resto de evidencia reutilizable por impacto, no manifest globalmente idéntico.
+- Build final `build-final.log/.exit` **TEST BUILD SUCCEEDED exit0**, sin aquellos avisos en dos vistas. `labels-final.xcresult` **2/2 Passed** y `gallery-final.xcresult` **2/2 Passed**, exit0/cero skips/fallos. Boot/bootstatus del mismo UDID antes de seed/addmedia, sin reset ni borrar media ajena; PhotosPicker de identificación/adicional reales, cancel/replacement/reselection/save/relaunch y JPEGs independientes exactos.
+- Abiertas dos PNG finales adicionales: labels-final-attachments/062E9FCF… (busy adicional) y A8807678… (acciones de identificación). Misma paleta/iconos/verticalidad, disabled real durante commit; identificación mantiene cápsulas separadas/alternativas/cuidado. Se reutilizan otras7capturas/video por layout/estado/orden/pager/componentes idénticos tras captura escalar del Bool; no claim de byte-identidad global previa.
+- `inputs-first.json`:140inputs SHA256 `ceb87825124d27640c5493d95daee7225b18d4af9bffa3751c114c12329d3b21`; `inputs-final.json`:140inputs SHA256 `5041bc718e607bfb80d6a83252b841d43e9a5d7b477d6b672662ba119ba6112e`. Comparación exacta: SOLO IdentificationPhotoView.swift y AddPlantPhotoView.swift difieren por captura escalar. Otros138inputs inclDomain/VM/tests/components/catalog/proyecto idénticos:25unit/5otrosAddUI/7otrasregresiones reutilizados por impacto sin repetir. JPEG Data/persistencia no cambió respecto a base aceptada y no se repite migración/gate entero como baseline.
+- Comandos exactos extraídos de7logs en `commands.json`. Summaries/trees/exit y `selected-evidence.json` contienen41IDs distintos y bundle final seleccionado; evidencia final no suma43ejecuciones como43escenarios. Ningún proceso xcodebuild/xctest activo al cierre; ninguna ejecución duplicada por cambio de rol/status/docs.
+- Estáticos iniciales plutil, JSON claves únicas y git diff --check correctos. Config privada comprobada únicamente por existencia; si ausente se copiaría example vacío, sin leer/copiar/sobrescribir real existente.
+- Evidencia previa233/233 histórica NO cubre estas fuentes. No gate completo ni baseline completo, matrices ampliadas, retries automáticos, API real o hardware.
+
+## Handoff y siguiente paso
+
+Autoverificación cerrada, sin bloqueos/código pendiente del implementer. Usuario preguntó si faltaba validator: sí, **ronda passing no accepted**; aguardar autorización de revisión independiente. Validator revisará delta/diff/evidencia y posee único gate final sobre fuentes nuevas; no atribuir gate233/233 histórico ni repetir focales cubiertas sin laguna. Gate previsto234=174unit+58UIparallel+2Fotosserial, **NO ejecutado**. Sin commit/stage/push/PR/merge/GitHub/delegación/otra feature en esta ronda.
+
+Para probar manualmente: abrir proyecto en este worktree, entrar en planta, Añadir foto; comprobar cabecera/hoja/acciones verticales, elegir foto con fecha antigua y guardar. Se cierra modal y muestra imagen última; botones/swipe desplazan imágenes, fecha humana visible, portada lista intacta. Estas son instrucciones, no smoke humano adicional ejecutado. Cámara física/iCloud/matrices ampliadas fuera de verificación habitual/no ejecutadas; sin nuevas garantías.

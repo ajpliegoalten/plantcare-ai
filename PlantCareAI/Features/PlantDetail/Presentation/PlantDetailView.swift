@@ -30,7 +30,8 @@ struct PlantDetailView: View {
                     if viewModel.makeAddPhoto != nil {
                         Button { photoEditor = viewModel.photoEditor() } label: {
                             Label("plantPhotos.add", systemImage: "photo.badge.plus").frame(maxWidth: .infinity, minHeight: 44)
-                        }.buttonStyle(.bordered).buttonBorderShape(.capsule)
+                                .foregroundStyle(Color("Surface"))
+                        }.buttonStyle(.borderedProminent).buttonBorderShape(.capsule).tint(Color("PrimaryAction"))
                             .accessibilityIdentifier("detailAddPhoto-\(plant.id)")
                         if viewModel.photoConfirmation != nil {
                             Label("plantPhotos.confirmed", systemImage: "checkmark.circle.fill")
@@ -60,13 +61,17 @@ struct PlantDetailView: View {
         }
         .sheet(item: $editor) { EditPlantView(viewModel: $0) }
         .sheet(item: $careEditor) { RegisterCareView(viewModel: $0) }
-        .sheet(item: $photoEditor) { AddPlantPhotoView(viewModel: $0, onFinished: { photoEditor = nil }) }
+        .sheet(item: $photoEditor) { AddPlantPhotoView(viewModel: $0, headerPhoto: viewModel.formPhoto, onFinished: { photoEditor = nil }) }
         .onChange(of: viewModel.photoConfirmation) { _, confirmed in
             if confirmed != nil { photoEditor = nil }
         }
         .accessibilityIdentifier("plantDetail-\(viewModel.id)")
         .task { await viewModel.load() }
-        .onDisappear { viewModel.cancelLoading() }
+        .onDisappear {
+            // A presented sheet (or its camera cover) is not navigation away
+            // from this plant: keep its session and confirmed page alive.
+            if photoEditor == nil && editor == nil && careEditor == nil { viewModel.cancelLoading() }
+        }
         .onChange(of: scenePhase) { _, phase in if phase == .active {
             viewModel.lastWatering.foreground(); viewModel.photoPager?.refreshDisplayZone()
         } }

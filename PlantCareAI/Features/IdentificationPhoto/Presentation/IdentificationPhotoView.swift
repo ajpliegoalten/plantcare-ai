@@ -159,7 +159,10 @@ struct IdentificationPhotoView: View {
     }
 
     private var photoActions: some View {
-        VStack(spacing: 16) {
+        // PhotosPicker's label builder is Sendable: capture presentation state
+        // on MainActor rather than reading the ViewModel inside that closure.
+        let sourcesEnabled = !viewModel.isBusy
+        return PhotoActionsSurface {
             if viewModel.identificationResult != nil || viewModel.confirmedIdentity != nil {
                 VStack(alignment: .leading, spacing: 8) {
                     Label("identificationPhoto.retrySection.title", systemImage: "arrow.clockwise")
@@ -174,17 +177,14 @@ struct IdentificationPhotoView: View {
                 .multilineTextAlignment(.leading)
             }
             PhotosPicker(selection: $selection, matching: .images, preferredItemEncoding: .current) {
-                Label("identificationPhoto.gallery", systemImage: "photo")
-                    .frame(maxWidth: .infinity, minHeight: 44)
-                    .foregroundStyle(viewModel.isBusy ? Color("TextSecondary") : Color("Surface"))
+                PhotoActionLabel(title: "identificationPhoto.gallery", symbol: "photo", prominent: true, enabled: sourcesEnabled)
             }
             .buttonStyle(.borderedProminent)
             .buttonBorderShape(.capsule)
             .accessibilityIdentifier("chooseGalleryPhoto")
             .disabled(viewModel.isBusy || viewModel.isEditingManualSpecies || viewModel.presentsCamera)
             Button { viewModel.takePhoto() } label: {
-                Label("identificationPhoto.camera", systemImage: "camera")
-                    .frame(maxWidth: .infinity, minHeight: 44)
+                PhotoActionLabel(title: "identificationPhoto.camera", symbol: "camera", enabled: sourcesEnabled)
             }
             .buttonStyle(.bordered)
             .buttonBorderShape(.capsule)
@@ -206,28 +206,12 @@ struct IdentificationPhotoView: View {
                 .padding(.top, 4)
                 .accessibilityIdentifier("identificationUnavailable")
         }
-        .padding(16)
-        .background(Color("SurfaceMuted"), in: RoundedRectangle(cornerRadius: 22))
-        .overlay(RoundedRectangle(cornerRadius: 22).stroke(Color("Outline"), lineWidth: 1))
     }
 
     private var preview: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 22).fill(Color("Surface"))
-            if let photo = viewModel.photo, let image = UIImage(data: photo.jpeg) {
-                Image(uiImage: image).resizable().scaledToFit()
-                    .accessibilityLabel(Text("identificationPhoto.preview"))
-                    .accessibilityIdentifier("identificationPhotoPreview")
-                    .accessibilityValue("\(photo.width) × \(photo.height)")
-            } else {
-                VStack(spacing: 16) {
-                    Image(systemName: "leaf").font(.largeTitle).accessibilityHidden(true)
-                    Text("identificationPhoto.placeholder")
-                }.padding(20).accessibilityIdentifier("identificationPhotoPlaceholder")
-            }
-        }
-        .aspectRatio(4 / 3, contentMode: .fit)
-        .clipShape(RoundedRectangle(cornerRadius: 22))
+        PhotoSelectionPreview(image: viewModel.photo.flatMap { UIImage(data: $0.jpeg) },
+            previewID: "identificationPhotoPreview", placeholderID: "identificationPhotoPlaceholder",
+            value: "\(viewModel.photo?.width ?? 0) × \(viewModel.photo?.height ?? 0)")
     }
 
     private var manualOption: some View {

@@ -41,8 +41,7 @@ struct PlantPhotoDescriptor: Equatable, Sendable, Identifiable {
          photos.filter { $0.plantID == plant.id }.map {
              Self(id: .additional($0.id), date: $0.occurredAt, createdAt: $0.createdAt)
          }).sorted {
-            if $0.date != $1.date { return $0.date > $1.date }
-            if $0.createdAt != $1.createdAt { return $0.createdAt > $1.createdAt }
+            if $0.createdAt != $1.createdAt { return $0.createdAt < $1.createdAt }
             return $0.id.stableKey < $1.id.stableKey
         }
     }

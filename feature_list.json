@@ -338,6 +338,24 @@
     "user_visible_behavior": "El usuario añade expresamente una foto local con fecha a un ejemplar ya guardado.",
     "depends_on": ["save-plant"],
     "status": "accepted",
+    "active_round": {
+      "id": "add-plant-photo-refinement",
+      "spec": "docs/specs/add-plant-photo-refinement.md",
+      "base": "cdea7b1",
+      "status": "accepted",
+      "prior_independent_validation": {
+        "verdict": "block",
+        "report": "docs/validations/add-plant-photo-refinement.md",
+        "blocker": "B1: infraestructura del simulador/testmanagerd. Gate único exit65, build aprobado,0escenarios funcionales arrancados y2entradas infraestructura; Fotos serial no ejecutada.140inputs antes/después idénticos, specs intactas;41focalizadas corroboradas, sin defectos bloqueantes de producto identificados. Bundle DerivedData/TestResults/20261012-175807-94814/parallel.xcresult. Detener aceptación/commit; autorizar diagnóstico/recuperación del entorno antes de revalidar, sin retries ciegos ni borrar datos ajenos."
+      },
+      "independent_validation": {
+        "verdict": "accept",
+        "report": "docs/validations/add-plant-photo-refinement-V2.md",
+        "evidence": "2026-10-12 openai/gpt-6.1-sol validator V2 ACCEPT: TEST_WORKERS=5 UI_TEST_SCREENSHOTS=0 caffeinate -dius ./init.sh exit0 build/ambas fases TEST SUCCEEDED,234/234=174unit+58UIparallel+2Fotosserial, cero fallos/skips/expected failures/errores infraestructura. Bundles DerivedData/TestResults/20261012-181015-97105/{parallel,gallery}.xcresult.140inputs antes/después idénticos manifest5041bc718e607bfb80d6a83252b841d43e9a5d7b477d6b672662ba119ba6112e. Specs original292328… y deltaa0475…intactas; informeBLOCK809b7…original preservado. B1 cerrado tras recuperación dirigida autorizada rootShutdown→Booted, demásdispositivos intactos/sin borrado y diagnóstico2/2; no causa profunda universalmente resuelta ni gatefallido reinterpretado. Destino acordado00BBB7EC iPhone17Pro iOS26.2/23C54 normal/large/light, Xcode26.2/17C52 macOS26.5.1. Focalizadas41/capturas/arquitectura/seguridad/docs corroboradas sin rerun. Usuario comunica manualOK, no agentmanual. Orquestador persiste accepted y commitLOCAL autorizado, sin push/PR/merge."
+      },
+      "notes": "Refinamiento accepted tras validator independiente V2/gate234/234. Modal acciones verticales/placeholder compartidos con Identificar y cabecera PlantFormHeader; Añadir foto verde, selección nueva al cerrar sheet; createdAt ascendente antigua→reciente y TabView page interactivo. Spec/aceptación original y BLOCK B1 históricos intactos; recuperación dirigida sin borrar datos, diagnóstico y gate nuevo justificados, sin reparación producto por infraestructura. ManualOK usuario reportado. Entrega commit local autorizada; sin push/PR/merge.",
+      "evidence": "41 distintos Passed=25unit+16UI exit0 cero skips/fallos; labels-final2 sustituye anteriores, gallery-final2 real serial. Build final exit0 corrige captura MainActor→Sendable en2vistas; otros138inputs idénticos al primer manifest validan reuse por impacto.140inputs finales inputs-final.json SHA2565041bc718e607bfb80d6a83252b841d43e9a5d7b477d6b672662ba119ba6112e. Evidencia/comandos7logs/xcresults/summaries/trees/selected-evidence41IDs en DerivedData/evidence/add-plant-photo-refinement; handoff detallado.7PNG+2finales y hoja48frames de video realmente inspeccionados: slide continuo/nueva3de3/verticalidad/cabecera/verde. Spec original292328…intacta, Data/schema/bytes sin cambios; sin API/privado/matrices/simulador alternativo/gate/commit/publicación. No tests activos. Validator independiente pendiente; predicción234=174unit+58UIparallel+2Fotosserial, NO ejecutado."
+    },
     "verification": ["Foto local fechada por operación, dos plantas/portadas/cinco kinds aislados, upgrade V2/V1 real/reopen, rollback/duplicado/retry/cancel/commit. Paginador inicial+adicionales/fecha/swipe/botones/cache/identidades/retry/tardíos/cero writes; nueva retroactiva seleccionada y reapertura inicial. Fotos reales seriales, regresiones directas y gate final independiente aprobado233/233."],
     "evidence": [
       "2026-10-12 implementer passing, NOT accepted/full gate. Spec aprobada byte-intacta SHA2562923282365edeaa511672dc14dc79bc85d1cc8dd49f59c0aa104d87c55db37b0; mismo worktree feature/add-plant-photo/base12c5184c6f34b2ae2faa5e15b95b54a8991a735e. Fotos locales una/intención,7campos/origen IANA/fecha humana, mismo actor V3 aditivo no versionado. V2/V1 reales/reopen/modelos/portadas/cinco kinds exactos, cleanup global antes de ambos dirs/rollback/duplicado/conflicto/referencias rotas. Paginador identity temporal/inicial proyectada/nueva seleccionada retroactiva/cache3 thumbnails1600 sin JPEG/cancel/generaciones/retry propios, editor/cuidado iniciales, cero writes observado por seam real. Sin IA/timeline/batch/portada/último-riego nuevos; ADR011.",

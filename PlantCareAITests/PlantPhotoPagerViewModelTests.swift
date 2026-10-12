@@ -18,7 +18,7 @@ final class PlantPhotoPagerViewModelTests: XCTestCase {
         for day in 1...4 {
             let photo = PlantPhoto(id: UUID(), plantID: plant.id,
                 occurredAt: try AddPlantPhoto.startOfDay(year: 1960, month: 1, day: day, zone: try AddPlantPhoto.zone("Europe/Madrid")),
-                createdAt: Date(timeIntervalSince1970: Double(day)), timeZoneIdentifier: "Europe/Madrid", width: prepared.width, height: prepared.height)
+                createdAt: plant.createdAt.addingTimeInterval(Double(day)), timeZoneIdentifier: "Europe/Madrid", width: prepared.width, height: prepared.height)
             photos.append(try await repository.savePhoto(photo, jpeg: prepared.jpeg))
         }
         let committedCount = commits.value
@@ -32,9 +32,12 @@ final class PlantPhotoPagerViewModelTests: XCTestCase {
             XCTAssertLessThanOrEqual(vm.cachedImageCount, 3)
             XCTAssertNotNil(vm.initialImage)
         }
-        vm.committed(photos[0], image: try AddPlantPhotoViewModel.thumbnail(prepared.jpeg))
-        XCTAssertEqual(vm.selected, .additional(photos[0].id)); await wait { vm.isComplete }
-        XCTAssertEqual(vm.selected, .additional(photos[0].id)); XCTAssertFalse(vm.canNext)
+        vm.committed(photos[3], image: try AddPlantPhotoViewModel.thumbnail(prepared.jpeg))
+        XCTAssertEqual(vm.selected, .additional(photos[3].id)); await wait { vm.isComplete }
+        XCTAssertEqual(vm.selected, .additional(photos[3].id)); XCTAssertFalse(vm.canNext)
+        vm.appear() // Sheet dismissal must not reset the confirmed selection.
+        XCTAssertEqual(vm.selected, .additional(photos[3].id))
+        guard case .loaded = vm.imageState(for: .additional(photos[2].id)) else { return XCTFail("Previous page must retain its bounded thumbnail for the slide") }
         let actual = try await repository.loadPhotos(for: plant.id); XCTAssertEqual(Set(actual.map(\.id)), Set(photos.map(\.id)))
         vm.disappear(); XCTAssertEqual(vm.cachedImageCount, 0); XCTAssertEqual(vm.selected, .initial(plant.id))
         vm.appear(); await wait { if case .loaded = vm.imageState { return true }; return false }

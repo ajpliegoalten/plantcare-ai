@@ -3,6 +3,7 @@ import PhotosUI
 
 struct AddPlantPhotoView: View {
     @StateObject var viewModel: AddPlantPhotoViewModel
+    var headerPhoto: UIImage? = nil
     var onFinished: (() -> Void)? = nil
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
@@ -10,24 +11,15 @@ struct AddPlantPhotoView: View {
     @State private var pendingCapture: Data?
 
     var body: some View {
-        NavigationStack {
+        let sourcesEnabled = !viewModel.isBusy
+        return NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
-                    Text(viewModel.plant.name).font(.headline).frame(maxWidth: .infinity, alignment: .leading)
-                    Color("SurfaceMuted").aspectRatio(4 / 3, contentMode: .fit).overlay {
-                        GeometryReader { geometry in
-                        ZStack {
-                        if let image = viewModel.preview {
-                            Image(uiImage: image).resizable().scaledToFill().accessibilityIdentifier("additionalPhotoPreview")
-                                .frame(width: geometry.size.width, height: geometry.size.height).clipped()
-                                .accessibilityLabel("plantPhotos.add")
-                                .accessibilityValue("\(viewModel.photo?.width ?? 0) × \(viewModel.photo?.height ?? 0)")
-                        } else {
-                            Image(systemName: "photo").font(.largeTitle).accessibilityIdentifier("additionalPhotoPlaceholder")
-                        }
-                        }.frame(width: geometry.size.width, height: geometry.size.height)
-                        }
-                    }.clipped().clipShape(RoundedRectangle(cornerRadius: 22)).allowsHitTesting(false)
+                    PlantFormHeader(name: viewModel.plant.name, subtitle: String(localized: "plantPhotos.belongs"),
+                        photo: headerPhoto, photoSize: 56)
+                    PhotoSelectionPreview(image: viewModel.preview, previewID: "additionalPhotoPreview",
+                        placeholderID: "additionalPhotoPlaceholder",
+                        value: "\(viewModel.photo?.width ?? 0) × \(viewModel.photo?.height ?? 0)", previewLabel: "plantPhotos.preview")
                     DatePicker("plantPhotos.date", selection: Binding(get: { viewModel.occurredAt }, set: viewModel.selectDate),
                                in: ...viewModel.latestSelectableDate, displayedComponents: .date)
                         .environment(\.calendar, viewModel.calendar).environment(\.timeZone, viewModel.displayZone)
@@ -42,14 +34,15 @@ struct AddPlantPhotoView: View {
                             }.frame(minHeight: 44)
                         }
                     }
-                    HStack(spacing: 12) {
+                    PhotoActionsSurface {
                         PhotosPicker(selection: $selection, matching: .images, preferredItemEncoding: .current) {
-                            Label("identificationPhoto.gallery", systemImage: "photo").frame(maxWidth: .infinity, minHeight: 44)
-                        }.accessibilityIdentifier("additionalPhotoGallery")
+                            PhotoActionLabel(title: "identificationPhoto.gallery", symbol: "photo", prominent: true, enabled: sourcesEnabled)
+                        }.buttonStyle(.borderedProminent).buttonBorderShape(.capsule)
+                            .disabled(viewModel.isBusy).accessibilityIdentifier("additionalPhotoGallery")
                         Button { viewModel.requestCamera() } label: {
-                            Label("identificationPhoto.camera", systemImage: "camera").frame(maxWidth: .infinity, minHeight: 44)
-                        }.accessibilityIdentifier("additionalPhotoCamera")
-                    }.buttonStyle(.borderedProminent).buttonBorderShape(.capsule).disabled(viewModel.isBusy)
+                            PhotoActionLabel(title: "identificationPhoto.camera", symbol: "camera", enabled: sourcesEnabled)
+                        }.buttonStyle(.bordered).buttonBorderShape(.capsule)
+                            .disabled(viewModel.isBusy).accessibilityIdentifier("additionalPhotoCamera")
                     if case .error = viewModel.state {
                         Text("plantPhotos.saveError").accessibilityIdentifier("additionalPhotoError")
                     }
@@ -63,6 +56,7 @@ struct AddPlantPhotoView: View {
                     }.buttonStyle(.borderedProminent).buttonBorderShape(.capsule)
                         .disabled(!viewModel.canSave)
                         .accessibilityIdentifier(viewModel.state.isPhotoError ? "retryAdditionalPhoto" : "saveAdditionalPhoto")
+                    }
                     #if DEBUG && targetEnvironment(simulator)
                     ForEach(viewModel.testSelections.keys.sorted(), id: \.self) { name in
                         Button("Test \(name)") {
@@ -75,13 +69,16 @@ struct AddPlantPhotoView: View {
                     }
                     #endif
                 }.padding(20)
-            }.background(Color("Background").ignoresSafeArea())
+            }.background(Color("Surface")).foregroundStyle(Color("TextPrimary"))
                 .navigationTitle("plantPhotos.add").navigationBarTitleDisplayMode(.inline)
+                .toolbarBackground(Color("Surface"), for: .navigationBar)
+                .toolbarBackground(.visible, for: .navigationBar)
                 .toolbar { ToolbarItem(placement: .cancellationAction) {
                     Button("identificationPhoto.cancel") { viewModel.close(); finish() }
                         .disabled(!viewModel.canClose).accessibilityIdentifier("cancelAdditionalPhoto")
                 } }
         }.tint(Color("PrimaryAction")).accessibilityIdentifier("addPlantPhotoForm")
+            .presentationDetents([.fraction(0.95)]).presentationCornerRadius(24)
             .presentationDragIndicator(.visible).interactiveDismissDisabled(!viewModel.canClose)
             .onChange(of: viewModel.state) { _, state in
                 if state == .saved { finish() }

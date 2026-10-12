@@ -1,6 +1,6 @@
 # ADR 011 — Fotografías adicionales locales y paginador del detalle
 
-Fecha: 2026-10-12. Decisión autorizada por la aprobación integral de `docs/specs/add-plant-photo.md`; implementación autoverificada, aceptación independiente pendiente.
+Fecha: 2026-10-12. Decisión original autorizada por aprobación integral de `docs/specs/add-plant-photo.md`, aceptada independientemente233/233 en `docs/validations/add-plant-photo.md`. Refinamiento posterior solicitado por usuario descrito abajo; su evidencia nueva no reutiliza ese gate como aceptación de fuentes modificadas.
 
 ## Decisión
 
@@ -19,6 +19,10 @@ El paginador proyecta la inicial una vez desde Plant.createdAt, sin zona EXIF in
 Una superficie fotográfica SwiftUI recibe swipe horizontal nativo/‹ › sobre la misma selección por identidad; no monta tareas de IO por página. Metadata y bytes tienen errores/retries separados. Solo lee/decodifica selección, thumbnails ImageIO ≤1600 px, máximo tres imágenes decodificadas LRU (inicial retenida mientras vive el destino), sin cache de JPEG/disco/global ni precarga. Generaciones/cancelación cubren transferencia, permiso, metadata, bytes y decode. Editor/cuidado usan snapshot **inicial**, nunca la adicional seleccionada. Abandonar detalle limpia cache y vuelve a inicial; cerrar el modal tras commit no abandona el destino.
 
 ## Alternativas y consecuencias
+
+### Refinamiento posterior autorizado
+
+Usuario solicita ordenar el carrusel por incorporación: **createdAt ascendente**, antigua primero, reciente última, empate por clave discriminada. La fecha humana se conserva/visualiza pero no ordena. Sustituye el orden descendente original descrito arriba; no migra ni escribe registros. TabView page nativo aporta desplazamiento interactivo entre páginas, usando selección estable/cache existente sin IO por cada página. Presentar una sheet/cámara no cancela la sesión de detalle; al cerrar tras commit permanece la nueva foto. Salir realmente del detalle sí restablece inicial. Cabecera/placeholder/acciones reutilizan componentes Presentation sin cambiar contratos Data/alta. Spec original y aceptación previa permanecen históricas; esta ronda requiere evidencia propia.
 
 No segundo actor/container, imágenes embebidas en SwiftData, galería separada, batch, sustitución de portada, timeline ni modelos especulativos de análisis. La futura cronología consultará estos mismos registros más la inicial proyectada.
 
