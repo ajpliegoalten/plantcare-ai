@@ -78,9 +78,9 @@ struct StorageFixtureLoad: LoadPlantsUseCase {
             try? FileManager.default.removeItem(at: root.appendingPathComponent("Photos").appendingPathComponent("\(StorageTestFixture.plant(1).id).jpg"))
         }
         let arguments = ProcessInfo.processInfo.arguments
-        if let position = arguments.firstIndex(of: "--watering-verify"), arguments.indices.contains(position + 1),
+        if let position = arguments.firstIndex(of: "--care-verify"), arguments.indices.contains(position + 1),
            let count = Int(arguments[position + 1]) {
-            try await WateringTestFixture.verify(root: root, repository: repository, count: count)
+            try await CareEventTestFixture.verify(root: root, repository: repository, count: count)
         }
         return plants
     }

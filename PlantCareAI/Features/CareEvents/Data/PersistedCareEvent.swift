@@ -21,7 +21,7 @@ final class PersistedCareEvent {
         guard let kind = CareEvent.Kind(rawValue: kind) else { throw CareEventError.storage }
         let event = CareEvent(id: id, plantID: plantID, kind: kind, occurredAt: occurredAt, note: note,
                               createdAt: createdAt, timeZoneIdentifier: timeZoneIdentifier)
-        do { try RegisterWatering.validateStructure(event) } catch { throw CareEventError.storage }
+        do { try RegisterCareEvent.validateStructure(event) } catch { throw CareEventError.storage }
         return event
     }
 }

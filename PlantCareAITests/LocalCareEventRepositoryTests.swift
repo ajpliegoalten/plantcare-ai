@@ -9,7 +9,7 @@ final class LocalCareEventRepositoryTests: XCTestCase {
 
     func event(id: UUID = UUID(), plantID: UUID = StorageTestFixture.plant(1).id, zone: String = "Europe/Madrid", note: String? = "Agua\n🌿") throws -> CareEvent {
         CareEvent(id: id, plantID: plantID, kind: .watering,
-                  occurredAt: try RegisterWatering.startOfDay(year: 2020, month: 1, day: 2, zone: try RegisterWatering.zone(zone)),
+                  occurredAt: try RegisterCareEvent.startOfDay(year: 2020, month: 1, day: 2, zone: try RegisterCareEvent.zone(zone)),
                   note: note, createdAt: Date(timeIntervalSince1970: 1_700_000_000), timeZoneIdentifier: zone)
     }
 
@@ -66,7 +66,7 @@ final class LocalCareEventRepositoryTests: XCTestCase {
         let result = try await repository!.saveCareEvent(original); XCTAssertEqual(result, original)
         repository = nil
         let backward = LocalPlantRepository(root: root, now: { original.occurredAt.addingTimeInterval(-1) })
-        let duplicate = try await RegisterWatering(repository: backward).execute(event: original, now: original.occurredAt.addingTimeInterval(-1))
+        let duplicate = try await RegisterCareEvent(repository: backward).execute(event: original, now: original.occurredAt.addingTimeInterval(-1))
         XCTAssertEqual(duplicate, original)
         let changedZone = CareEvent(id: original.id, plantID: original.plantID, kind: .watering, occurredAt: original.occurredAt,
             note: original.note, createdAt: original.createdAt, timeZoneIdentifier: "Europe/Paris")
@@ -111,17 +111,17 @@ final class LocalCareEventRepositoryTests: XCTestCase {
 
     func testFixtureComparesLiteralMultilinePayloadAndExpectedDayAfterRecreation() async throws {
         try seedV1()
-        let fixture = WateringTestFixture(root: root, mode: "success")
+        let fixture = CareEventTestFixture(root: root, mode: "success")
         var repository: LocalPlantRepository? = LocalPlantRepository(root: root, beforeCareCommit: { try fixture.beforeCareCommit($0) })
         let note = "Agua\nSegunda línea"
-        let occurredAt = try RegisterWatering.startOfDay(year: 2020, month: 1, day: 2, zone: try RegisterWatering.zone("Europe/Madrid"))
+        let occurredAt = try RegisterCareEvent.startOfDay(year: 2020, month: 1, day: 2, zone: try RegisterCareEvent.zone("Europe/Madrid"))
         let event = CareEvent(id: UUID(), plantID: StorageTestFixture.plant(1).id, kind: .watering, occurredAt: occurredAt,
             note: " \n" + note + "\n ", createdAt: occurredAt.addingTimeInterval(86400 + 3600), timeZoneIdentifier: "Europe/Madrid")
         _ = try await repository!.saveCareEvent(event)
         repository = nil
         let reopened = LocalPlantRepository(root: root)
-        try await WateringTestFixture.verify(root: root, repository: reopened, count: 1,
-            arguments: ["--watering-expected-offset", "-1", "--watering-expected-note-base64", Data(note.utf8).base64EncodedString()])
+        try await CareEventTestFixture.verify(root: root, repository: reopened, count: 1,
+            arguments: ["--care-expected-offset", "-1", "--care-expected-note-base64", Data(note.utf8).base64EncodedString()])
     }
 
     func testCanonicallyEquivalentButDifferentUnicodePayloadIsConflictWithoutOverwrite() async throws {
@@ -136,6 +136,67 @@ final class LocalCareEventRepositoryTests: XCTestCase {
         do { _ = try await repository.saveCareEvent(changed); XCTFail() } catch { XCTAssertEqual(error as? CareEventError, .conflict) }
         let events = try await LocalPlantRepository(root: root).loadCareEvents(for: original.plantID)
         XCTAssertEqual(events, [original]); XCTAssertEqual(Array(events[0].note!.utf8), Array("é".utf8))
+    }
+
+    private func seedV2Watering(_ original: CareEvent) throws {
+        // Same V2 schema as the accepted application, with a literal legacy raw.
+        try seedV1()
+        let container = try ModelContainer(for: PersistedPlant.self, PersistedCareEvent.self, configurations: ModelConfiguration(url: root.appendingPathComponent("Plants.store")))
+        let context = ModelContext(container); context.autosaveEnabled = false
+        let row = PersistedCareEvent(original); row.kind = "watering"
+        context.insert(row); try context.save()
+    } // Both context and container released before the new reader opens.
+
+    func testRealV2WateringCompatibilityFiveKindsNilAndNotesOrderingAndIsolation() async throws {
+        let original = try event(note: "e\u{301}\n  Agua")
+        try seedV2Watering(original)
+        var repository: LocalPlantRepository? = LocalPlantRepository(root: root)
+        let legacy = try await repository!.loadCareEvents(for: original.plantID)
+        XCTAssertEqual(legacy, [original]); try await assertPlants(repository!)
+        var expected = [original]
+        for (index, kind) in CareEvent.Kind.allCases.enumerated() {
+            for note in [nil, "🌿 \(kind.rawValue)\n  e\u{301}"] as [String?] {
+                let added = CareEvent(id: UUID(), plantID: original.plantID, kind: kind,
+                    occurredAt: original.occurredAt.addingTimeInterval(index == 0 ? -86400 : 86400), note: note,
+                    createdAt: original.createdAt.addingTimeInterval(Double(index)), timeZoneIdentifier: original.timeZoneIdentifier)
+                let result = try await repository!.saveCareEvent(added); XCTAssertEqual(result, added); expected.append(added)
+            }
+        }
+        repository = nil
+        let reopened = LocalPlantRepository(root: root)
+        let actual = try await reopened.loadCareEvents(for: original.plantID)
+        expected.sort { lhs, rhs in
+            if lhs.occurredAt != rhs.occurredAt { return lhs.occurredAt > rhs.occurredAt }
+            if lhs.createdAt != rhs.createdAt { return lhs.createdAt > rhs.createdAt }
+            return lhs.id.uuidString < rhs.id.uuidString
+        }
+        XCTAssertEqual(actual, expected); XCTAssertTrue(actual.contains(original))
+        let other = try await reopened.loadCareEvents(for: StorageTestFixture.plant(2).id); XCTAssertTrue(other.isEmpty)
+        try await assertPlants(reopened)
+    }
+
+    func testKindOnlyConflictNeverOverwritesAndUnknownRawFailsBeforeCleanup() async throws {
+        let original = try event()
+        try seedV2Watering(original)
+        var repository: LocalPlantRepository? = LocalPlantRepository(root: root)
+        let changed = CareEvent(id: original.id, plantID: original.plantID, kind: .fertilizing, occurredAt: original.occurredAt,
+            note: original.note, createdAt: original.createdAt, timeZoneIdentifier: original.timeZoneIdentifier)
+        do { _ = try await repository!.saveCareEvent(changed); XCTFail() } catch { XCTAssertEqual(error as? CareEventError, .conflict) }
+        let stillOriginal = try await repository!.loadCareEvents(for: original.plantID); XCTAssertEqual(stillOriginal, [original])
+        repository = nil
+        try writeUnknownRaw()
+        let pending = root.appendingPathComponent("Photos/keep.pending")
+        try Data("keep".utf8).write(to: pending)
+        let fresh = LocalPlantRepository(root: root)
+        do { _ = try await fresh.loadCareEvents(for: original.plantID); XCTFail() } catch { XCTAssertEqual(error as? CareEventError, .storage) }
+        XCTAssertEqual(try Data(contentsOf: pending), Data("keep".utf8))
+    }
+
+    private func writeUnknownRaw() throws {
+        let container = try ModelContainer(for: PersistedPlant.self, PersistedCareEvent.self, configurations: ModelConfiguration(url: root.appendingPathComponent("Plants.store")))
+        let context = ModelContext(container)
+        let rows = try context.fetch(FetchDescriptor<PersistedCareEvent>())
+        rows[0].kind = "unknown-care-kind"; try context.save()
     }
 }
 
