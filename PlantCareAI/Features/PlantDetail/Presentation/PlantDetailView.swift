@@ -7,9 +7,11 @@ struct PlantDetailView: View {
     @State private var careEditor: RegisterCareViewModel?
     @State private var photoEditor: AddPlantPhotoViewModel?
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    private let isCoveredByHistory: () -> Bool
 
-    init(viewModel: PlantDetailViewModel) {
+    init(viewModel: PlantDetailViewModel, isCoveredByHistory: @escaping () -> Bool = { false }) {
         _viewModel = StateObject(wrappedValue: viewModel)
+        self.isCoveredByHistory = isCoveredByHistory
     }
 
     var body: some View {
@@ -39,6 +41,7 @@ struct PlantDetailView: View {
                         }
                     }
                     careRegistration
+                    history(plant)
                     careSheet(plant.careSheet)
                 }
             }
@@ -70,12 +73,36 @@ struct PlantDetailView: View {
         .onDisappear {
             // A presented sheet (or its camera cover) is not navigation away
             // from this plant: keep its session and confirmed page alive.
-            if photoEditor == nil && editor == nil && careEditor == nil { viewModel.cancelLoading() }
+            if photoEditor == nil && editor == nil && careEditor == nil {
+                viewModel.cancelLoading(preservingPhotoSelection: isCoveredByHistory())
+            }
         }
         .onChange(of: scenePhase) { _, phase in if phase == .active {
             viewModel.lastWatering.foreground(); viewModel.photoPager?.refreshDisplayZone()
         } }
         .onReceive(NotificationCenter.default.publisher(for: .NSSystemTimeZoneDidChange)) { _ in viewModel.photoPager?.refreshDisplayZone() }
+    }
+
+    private func history(_ plant: Plant) -> some View {
+        NavigationLink(value: PlantTimelineRoute(plantID: plant.id)) {
+            HStack(spacing: 12) {
+                Image(systemName: "clock.arrow.circlepath")
+                    .foregroundStyle(Color("Primary"))
+                    .frame(width: 44, height: 44)
+                    .background(Color("SurfaceMuted"), in: RoundedRectangle(cornerRadius: 12))
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("timeline.open").font(.headline)
+                    Text("timeline.subtitle").font(.subheadline).foregroundStyle(Color("TextSecondary"))
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                Image(systemName: "chevron.right").foregroundStyle(Color("TextSecondary")).accessibilityHidden(true)
+            }
+            .padding(16).frame(maxWidth: .infinity, minHeight: 44)
+            .background(Color("Surface"), in: RoundedRectangle(cornerRadius: 16))
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("detailHistory-\(plant.id)")
     }
 
     private func identity(_ plant: Plant) -> some View {

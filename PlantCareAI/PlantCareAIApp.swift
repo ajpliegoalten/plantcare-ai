@@ -39,6 +39,10 @@ struct PlantCareAIApp: App {
                 repository = LocalPlantRepository(root: testRoot, beforePhotoCommit: { try fixture.beforeCommit($0) })
             }
             load = StorageFixtureLoad(root: testRoot, repository: repository, seed: arguments.contains("--storage-seed"), corrupt: arguments.contains("--storage-corrupt"))
+            if let position = arguments.firstIndex(of: "--timeline-fixture"), arguments.indices.contains(position + 1) {
+                load = PlantTimelineFixtureLoad(base: load, repository: repository,
+                    seed: arguments.contains("--storage-seed"), mode: arguments[position + 1])
+            }
         }
         #endif
         var lastWatering: any LoadLastWateringUseCase = LoadLastWatering(repository: repository)
@@ -61,6 +65,21 @@ struct PlantCareAIApp: App {
         viewModel.makePhotoPager = { plant in
             PlantPhotoPagerViewModel(plant: plant, loadMetadata: LoadPlantPhotos(repository: photoReader),
                 loadAdditional: LoadPlantPhoto(repository: photoReader), loadInitial: LoadInitialPlantPhoto(repository: repository))
+        }
+        var timelineReader: any LoadPlantTimelineUseCase = LoadPlantTimeline(
+            detail: LoadPlantDetail(repository: repository), care: repository, photos: photoReader)
+        #if DEBUG && targetEnvironment(simulator)
+        if arguments.contains("--timeline-read-error"),
+           let position = arguments.firstIndex(of: "--storage-test-id"), arguments.indices.contains(position + 1),
+           UUID(uuidString: arguments[position + 1]) != nil {
+            timelineReader = PlantTimelineReadTestFixture(base: timelineReader)
+        }
+        #endif
+        viewModel.makeTimeline = { id in
+            PlantTimelineViewModel(plantID: id,
+                load: timelineReader,
+                photos: PlantTimelinePhotoViewModel(plantID: id, loadInitial: LoadInitialPlantPhoto(repository: repository),
+                    loadAdditional: LoadPlantPhoto(repository: photoReader)))
         }
         viewModel.makeAddPhoto = { plant, onSaved in
             let draft = AddPlantPhotoViewModel(plant: plant, prepare: PrepareIdentificationPhoto(preparer: LocalIdentificationPhotoPreparer()),

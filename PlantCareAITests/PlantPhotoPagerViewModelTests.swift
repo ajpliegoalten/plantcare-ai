@@ -37,6 +37,13 @@ final class PlantPhotoPagerViewModelTests: XCTestCase {
         XCTAssertEqual(vm.selected, .additional(photos[3].id)); XCTAssertFalse(vm.canNext)
         vm.appear() // Sheet dismissal must not reset the confirmed selection.
         XCTAssertEqual(vm.selected, .additional(photos[3].id))
+        vm.disappear(preservingSelection: true)
+        XCTAssertEqual(vm.selected, .additional(photos[3].id)); XCTAssertLessThanOrEqual(vm.cachedImageCount, 3)
+        XCTAssertNotNil(vm.initialImage)
+        vm.appear(); await wait { if case .loaded = vm.imageState { return true }; return false }
+        XCTAssertEqual(vm.selected, .additional(photos[3].id))
+        vm.select(.additional(photos[2].id)); await wait { if case .loaded = vm.imageState { return true }; return false }
+        vm.select(.additional(photos[3].id)); await wait { if case .loaded = vm.imageState { return true }; return false }
         guard case .loaded = vm.imageState(for: .additional(photos[2].id)) else { return XCTFail("Previous page must retain its bounded thumbnail for the slide") }
         let actual = try await repository.loadPhotos(for: plant.id); XCTAssertEqual(Set(actual.map(\.id)), Set(photos.map(\.id)))
         vm.disappear(); XCTAssertEqual(vm.cachedImageCount, 0); XCTAssertEqual(vm.selected, .initial(plant.id))

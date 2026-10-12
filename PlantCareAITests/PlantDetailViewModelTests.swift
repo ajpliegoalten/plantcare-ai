@@ -31,6 +31,11 @@ final class PlantDetailViewModelTests: XCTestCase {
         XCTAssertTrue(vm.editor()?.photo === initial); XCTAssertTrue(vm.careEditor()?.photo === initial)
         let after = await repository.counts(); XCTAssertEqual(before.0, after.0); XCTAssertEqual(before.1, after.1); XCTAssertEqual(after.2, 0)
         let fresh = try XCTUnwrap(vm.photoEditor()); XCTAssertNil(fresh.photo); XCTAssertNil(vm.photoConfirmation)
+        vm.cancelLoading(preservingPhotoSelection: true)
+        XCTAssertEqual(vm.photoPager?.selected, .additional(confirmed.id))
+        XCTAssertTrue(vm.photoPager?.initialImage === initial)
+        await vm.load()
+        XCTAssertTrue(vm.editor()?.photo === initial); XCTAssertTrue(vm.careEditor()?.photo === initial)
         vm.cancelLoading(); XCTAssertEqual(vm.photoPager?.selected, .initial(vm.id))
     }
     func testSummaryReadsBeforePhotoFinishesAndNeverForUnavailableMetadata() async {

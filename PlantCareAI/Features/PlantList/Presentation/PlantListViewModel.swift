@@ -22,6 +22,7 @@ final class PlantListViewModel: ObservableObject {
     var makeIdentificationPhoto: (() -> IdentificationPhotoViewModel)?
     var makeAddPhoto: ((Plant, @escaping @MainActor (PlantPhoto, UIImage) -> Void) -> AddPlantPhotoViewModel)?
     var makePhotoPager: ((Plant) -> PlantPhotoPagerViewModel)?
+    var makeTimeline: ((UUID) -> PlantTimelineViewModel)?
 
     init(loadPlants: any LoadPlantsUseCase, loadPhoto: LoadInitialPlantPhoto, loadDetail: LoadPlantDetail, update: UpdatePlant, registerCare: RegisterCareEvent? = nil, loadLastWatering: (any LoadLastWateringUseCase)? = nil) {
         self.loadPlants = loadPlants
