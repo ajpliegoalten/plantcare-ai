@@ -1,0 +1,7 @@
+import Foundation
+
+protocol PlantPhotoRepository: Sendable {
+    func savePhoto(_ photo: PlantPhoto, jpeg: Data) async throws -> PlantPhoto
+    func loadPhotos(for plantID: UUID) async throws -> [PlantPhoto]
+    func loadPhoto(id: UUID, for plantID: UUID) async throws -> Data
+}

@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 @MainActor
 final class PlantListViewModel: ObservableObject {
@@ -19,6 +20,8 @@ final class PlantListViewModel: ObservableObject {
     var lastIdentificationInvocationCount: Int?
     #endif
     var makeIdentificationPhoto: (() -> IdentificationPhotoViewModel)?
+    var makeAddPhoto: ((Plant, @escaping @MainActor (PlantPhoto, UIImage) -> Void) -> AddPlantPhotoViewModel)?
+    var makePhotoPager: ((Plant) -> PlantPhotoPagerViewModel)?
 
     init(loadPlants: any LoadPlantsUseCase, loadPhoto: LoadInitialPlantPhoto, loadDetail: LoadPlantDetail, update: UpdatePlant, registerCare: RegisterCareEvent? = nil, loadLastWatering: (any LoadLastWateringUseCase)? = nil) {
         self.loadPlants = loadPlants
@@ -71,11 +74,14 @@ final class PlantListViewModel: ObservableObject {
     }
 
     func detailViewModel(id: UUID) -> PlantDetailViewModel {
-        PlantDetailViewModel(id: id, loadDetail: loadDetail, loadPhoto: loadPhoto, update: update, registerCare: registerCare, loadLastWatering: loadLastWatering, onWatering: { [weak self] id in
+        let detail = PlantDetailViewModel(id: id, loadDetail: loadDetail, loadPhoto: loadPhoto, update: update, registerCare: registerCare, loadLastWatering: loadLastWatering, onWatering: { [weak self] id in
             self?.cards.first { $0.id == id }?.lastWatering.invalidate()
         }) { [weak self] plant in
             self?.applyUpdatedPlant(plant)
         }
+        detail.makeAddPhoto = makeAddPhoto
+        detail.makePhotoPager = makePhotoPager
+        return detail
     }
 
     func applyUpdatedPlant(_ plant: Plant) {

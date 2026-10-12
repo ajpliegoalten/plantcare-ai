@@ -21,6 +21,22 @@ final class PlantDetailViewModel: ObservableObject {
     private let onWatering: @MainActor (UUID) -> Void
     @Published private(set) var careConfirmation: CareEvent?
     private var careSession: UUID?
+    @Published private(set) var photoPager: PlantPhotoPagerViewModel?
+    @Published private(set) var photoConfirmation: PlantPhoto?
+    var makeAddPhoto: ((Plant, @escaping @MainActor (PlantPhoto, UIImage) -> Void) -> AddPlantPhotoViewModel)?
+    var makePhotoPager: ((Plant) -> PlantPhotoPagerViewModel)?
+    private var photoSession: UUID?
+
+    func photoEditor() -> AddPlantPhotoViewModel? {
+        guard case .loaded(let plant) = state, let makeAddPhoto else { return nil }
+        photoConfirmation = nil
+        let session = UUID(); photoSession = session
+        return makeAddPhoto(plant) { [weak self] photo, image in
+            guard let self, self.photoSession == session, photo.plantID == self.id else { return }
+            self.photoSession = nil; self.photoConfirmation = photo
+            self.photoPager?.committed(photo, image: image)
+        }
+    }
 
     init(id: UUID, loadDetail: LoadPlantDetail, loadPhoto: LoadInitialPlantPhoto, update: UpdatePlant, registerCare: RegisterCareEvent? = nil, loadLastWatering: (any LoadLastWateringUseCase)? = nil, onWatering: @escaping @MainActor (UUID) -> Void = { _ in }, onUpdated: @escaping @MainActor (Plant) -> Void = { _ in }) {
         self.id = id
@@ -33,7 +49,10 @@ final class PlantDetailViewModel: ObservableObject {
         self.onWatering = onWatering
     }
 
-    private var formPhoto: UIImage? { if case .loaded(let image) = photoState { return image }; return nil }
+    var formPhoto: UIImage? {
+        if let photoPager { return photoPager.initialImage }
+        if case .loaded(let image) = photoState { return image }; return nil
+    }
 
     func careEditor() -> RegisterCareViewModel? {
         guard case .loaded(let plant) = state, let registerCare else { return nil }
@@ -69,6 +88,7 @@ final class PlantDetailViewModel: ObservableObject {
     func load() async {
         if case .loaded = state {
             lastWatering.appear()
+            if let photoPager { photoPager.appear(); return }
             await loadImage()
             return
         }
@@ -84,6 +104,9 @@ final class PlantDetailViewModel: ObservableObject {
             guard let plant else { state = .notFound; return }
             state = .loaded(plant)
             lastWatering.appear() // Independent of photograph IO/decode.
+            if let makePhotoPager {
+                photoPager = makePhotoPager(plant); photoPager?.appear(); return
+            }
             await loadImage()
         } catch {
             guard request == metadataGeneration else { return }
@@ -119,6 +142,9 @@ final class PlantDetailViewModel: ObservableObject {
     }
 
     func cancelLoading() {
+        photoPager?.disappear()
+        photoConfirmation = nil
+        photoSession = nil
         lastWatering.disappear()
         if metadataPending {
             metadataGeneration += 1
