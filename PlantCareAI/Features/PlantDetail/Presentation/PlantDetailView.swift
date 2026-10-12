@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PlantDetailView: View {
     @StateObject private var viewModel: PlantDetailViewModel
+    @Environment(\.scenePhase) private var scenePhase
     @State private var editor: EditPlantViewModel?
     @State private var careEditor: RegisterCareViewModel?
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -49,6 +50,7 @@ struct PlantDetailView: View {
         .accessibilityIdentifier("plantDetail-\(viewModel.id)")
         .task { await viewModel.load() }
         .onDisappear { viewModel.cancelLoading() }
+        .onChange(of: scenePhase) { _, phase in if phase == .active { viewModel.lastWatering.foreground() } }
     }
 
     private func identity(_ plant: Plant) -> some View {
@@ -95,6 +97,21 @@ struct PlantDetailView: View {
     }
 
     private var careRegistration: some View {
+        PlantCareRegistration(viewModel: viewModel) { careEditor = viewModel.careEditor() }
+    }
+
+    private struct PlantCareRegistration: View {
+        @ObservedObject var viewModel: PlantDetailViewModel
+        @ObservedObject var lastWatering: LastWateringHintViewModel
+        let onOpen: () -> Void
+
+        init(viewModel: PlantDetailViewModel, onOpen: @escaping () -> Void) {
+            self.viewModel = viewModel
+            self.lastWatering = viewModel.lastWatering
+            self.onOpen = onOpen
+        }
+
+        var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Label("detail.care.registrationTitle", systemImage: "leaf.fill")
@@ -105,7 +122,10 @@ struct PlantDetailView: View {
                 Label("care.confirmed", systemImage: "checkmark.circle.fill")
                     .accessibilityIdentifier("careConfirmation")
             }
-            Button { careEditor = viewModel.careEditor() } label: {
+            if case .loaded = lastWatering.state {
+                LastWateringHintView(viewModel: lastWatering, style: .detailRow)
+            }
+            Button(action: onOpen) {
                 Label("detail.care.register", systemImage: "leaf.fill")
                     .font(.body.weight(.semibold))
                     .frame(maxWidth: .infinity, minHeight: 52)
@@ -123,6 +143,7 @@ struct PlantDetailView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color("Surface"), in: RoundedRectangle(cornerRadius: 22))
         .shadow(color: Color("Primary").opacity(0.04), radius: 10, y: 3)
+        }
     }
 
     private func careSheet(_ sheet: CareSheet) -> some View {

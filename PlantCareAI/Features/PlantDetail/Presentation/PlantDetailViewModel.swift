@@ -17,16 +17,20 @@ final class PlantDetailViewModel: ObservableObject {
     private let update: UpdatePlant
     private let onUpdated: @MainActor (Plant) -> Void
     private let registerCare: RegisterCareEvent?
+    let lastWatering: LastWateringHintViewModel
+    private let onWatering: @MainActor (UUID) -> Void
     @Published private(set) var careConfirmation: CareEvent?
     private var careSession: UUID?
 
-    init(id: UUID, loadDetail: LoadPlantDetail, loadPhoto: LoadInitialPlantPhoto, update: UpdatePlant, registerCare: RegisterCareEvent? = nil, onUpdated: @escaping @MainActor (Plant) -> Void = { _ in }) {
+    init(id: UUID, loadDetail: LoadPlantDetail, loadPhoto: LoadInitialPlantPhoto, update: UpdatePlant, registerCare: RegisterCareEvent? = nil, loadLastWatering: (any LoadLastWateringUseCase)? = nil, onWatering: @escaping @MainActor (UUID) -> Void = { _ in }, onUpdated: @escaping @MainActor (Plant) -> Void = { _ in }) {
         self.id = id
         self.loadDetail = loadDetail
         self.loadPhoto = loadPhoto
         self.update = update
         self.onUpdated = onUpdated
         self.registerCare = registerCare
+        self.lastWatering = LastWateringHintViewModel(plantID: id, load: loadLastWatering)
+        self.onWatering = onWatering
     }
 
     private var formPhoto: UIImage? { if case .loaded(let image) = photoState { return image }; return nil }
@@ -40,6 +44,10 @@ final class PlantDetailViewModel: ObservableObject {
             guard let self, self.careSession == session, event.plantID == self.id else { return }
             self.careConfirmation = event
             self.careSession = nil
+            if event.kind == .watering {
+                self.lastWatering.invalidate()
+                self.onWatering(self.id)
+            }
         }
     }
 
@@ -60,6 +68,7 @@ final class PlantDetailViewModel: ObservableObject {
 
     func load() async {
         if case .loaded = state {
+            lastWatering.appear()
             await loadImage()
             return
         }
@@ -74,6 +83,7 @@ final class PlantDetailViewModel: ObservableObject {
             metadataPending = false
             guard let plant else { state = .notFound; return }
             state = .loaded(plant)
+            lastWatering.appear() // Independent of photograph IO/decode.
             await loadImage()
         } catch {
             guard request == metadataGeneration else { return }
@@ -109,6 +119,7 @@ final class PlantDetailViewModel: ObservableObject {
     }
 
     func cancelLoading() {
+        lastWatering.disappear()
         if metadataPending {
             metadataGeneration += 1
             metadataPending = false

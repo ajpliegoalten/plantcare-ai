@@ -9,12 +9,14 @@ final class PlantCardViewModel: ObservableObject, Identifiable {
     nonisolated let id: UUID
     @Published private(set) var photoState: PhotoState = .idle
     private let loadPhoto: LoadInitialPlantPhoto
+    let lastWatering: LastWateringHintViewModel
     private var generation = 0
 
-    init(plant: Plant, loadPhoto: LoadInitialPlantPhoto) {
+    init(plant: Plant, loadPhoto: LoadInitialPlantPhoto, loadLastWatering: (any LoadLastWateringUseCase)? = nil) {
         self.plant = plant
         self.id = plant.id
         self.loadPhoto = loadPhoto
+        self.lastWatering = LastWateringHintViewModel(plantID: plant.id, load: loadLastWatering)
     }
 
     func applyUpdatedPlant(_ plant: Plant) {

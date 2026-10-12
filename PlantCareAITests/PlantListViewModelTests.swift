@@ -27,9 +27,12 @@ final class PlantListViewModelTests: XCTestCase {
         let repository = LocalPlantRepository(root: root)
         for index in 1...2 { try await repository.savePlant(StorageTestFixture.plant(index), initialPhoto: StorageTestFixture.photo(index)) }
         let model = PlantListViewModel(loadPlants: LoadPlants(repository: repository), loadPhoto: LoadInitialPlantPhoto(repository: repository),
-            loadDetail: LoadPlantDetail(repository: repository), update: UpdatePlant(repository: repository), registerCare: RegisterCareEvent(repository: repository))
+            loadDetail: LoadPlantDetail(repository: repository), update: UpdatePlant(repository: repository), registerCare: RegisterCareEvent(repository: repository), loadLastWatering: LoadLastWatering(repository: repository))
         await model.load()
         let cards = model.cards
+        cards.forEach { $0.lastWatering.appear() }
+        for _ in 0..<1000 { if cards.allSatisfy({ $0.lastWatering.state == .loaded(nil) }) { break }; try? await Task.sleep(for: .milliseconds(2)) }
+        XCTAssertEqual(cards[0].lastWatering.state, .loaded(nil)); XCTAssertEqual(cards[1].lastWatering.state, .loaded(nil))
         await cards[0].load()
         guard case .loaded(let image) = cards[0].photoState else { return XCTFail() }
         let detail = model.detailViewModel(id: cards[0].id)
@@ -37,14 +40,24 @@ final class PlantListViewModelTests: XCTestCase {
         await detail.load()
         let watering = try XCTUnwrap(detail.careEditor()); watering.selectKind(.watering); await watering.save()
         XCTAssertEqual(watering.state, .saved)
+        let date = try XCTUnwrap(detail.careConfirmation?.occurredAt)
+        for _ in 0..<1000 { if detail.lastWatering.state == .loaded(date), cards[0].lastWatering.state == .loaded(date) { break }; try? await Task.sleep(for: .milliseconds(2)) }
+        XCTAssertEqual(detail.lastWatering.state, .loaded(date)); XCTAssertEqual(cards[0].lastWatering.state, .loaded(date))
+        XCTAssertEqual(cards[1].lastWatering.state, .loaded(nil))
+        let retroactive = try XCTUnwrap(detail.careEditor()); retroactive.selectKind(.watering); retroactive.selectDay(offset: -1); await retroactive.save()
+        for _ in 0..<1000 { if detail.lastWatering.state == .loaded(date), cards[0].lastWatering.state == .loaded(date) { break }; try? await Task.sleep(for: .milliseconds(2)) }
+        XCTAssertEqual(detail.lastWatering.state, .loaded(date)); XCTAssertEqual(cards[0].lastWatering.state, .loaded(date))
+        let otherCare = try XCTUnwrap(detail.careEditor()); otherCare.selectKind(.fertilizing); await otherCare.save()
+        XCTAssertEqual(detail.lastWatering.state, .loaded(date)); XCTAssertEqual(cards[0].lastWatering.state, .loaded(date))
         XCTAssertTrue(model.cards[0] === cards[0]); XCTAssertTrue(model.cards[1] === cards[1])
         guard case .loaded(let retained) = cards[0].photoState else { return XCTFail() }
         XCTAssertTrue(image === retained)
         guard case .loaded(let plants) = model.state else { return XCTFail() }
         XCTAssertEqual(plants, (1...2).map(StorageTestFixture.plant))
         let events = try await repository.loadCareEvents(for: cards[0].id)
-        XCTAssertEqual(events.count, 1); XCTAssertEqual(events.first, detail.careConfirmation)
+        XCTAssertEqual(events.count, 3); XCTAssertTrue(events.contains(try XCTUnwrap(detail.careConfirmation)))
         let other = try await repository.loadCareEvents(for: cards[1].id); XCTAssertEqual(other, [])
+        cards.forEach { $0.lastWatering.disappear() }; detail.cancelLoading()
     }
     func testCreatedPlantKeepsExistingCardsAndPhotoStatesOrdersAndDeduplicatesCallback() async {
         let repository = CardPhotoRepository()

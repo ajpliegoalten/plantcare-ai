@@ -4,6 +4,45 @@ import UIKit
 
 @MainActor
 final class PlantDetailViewModelTests: XCTestCase {
+    func testSummaryReadsBeforePhotoFinishesAndNeverForUnavailableMetadata() async {
+        let repository = DetailRepository(), loader = DetailHintLoader()
+        let vm = PlantDetailViewModel(id: StorageTestFixture.plant(1).id, loadDetail: LoadPlantDetail(repository: repository),
+                                     loadPhoto: LoadInitialPlantPhoto(repository: repository), update: UpdatePlant(repository: repository), loadLastWatering: loader)
+        let task = Task { await vm.load() }; await repository.wait(count: 1)
+        for _ in 0..<1000 { if vm.lastWatering.state == .loaded(nil) { break }; try? await Task.sleep(for: .milliseconds(2)) }
+        XCTAssertEqual(vm.lastWatering.state, .loaded(nil))
+        guard case .loading = vm.photoState else { return XCTFail("Summary must not wait for photo") }
+        await repository.resolvePhoto(0, .failure(PlantStorageError.photoMissing)); await task.value
+        XCTAssertEqual(vm.lastWatering.state, .loaded(nil))
+        vm.cancelLoading()
+        for unavailable in [DetailRepository(plants: []), DetailRepository(failure: .storage)] {
+            let model = PlantDetailViewModel(id: UUID(), loadDetail: LoadPlantDetail(repository: unavailable), loadPhoto: LoadInitialPlantPhoto(repository: unavailable), update: UpdatePlant(repository: unavailable), loadLastWatering: loader)
+            await model.load(); XCTAssertEqual(model.lastWatering.state, .idle)
+        }
+        let count = await loader.calls; XCTAssertEqual(count, 1)
+    }
+
+    func testConfirmedWateringReadFailureDoesNotUndoCommitOrReloadPhotoAndOtherKindsDoNotRead() async throws {
+        let repository = DetailRepository(), loader = DetailHintLoader(failAfterFirst: true)
+        var callbacks: [UUID] = []
+        let vm = PlantDetailViewModel(id: StorageTestFixture.plant(1).id, loadDetail: LoadPlantDetail(repository: repository),
+                                     loadPhoto: LoadInitialPlantPhoto(repository: repository), update: UpdatePlant(repository: repository),
+                                     registerCare: RegisterCareEvent(repository: DetailWateringRepository()), loadLastWatering: loader, onWatering: { callbacks.append($0) })
+        let task = Task { await vm.load() }; await repository.wait(count: 1)
+        await repository.resolvePhoto(0, .success(StorageTestFixture.photo(1))); await task.value
+        for _ in 0..<1000 { if vm.lastWatering.state == .loaded(nil) { break }; try? await Task.sleep(for: .milliseconds(2)) }
+        let before = await repository.counts()
+        let other = try XCTUnwrap(vm.careEditor()); other.selectKind(.repotting); await other.save()
+        XCTAssertEqual(vm.lastWatering.state, .loaded(nil)); XCTAssertTrue(callbacks.isEmpty)
+        let watering = try XCTUnwrap(vm.careEditor()); watering.selectKind(.watering); await watering.save()
+        for _ in 0..<1000 { if vm.lastWatering.state == .failed { break }; try? await Task.sleep(for: .milliseconds(2)) }
+        XCTAssertEqual(vm.lastWatering.state, .failed); XCTAssertNil(vm.lastWatering.value(compact: true))
+        XCTAssertEqual(watering.state, .saved); XCTAssertEqual(vm.careConfirmation?.kind, .watering)
+        XCTAssertEqual(callbacks, [vm.id])
+        let after = await repository.counts(); XCTAssertEqual(before.0, after.0); XCTAssertEqual(before.1, after.1)
+        let count = await loader.calls; XCTAssertEqual(count, 2)
+        vm.cancelLoading()
+    }
     func testWateringFactoryLoadedOnlySnapshotPhotosAndConfirmationWithoutReload() async throws {
         let repository = DetailRepository()
         let events = DetailWateringRepository()
@@ -245,4 +284,15 @@ final class PlantDetailViewModelTests: XCTestCase {
 private actor DetailWateringRepository: CareEventRepository {
     func saveCareEvent(_ event: CareEvent) async throws -> CareEvent { event }
     func loadCareEvents(for plantID: UUID) async throws -> [CareEvent] { [] }
+}
+
+private actor DetailHintLoader: LoadLastWateringUseCase {
+    var calls = 0
+    let failAfterFirst: Bool
+    init(failAfterFirst: Bool = false) { self.failAfterFirst = failAfterFirst }
+    func execute(for plantID: UUID) async throws -> Date? {
+        calls += 1
+        if failAfterFirst && calls > 1 { throw CareEventError.storage }
+        return nil
+    }
 }

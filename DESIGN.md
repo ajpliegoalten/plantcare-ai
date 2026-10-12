@@ -65,6 +65,12 @@ No crear pantalla independiente de actividad en el MVP. El detalle puede mostrar
 
 ## Componentes, estados y accesibilidad
 
+### Último riego: delta autorizado (2026-10-12)
+
+Mis plantas muestra debajo de especie y antes de ubicación una gota decorativa y caption medium: «Último riego: hoy» o fecha breve española sin punto («8 oct 2026»); loaded(nil) muestra «Sin riegos registrados» en tono secundario. No acción rápida nueva ni consejo en tarjetas. En el box Cuidados del detalle, encima de Registrar cuidado, fila SurfaceMuted/radio12 y círculo CareMint con gota; etiqueta «Último riego» y fecha («Hoy, 12 oct 2026» solo si es hoy real). Ausencia real lleva gota outline y etiqueta/valor en dos líneas.
+
+Idle/loading/failed no montan resumen, icono, ID, accessibilityValue residual ni separación propia: no spinner/placeholder/error/retry. Box, CTA, confirmación real y recordatorio de comprobar humedad permanecen en detalle. Iconos decorativos ocultos y texto adaptable completo; calendario gregoriano/zona actual, nunca urgencia, días transcurridos ni hechos inferidos de la fecha. Solo commit watering invalida/relee; abrir/cancelar/fallar/registrar otro cuidado no cambia el resumen. Foto4:3, navegación, cabecera y ficha preservadas. Esta implementación sustituye la expectativa anterior sin última-fecha, sin reescribir evidencias históricas.
+
 ### Detalle: rediseño autorizado (2026-10-11)
 
 El HTML «Plant Detail» aportado por el usuario es referencia de composición de esta pantalla, adaptada a SwiftUI y a los datos reales. Foto propia 4:3 con esquinas suaves; tarjeta blanca con nombre predominante, especie secundaria en cursiva, icono SF Symbols de planta en círculo y fecha persistida en franja crema con calendario. Mantener ubicación opcional y Editar nativo funcional. No añadir colección «Interior», avatar/cuentas, menú sin acciones, estado de salud ni ampliación de foto no implementada.

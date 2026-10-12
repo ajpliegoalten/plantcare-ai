@@ -3,6 +3,24 @@ import SwiftData
 @testable import PlantCareAI
 
 final class LocalCareEventRepositoryTests: XCTestCase {
+    func testLastWateringRealReopenMaxAndReadOnlyExactPlantPhotoAndPayload() async throws {
+        try seedV1()
+        var repository: LocalPlantRepository? = LocalPlantRepository(root: root)
+        let newest = try event()
+        let older = CareEvent(id: UUID(), plantID: newest.plantID, kind: .watering,
+                             occurredAt: newest.occurredAt.addingTimeInterval(-86400), note: "Retroactivo", createdAt: newest.createdAt.addingTimeInterval(50), timeZoneIdentifier: newest.timeZoneIdentifier)
+        let otherKind = CareEvent(id: UUID(), plantID: newest.plantID, kind: .other,
+                                 occurredAt: newest.occurredAt.addingTimeInterval(86400), note: nil, createdAt: newest.createdAt, timeZoneIdentifier: newest.timeZoneIdentifier)
+        for event in [newest, otherKind, older] { _ = try await repository!.saveCareEvent(event) }
+        repository = nil
+        let reopened = LocalPlantRepository(root: root)
+        let first = try await LoadLastWatering(repository: reopened).execute(for: newest.plantID)
+        let second = try await LoadLastWatering(repository: reopened).execute(for: StorageTestFixture.plant(2).id)
+        XCTAssertEqual(first, newest.occurredAt); XCTAssertNil(second)
+        let actual = try await reopened.loadCareEvents(for: newest.plantID)
+        XCTAssertEqual(actual, [otherKind, newest, older])
+        try await assertPlants(reopened)
+    }
     var root: URL!
     override func setUpWithError() throws { root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString) }
     override func tearDownWithError() throws { try? FileManager.default.removeItem(at: root) }

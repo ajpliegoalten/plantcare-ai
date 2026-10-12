@@ -1,6 +1,23 @@
 #if DEBUG && targetEnvironment(simulator)
 import Foundation
 
+// A read-only seam over the real repository, enabled only for isolated simulator UUID stores.
+actor LastWateringReadTestFixture: LoadLastWateringUseCase {
+    let load: any LoadLastWateringUseCase
+    let mode: String
+    private var calls: [UUID: Int] = [:]
+    init(load: any LoadLastWateringUseCase, mode: String) { self.load = load; self.mode = mode }
+    func execute(for plantID: UUID) async throws -> Date? {
+        calls[plantID, default: 0] += 1
+        let count = calls[plantID]!
+        if mode == "slow" { try await Task.sleep(for: .seconds(12)) }
+        if mode == "failed" || (mode == "fail-first" && count <= 2) || (mode == "fail-after-commit" && count >= 3) {
+            throw CareEventError.storage
+        }
+        return try await load.execute(for: plantID)
+    }
+}
+
 // Opt-in UUID-scoped simulator store only. Expected dispatch payloads are not product history.
 final class CareEventTestFixture: @unchecked Sendable {
     private struct Payload: Codable, Equatable {
