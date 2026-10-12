@@ -1,5 +1,7 @@
 # Suite UI: cobertura y coste
 
+Delta add-plant-photo: `AddPlantPhotoUITests` (6 métodos) y nuevo método adicional dentro de `SystemGalleryUITests` (ahora2, ambos seriales/sembrados). No se retiran assertions heredadas: inicial conserva value/IDs de detalle, retry inicial≥44pt, editor/cuidados/card/último riego/alta/fallback mantienen regresiones. `docs/testing-add-plant-photo.md` fija selectores/fixtures/calendario nativo/evidencia focalizada. Conteos históricos abajo permanecen como antecedentes; predicción actual233, no gate ejecutado por implementer. init.sh intacto y clase Fotos completa ya incluida.
+
 Helper manual: `typeManual` comprueba geometría **después** de focus mediante `revealFocusedManual`, no solo isHittable/borde app. Campo completo entre navegación y teclado/accesorio Listo antes de long-press nativo; gutter drags limitados a contenido, assertions fail-closed si sigue ocluido. Seleccionar todo/Next/delete y exact-empty/exact-name permanecen; rama selección párrafo editor no modificada. H1 y sus siete callers/diagnóstico sin reproducir fallo constan en `docs/handoffs/other-care-events-repair.md`; no reinterpretar gate fallido como aprobado.
 
 Refactor solicitado el 2026-10-11. En su fase inicial **no se ejecutaron builds, tests, simuladores ni mediciones**, por petición del usuario. La posterior validación y sus fallos están registrados en `docs/validations/ui-test-performance.md`; resultados de reparación en PROGRESS. No confundir esa historia con aceptación de las fuentes actuales.

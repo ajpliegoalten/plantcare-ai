@@ -134,6 +134,14 @@ Presentation mantiene instancias independientes de LastWateringHintViewModel por
 
 El fetch actual de eventos es completo y se filtra por planta en Data; cada tarjeta visible consulta separadamente. Es suficiente para el prototipo, no una promesa de batch/escala.
 
+## Fotografías adicionales y paginador (ADR011)
+
+`AddPlantPhotoView → AddPlantPhotoViewModel → AddPlantPhoto → PlantPhotoRepository ← LocalPlantRepository`. `PlantPhotoPagerView → PlantPhotoPagerViewModel → LoadPlantPhotos/LoadPlantPhoto/LoadInitialPlantPhoto → contratos Domain ← mismo actor`. Features/PlantPhotos conserva Domain Foundation, Presentation UIKit/SwiftUI y Data SwiftData/fixture. App compone fábricas de modal/paginador por PlantList/PlantDetail tras overrides Debug; init/fábricas no hacen IO. ContentView y transporte/consentimiento IA intactos.
+
+Schema documental V3 no versionado añade PersistedPlantPhoto, siete campos+referencia canónica, sin mutar Plant/CareSheet/CareEvent ni duplicar iniciales. `AdditionalPhotos/<photoID>.jpg` separado de `Photos/<plantID>.jpg`; recuperación valida **todos** los metadatos/pertenencias antes de limpiar cualquiera. Upgrade real V2/V1→V3/reopen demostrado, sin reset/fallback destructivo ni downgrade prometido. Publicación JPEG validado sin recompresión y save síncronos dentro del único actor; rollback solo de archivos propios, duplicado literal antes del reloj, conflicto sin overwrite. Referencia rota produce error propio de lectura, no elimina planta/registro.
+
+Inicial proyectada con identidad discriminada y fecha de alta; adicionales por fecha humana. Orden fecha desc/createdAt desc/clave estable asc, apertura inicial aunque no índice0. Commit canónico selecciona nueva identidad incluso retroactiva, cachea thumbnail y reconcilia metadata con generación; fallo de relectura no convierte éxito en error de save ni contador parcial. Solo selección carga bytes; ImageIO ≤1600 px fuera de MainActor, cache local máximo3 decodificadas sin JPEG, inicial preservada para editor/cuidado. Cancelación/generaciones/lifecycle y errores separados de metadata/imagen mantienen identidad/fecha propia. Swipe/botones/fecha/refresh son lecturas, no alteran portada ni último riego. DTO IdentificationPhoto compartido como JPEG efímero; no uso del VM de identificación ni envío IA. Sin timeline/batches.
+
 ## Recursos y comprobación
 
 - `PlantCareAI/Assets.xcassets`: ocho colores semánticos sRGB de `DESIGN.md`, sin imágenes. Las fotos de ejemplares proceden del repositorio local por UUID; la preview efímera muestra únicamente la selección/captura del usuario.

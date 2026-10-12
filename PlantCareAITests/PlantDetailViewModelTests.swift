@@ -4,6 +4,35 @@ import UIKit
 
 @MainActor
 final class PlantDetailViewModelTests: XCTestCase {
+    func testAdditionalPhotoFactoryLoadedOnlySelectsCommitButEditorAndCareKeepInitialSnapshot() async throws {
+        let repository = DetailRepository(), photos = PhotoTestRepository()
+        let vm = model(1, repository, watering: RegisterCareEvent(repository: DetailWateringRepository()))
+        vm.makePhotoPager = { plant in
+            PlantPhotoPagerViewModel(plant: plant, loadMetadata: LoadPlantPhotos(repository: photos),
+                loadAdditional: LoadPlantPhoto(repository: photos), loadInitial: LoadInitialPlantPhoto(repository: repository))
+        }
+        vm.makeAddPhoto = { plant, callback in
+            AddPlantPhotoViewModel(plant: plant, prepare: PrepareIdentificationPhoto(preparer: LocalIdentificationPhotoPreparer()),
+                validate: LocalPreparedPlantPhotoValidator(), camera: CheckCameraAccess(access: PhotoCameraDouble()),
+                add: AddPlantPhoto(repository: photos), zone: { TimeZone(identifier: "Europe/Madrid")! }, onSaved: callback)
+        }
+        XCTAssertNil(vm.photoEditor())
+        await vm.load(); await repository.wait(count: 1)
+        await repository.resolvePhoto(0, .success(StorageTestFixture.photo(1)))
+        for _ in 0..<1000 { if vm.photoPager?.initialImage != nil { break }; try? await Task.sleep(for: .milliseconds(2)) }
+        let initial = try XCTUnwrap(vm.photoPager?.initialImage)
+        let before = await repository.counts()
+        let draft = try XCTUnwrap(vm.photoEditor()); XCTAssertNil(draft.preview); XCTAssertNil(draft.photo)
+        draft.select { StorageTestFixture.photo(2) }
+        for _ in 0..<1000 { if !draft.isLoading { break }; try? await Task.sleep(for: .milliseconds(2)) }
+        await draft.save(); XCTAssertEqual(draft.state, .saved)
+        let confirmed = try XCTUnwrap(vm.photoConfirmation)
+        XCTAssertEqual(vm.photoPager?.selected, .additional(confirmed.id))
+        XCTAssertTrue(vm.editor()?.photo === initial); XCTAssertTrue(vm.careEditor()?.photo === initial)
+        let after = await repository.counts(); XCTAssertEqual(before.0, after.0); XCTAssertEqual(before.1, after.1); XCTAssertEqual(after.2, 0)
+        let fresh = try XCTUnwrap(vm.photoEditor()); XCTAssertNil(fresh.photo); XCTAssertNil(vm.photoConfirmation)
+        vm.cancelLoading(); XCTAssertEqual(vm.photoPager?.selected, .initial(vm.id))
+    }
     func testSummaryReadsBeforePhotoFinishesAndNeverForUnavailableMetadata() async {
         let repository = DetailRepository(), loader = DetailHintLoader()
         let vm = PlantDetailViewModel(id: StorageTestFixture.plant(1).id, loadDetail: LoadPlantDetail(repository: repository),

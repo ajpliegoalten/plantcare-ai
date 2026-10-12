@@ -4,7 +4,7 @@ import ImageIO
 import UniformTypeIdentifiers
 
 // One instance per store, composed by the app. Its actor serializes duplicate checks and publication.
-actor LocalPlantRepository: PlantRepository, CareEventRepository {
+actor LocalPlantRepository: PlantRepository, CareEventRepository, PlantPhotoRepository {
     private let root: URL
     private var container: ModelContainer?
     private var context: ModelContext?
@@ -12,22 +12,28 @@ actor LocalPlantRepository: PlantRepository, CareEventRepository {
     private let beforeCommit: @Sendable () throws -> Void
     private let now: @Sendable () -> Date
     private let beforeCareCommit: @Sendable (CareEvent) throws -> Void
+    private let photoPublication: @Sendable (PlantPhoto, Bool) throws -> Void
+    private let beforePhotoCommit: @Sendable (PlantPhoto) throws -> Void
 
-    init(root: URL, beforeCommit: @escaping @Sendable () throws -> Void = {}, now: @escaping @Sendable () -> Date = { Date() }, beforeCareCommit: @escaping @Sendable (CareEvent) throws -> Void = { _ in }) {
+    init(root: URL, beforeCommit: @escaping @Sendable () throws -> Void = {}, now: @escaping @Sendable () -> Date = { Date() }, beforeCareCommit: @escaping @Sendable (CareEvent) throws -> Void = { _ in }, photoPublication: @escaping @Sendable (PlantPhoto, Bool) throws -> Void = { _, _ in }, beforePhotoCommit: @escaping @Sendable (PlantPhoto) throws -> Void = { _ in }) {
         self.root = root
         self.beforeCommit = beforeCommit
         self.now = now
         self.beforeCareCommit = beforeCareCommit
+        self.photoPublication = photoPublication
+        self.beforePhotoCommit = beforePhotoCommit
     }
 
     private var photos: URL { root.appendingPathComponent("Photos", isDirectory: true) }
+    private var additionalPhotos: URL { root.appendingPathComponent("AdditionalPhotos", isDirectory: true) }
 
     private func store() throws -> ModelContext {
         if let context { return context }
         do {
             try FileManager.default.createDirectory(at: photos, withIntermediateDirectories: true)
+            try FileManager.default.createDirectory(at: additionalPhotos, withIntermediateDirectories: true)
             let configuration = ModelConfiguration(url: root.appendingPathComponent("Plants.store"))
-            let container = try ModelContainer(for: PersistedPlant.self, PersistedCareEvent.self, configurations: configuration)
+            let container = try ModelContainer(for: PersistedPlant.self, PersistedCareEvent.self, PersistedPlantPhoto.self, configurations: configuration)
             let context = ModelContext(container)
             context.autosaveEnabled = false
             // Fetch must succeed before cleanup: unreadable metadata must never erase referenced photos.
@@ -37,7 +43,21 @@ actor LocalPlantRepository: PlantRepository, CareEventRepository {
                 return record.photoReference
             })
             // Validate the additive entity too before any orphan cleanup.
-            for event in try context.fetch(FetchDescriptor<PersistedCareEvent>()) { _ = try event.domain() }
+            let plantIDs = Set(records.map(\.id))
+            for event in try context.fetch(FetchDescriptor<PersistedCareEvent>()) {
+                guard plantIDs.contains(try event.domain().plantID) else { throw PlantStorageError.storage }
+            }
+            let additionalReferences = Set(try context.fetch(FetchDescriptor<PersistedPlantPhoto>()).map { record in
+                let photo = try record.domain()
+                guard plantIDs.contains(photo.plantID) else { throw PlantPhotoError.storage }
+                return record.photoReference
+            })
+            // Both entity sets are valid before either directory is touched.
+            for file in try FileManager.default.contentsOfDirectory(at: additionalPhotos, includingPropertiesForKeys: nil) {
+                if file.pathExtension == "pending" || (file.pathExtension == "jpg" && !additionalReferences.contains(file.lastPathComponent)) {
+                    try FileManager.default.removeItem(at: file)
+                }
+            }
             for file in try FileManager.default.contentsOfDirectory(at: photos, includingPropertiesForKeys: nil) {
                 if file.pathExtension == "pending" || (file.pathExtension == "jpg" && !references.contains(file.lastPathComponent)) {
                     try FileManager.default.removeItem(at: file)
@@ -54,6 +74,92 @@ actor LocalPlantRepository: PlantRepository, CareEventRepository {
             return try store().fetch(FetchDescriptor<PersistedPlant>()).map { try $0.domain() }
                 .sorted { $0.createdAt == $1.createdAt ? $0.id.uuidString < $1.id.uuidString : $0.createdAt < $1.createdAt }
         } catch { throw PlantStorageError.storage }
+    }
+
+    func savePhoto(_ photo: PlantPhoto, jpeg: Data) async throws -> PlantPhoto {
+        try AddPlantPhoto.validateStructure(photo)
+        // Suspension occurs before obtaining a context. Publication through save is synchronous.
+        do {
+            try await LocalPreparedPlantPhotoValidator().validate(
+                IdentificationPhoto(id: photo.id, jpeg: jpeg, width: photo.width, height: photo.height))
+        } catch is CancellationError { throw CancellationError() }
+        catch { throw PlantPhotoError.photoCorrupt }
+        let context: ModelContext
+        do { context = try store() } catch { throw PlantPhotoError.storage }
+        let destination = additionalPhotos.appendingPathComponent(photo.id.uuidString + ".jpg")
+        let temporary = additionalPhotos.appendingPathComponent(UUID().uuidString + ".pending")
+        var published = false
+        do {
+            guard try context.fetch(FetchDescriptor<PersistedPlant>()).contains(where: { $0.id == photo.plantID }) else {
+                throw PlantPhotoError.plantNotFound
+            }
+            if let record = try context.fetch(FetchDescriptor<PersistedPlantPhoto>()).first(where: { $0.id == photo.id }) {
+                let confirmed = try record.domain()
+                guard confirmed == photo else { throw PlantPhotoError.conflict }
+                let existing = try readPhoto(record)
+                guard existing == jpeg else { throw PlantPhotoError.conflict }
+                return confirmed
+            }
+            try Task.checkCancellation()
+            try AddPlantPhoto.validateInsertion(photo, now: now())
+            try photoPublication(photo, false)
+            try jpeg.write(to: temporary, options: .atomic)
+            guard try Data(contentsOf: temporary) == jpeg else { throw PlantPhotoError.storage }
+            try FileManager.default.moveItem(at: temporary, to: destination)
+            published = true
+            try photoPublication(photo, true)
+            context.insert(PersistedPlantPhoto(photo))
+            try beforePhotoCommit(photo)
+            try beforeCommit()
+            try context.save()
+            return photo
+        } catch {
+            context.rollback()
+            try? FileManager.default.removeItem(at: temporary)
+            if published { try? FileManager.default.removeItem(at: destination) }
+            throw (error as? PlantPhotoError) ?? (error is CancellationError ? error : PlantPhotoError.storage)
+        }
+    }
+
+    func loadPhotos(for plantID: UUID) async throws -> [PlantPhoto] {
+        do {
+            let context = try store()
+            guard try context.fetch(FetchDescriptor<PersistedPlant>()).contains(where: { $0.id == plantID }) else {
+                throw PlantPhotoError.plantNotFound
+            }
+            return try context.fetch(FetchDescriptor<PersistedPlantPhoto>()).filter { $0.plantID == plantID }
+                .map { try $0.domain() }.sorted {
+                    if $0.occurredAt != $1.occurredAt { return $0.occurredAt > $1.occurredAt }
+                    if $0.createdAt != $1.createdAt { return $0.createdAt > $1.createdAt }
+                    return $0.id.uuidString < $1.id.uuidString
+                }
+        } catch { throw (error as? PlantPhotoError) ?? .storage }
+    }
+
+    func loadPhoto(id: UUID, for plantID: UUID) async throws -> Data {
+        do {
+            guard let record = try store().fetch(FetchDescriptor<PersistedPlantPhoto>()).first(where: { $0.id == id && $0.plantID == plantID }) else {
+                throw PlantPhotoError.notFound
+            }
+            return try readPhoto(record)
+        } catch { throw (error as? PlantPhotoError) ?? .storage }
+    }
+
+    private func readPhoto(_ record: PersistedPlantPhoto) throws -> Data {
+        let photo = try record.domain()
+        let url = additionalPhotos.appendingPathComponent(record.photoReference)
+        guard FileManager.default.fileExists(atPath: url.path) else { throw PlantPhotoError.photoMissing }
+        let data = try Data(contentsOf: url)
+        guard data.count <= 5 * 1024 * 1024, Self.validJPEG(data), data.prefix(2) == Data([0xff, 0xd8]), data.suffix(2) == Data([0xff, 0xd9]),
+              let source = CGImageSourceCreateWithData(data as CFData, nil),
+              CGImageSourceGetCount(source) == 1,
+              let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+              properties[kCGImagePropertyExifDictionary] == nil,
+              properties[kCGImagePropertyGPSDictionary] == nil,
+              properties[kCGImagePropertyOrientation] == nil,
+              properties[kCGImagePropertyPixelWidth] as? Int == photo.width,
+              properties[kCGImagePropertyPixelHeight] as? Int == photo.height else { throw PlantPhotoError.photoCorrupt }
+        return data
     }
 
     func saveCareEvent(_ event: CareEvent) async throws -> CareEvent {

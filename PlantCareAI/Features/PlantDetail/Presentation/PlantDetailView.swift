@@ -5,6 +5,7 @@ struct PlantDetailView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var editor: EditPlantViewModel?
     @State private var careEditor: RegisterCareViewModel?
+    @State private var photoEditor: AddPlantPhotoViewModel?
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     init(viewModel: PlantDetailViewModel) {
@@ -22,8 +23,20 @@ struct PlantDetailView: View {
                 case .failed:
                     Text("detail.storageError").accessibilityIdentifier("detailStorageError")
                 case .loaded(let plant):
-                    photo
+                    if let pager = viewModel.photoPager {
+                        PlantPhotoPagerView(viewModel: pager, plantID: plant.id)
+                    } else { photo }
                     identity(plant)
+                    if viewModel.makeAddPhoto != nil {
+                        Button { photoEditor = viewModel.photoEditor() } label: {
+                            Label("plantPhotos.add", systemImage: "photo.badge.plus").frame(maxWidth: .infinity, minHeight: 44)
+                        }.buttonStyle(.bordered).buttonBorderShape(.capsule)
+                            .accessibilityIdentifier("detailAddPhoto-\(plant.id)")
+                        if viewModel.photoConfirmation != nil {
+                            Label("plantPhotos.confirmed", systemImage: "checkmark.circle.fill")
+                                .accessibilityIdentifier("additionalPhotoConfirmation-\(plant.id)")
+                        }
+                    }
                     careRegistration
                     careSheet(plant.careSheet)
                 }
@@ -47,10 +60,17 @@ struct PlantDetailView: View {
         }
         .sheet(item: $editor) { EditPlantView(viewModel: $0) }
         .sheet(item: $careEditor) { RegisterCareView(viewModel: $0) }
+        .sheet(item: $photoEditor) { AddPlantPhotoView(viewModel: $0, onFinished: { photoEditor = nil }) }
+        .onChange(of: viewModel.photoConfirmation) { _, confirmed in
+            if confirmed != nil { photoEditor = nil }
+        }
         .accessibilityIdentifier("plantDetail-\(viewModel.id)")
         .task { await viewModel.load() }
         .onDisappear { viewModel.cancelLoading() }
-        .onChange(of: scenePhase) { _, phase in if phase == .active { viewModel.lastWatering.foreground() } }
+        .onChange(of: scenePhase) { _, phase in if phase == .active {
+            viewModel.lastWatering.foreground(); viewModel.photoPager?.refreshDisplayZone()
+        } }
+        .onReceive(NotificationCenter.default.publisher(for: .NSSystemTimeZoneDidChange)) { _ in viewModel.photoPager?.refreshDisplayZone() }
     }
 
     private func identity(_ plant: Plant) -> some View {

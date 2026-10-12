@@ -2048,7 +2048,202 @@ final class IdentificationPhotoUITests: PlantCareAIUITestCase {
 }
 
 // This class runs separately on the seeded simulator, not on parallel clones.
+final class AddPlantPhotoUITests: PlantCareAIUITestCase {
+    private func revealPhoto(_ element: XCUIElement, app: XCUIApplication) {
+        let bar = app.navigationBars["Añadir foto"]; XCTAssertTrue(bar.exists)
+        for _ in 0..<8 {
+            let y = element.frame.midY
+            if element.isHittable && y > bar.frame.maxY + 44 && y < app.frame.maxY - 60 { break }
+            let down = y <= bar.frame.maxY + 44
+            app.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: down ? 0.4 : 0.7))
+                .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: down ? 0.65 : 0.45)))
+        }
+        XCTAssertTrue(bar.exists); XCTAssertTrue(element.isHittable)
+        XCTAssertGreaterThan(element.frame.midY, bar.frame.maxY + 44)
+        XCTAssertLessThan(element.frame.midY, app.frame.maxY - 60)
+    }
+    private func launch(_ app: XCUIApplication, id: String, mode: String = "success", extra: [String] = []) {
+        app.launchArguments = ["--storage-test-id", id, "--storage-seed", "--additional-photo-fixture", mode, "-AppleLanguages", "(es)"] + extra
+        app.launch()
+        let card = app.buttons["plantCard-\(plantID(1))"]
+        XCTAssertTrue(card.waitForExistence(timeout: 10)); card.tap()
+        XCTAssertTrue(app.staticTexts["selectedPlant-\(plantID(1))"].waitForExistence(timeout: 10))
+    }
+    private func open(_ app: XCUIApplication, plant: Int = 1) {
+        let button = app.buttons["detailAddPhoto-\(plantID(plant))"]; reveal(button, in: app); button.tap()
+        XCTAssertTrue(app.navigationBars["Añadir foto"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.images["additionalPhotoPlaceholder"].exists)
+        XCTAssertFalse(app.buttons["saveAdditionalPhoto"].isEnabled)
+    }
+    private func choose(_ app: XCUIApplication, _ asset: String) {
+        let button = app.buttons["fixture-additional-\(asset)"]; revealPhoto(button, app: app); button.tap()
+        let preview = app.images["additionalPhotoPreview"]
+        XCTAssertTrue(preview.waitForExistence(timeout: 10))
+        expectation(for: NSPredicate(format: "enabled == true"), evaluatedWith: app.buttons["saveAdditionalPhoto"])
+        waitForExpectations(timeout: 10)
+    }
+    private func save(_ app: XCUIApplication, plant: Int = 1, retry: Bool = false) {
+        let button = app.buttons[retry ? "retryAdditionalPhoto" : "saveAdditionalPhoto"]; revealPhoto(button, app: app); button.tap()
+        XCTAssertTrue(app.navigationBars["Añadir foto"].waitForNonExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["plantPhotoDate-\(plantID(plant))"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["plantPhotoDate-\(plantID(plant))"].label.hasPrefix("Foto inicial"))
+    }
+    private func verify(_ app: XCUIApplication, id: String, expected: String) {
+        app.terminate()
+        app.launchArguments = ["--storage-test-id", id, "--storage-verify", "--photo-verify", expected, "-AppleLanguages", "(es)"]
+        app.launch(); assertCards(app)
+    }
+    func testSuccessivePhotosRetroactiveSelectionPagerSwipeAndRelaunchIsolation() {
+        let app = XCUIApplication(), id = isolatedID(); launch(app, id: id)
+        open(app); capture("additional-empty", app: app); choose(app, "A"); capture("additional-preview", app: app); save(app)
+        open(app); choose(app, "B")
+        let picker = app.datePickers["additionalPhotoDate"]
+        XCTAssertTrue(picker.exists)
+        let dateButton = picker.buttons.firstMatch
+        XCTAssertTrue(dateButton.isEnabled)
+        XCTAssertGreaterThan(dateButton.frame.minY, app.navigationBars["Añadir foto"].frame.maxY)
+        XCTAssertTrue(app.frame.contains(dateButton.frame))
+        dateButton.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        var calendar = Calendar(identifier: .gregorian); calendar.timeZone = .current
+        let today = calendar.startOfDay(for: Date()), yesterday = calendar.date(byAdding: .day, value: -1, to: Date())!
+        let formatter = DateFormatter(); formatter.locale = Locale(identifier: "es_ES"); formatter.calendar = calendar
+        formatter.dateFormat = "EEEE, d 'de' MMMM"
+        let tomorrow = calendar.date(byAdding: .day, value: 1, to: today)!
+        if calendar.component(.month, from: tomorrow) == calendar.component(.month, from: today) {
+            let future = app.buttons[formatter.string(from: tomorrow)]; XCTAssertTrue(future.waitForExistence(timeout: 5)); XCTAssertFalse(future.isEnabled)
+        } else { XCTAssertFalse(app.buttons["DatePicker.NextMonth"].isEnabled) }
+        if calendar.component(.month, from: yesterday) != calendar.component(.month, from: today) { app.buttons["DatePicker.PreviousMonth"].tap() }
+        let past = app.buttons[formatter.string(from: yesterday)]; XCTAssertTrue(past.waitForExistence(timeout: 5)); past.tap()
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.1)).tap(); save(app)
+        let date = app.staticTexts["plantPhotoDate-\(plantID(1))"]
+        let pastLabel = date.label
+        let selectedImage = app.descendants(matching: .any).matching(NSPredicate(format: "identifier BEGINSWITH %@", "plantPhotoImage-additional-")).firstMatch
+        expectation(for: NSPredicate(format: "value == %@", "Foto cargada · 80 × 120"), evaluatedWith: selectedImage)
+        waitForExpectations(timeout: 5)
+        capture("additional-retroactive-pager", app: app)
+        let previous = app.buttons["plantPhotoPrevious-\(plantID(1))"]; reveal(previous, in: app); previous.tap()
+        XCTAssertNotEqual(date.label, pastLabel)
+        expectation(for: NSPredicate(format: "value == %@", "Foto cargada · 120 × 80"), evaluatedWith: selectedImage)
+        waitForExpectations(timeout: 5)
+        let next = app.buttons["plantPhotoNext-\(plantID(1))"]; next.tap(); XCTAssertEqual(date.label, pastLabel)
+        let pager = app.descendants(matching: .any)["plantPhotoPager-\(plantID(1))"].firstMatch
+        pager.swipeLeft(); XCTAssertTrue(date.label.hasPrefix("Foto inicial")); XCTAssertFalse(next.isEnabled)
+        back(app)
+        let second = app.buttons["plantCard-\(plantID(2))"]; reveal(second, in: app); second.tap()
+        XCTAssertTrue(app.staticTexts["selectedPlant-\(plantID(2))"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["plantPhotoNext-\(plantID(2))"].exists)
+        open(app, plant: 2); choose(app, "A"); save(app, plant: 2)
+        verify(app, id: id, expected: "A:0,B:-1;A:0")
+        for index in 1...2 {
+            let card = app.buttons["plantCard-\(plantID(index))"]; reveal(card, in: app); card.tap()
+            let initial = app.staticTexts["plantPhotoDate-\(plantID(index))"]
+            XCTAssertTrue(initial.waitForExistence(timeout: 5)); XCTAssertTrue(initial.label.hasPrefix("Foto inicial"))
+            let prev = app.buttons["plantPhotoPrevious-\(plantID(index))"]; reveal(prev, in: app); prev.tap()
+            XCTAssertFalse(initial.label.hasPrefix("Foto inicial")); back(app)
+        }
+    }
+    func testReplacementFailureCancelGestureAndFreshDraftNoWrites() {
+        let app = XCUIApplication(), id = isolatedID(); launch(app, id: id)
+        open(app); choose(app, "A")
+        let preview = app.images["additionalPhotoPreview"], original = app.images["additionalPhotoPreview"].value as? String
+        let failure = app.buttons["fixture-additional-failure"]; reveal(failure, in: app); failure.tap()
+        XCTAssertTrue(app.staticTexts["additionalPhotoError"].waitForExistence(timeout: 5)); XCTAssertEqual(preview.value as? String, original)
+        choose(app, "B"); XCTAssertNotEqual(preview.value as? String, original)
+        choose(app, "B"); capture("additional-replaced", app: app)
+        app.buttons["cancelAdditionalPhoto"].tap(); XCTAssertTrue(app.navigationBars["Añadir foto"].waitForNonExistence(timeout: 5))
+        open(app); let bar = app.navigationBars["Añadir foto"]
+        bar.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.5)).press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.9)))
+        XCTAssertTrue(bar.waitForNonExistence(timeout: 5)); open(app); XCTAssertTrue(app.images["additionalPhotoPlaceholder"].exists)
+        app.buttons["cancelAdditionalPhoto"].tap(); verify(app, id: id, expected: ";")
+    }
+    func testLocalFailureRetryAndMissingCoverDoesNotBlockAdd() {
+        let app = XCUIApplication(), id = isolatedID(); launch(app, id: id, mode: "errorOnce", extra: ["--storage-photo-missing"])
+        open(app); choose(app, "A")
+        let saveButton = app.buttons["saveAdditionalPhoto"]; reveal(saveButton, in: app); saveButton.tap()
+        XCTAssertTrue(app.staticTexts["additionalPhotoError"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.images["additionalPhotoPreview"].exists); XCTAssertEqual(app.buttons["retryAdditionalPhoto"].label, "Reintentar guardado")
+        capture("additional-error", app: app); save(app, retry: true)
+        // Cover remains deliberately missing. Verify metadata/bytes without the old cover verifier.
+        app.terminate(); app.launchArguments = ["--storage-test-id", id, "--photo-verify", "A:0;", "-AppleLanguages", "(es)"]
+        app.launch(); XCTAssertTrue(app.buttons["plantCard-\(plantID(1))"].waitForExistence(timeout: 10))
+    }
+    func testCommitBusyLocksCancelSourcesGestureAndDoubleTap() {
+        let app = XCUIApplication(), id = isolatedID(); launch(app, id: id, mode: "busy")
+        open(app); choose(app, "A")
+        let button = app.buttons["saveAdditionalPhoto"]; reveal(button, in: app); button.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["additionalPhotoSaving"].firstMatch.waitForExistence(timeout: 3))
+        XCTAssertFalse(app.buttons["cancelAdditionalPhoto"].isEnabled); XCTAssertFalse(app.buttons["additionalPhotoGallery"].isEnabled)
+        XCTAssertFalse(app.buttons["additionalPhotoCamera"].isEnabled)
+        XCTAssertFalse(app.buttons["saveAdditionalPhoto"].isEnabled)
+        button.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        let bar = app.navigationBars["Añadir foto"]
+        bar.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.5)).press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.9)))
+        XCTAssertTrue(bar.exists); capture("additional-busy", app: app)
+        XCTAssertTrue(app.navigationBars["Añadir foto"].waitForNonExistence(timeout: 10)); verify(app, id: id, expected: "A:0;")
+    }
+    func testReadFailuresMetadataAndOwnImageRetryKeepDateAndCareAvailable() {
+        let app = XCUIApplication(), id = isolatedID()
+        launch(app, id: id, extra: ["--additional-photo-read-fixture", "metadataErrorOnce"])
+        let metadataError = app.staticTexts["plantPhotoMetadataError-\(plantID(1))"]
+        XCTAssertTrue(metadataError.waitForExistence(timeout: 5)); XCTAssertFalse(app.buttons["plantPhotoNext-\(plantID(1))"].exists)
+        let metadataRetry = app.buttons["plantPhotoMetadataRetry-\(plantID(1))"]; metadataRetry.tap()
+        XCTAssertTrue(metadataError.waitForNonExistence(timeout: 5))
+        open(app); choose(app, "A"); save(app)
+        app.terminate(); app.launchArguments = ["--storage-test-id", id, "--storage-verify", "--photo-verify", "A:0;", "--additional-photo-read-fixture", "imageErrorOnce", "-AppleLanguages", "(es)"]
+        app.launch(); let card = app.buttons["plantCard-\(plantID(1))"]; XCTAssertTrue(card.waitForExistence(timeout: 10)); card.tap()
+        let previous = app.buttons["plantPhotoPrevious-\(plantID(1))"]; XCTAssertTrue(previous.waitForExistence(timeout: 5)); previous.tap()
+        let error = app.staticTexts.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plantPhotoError-additional-")).firstMatch
+        XCTAssertTrue(error.waitForExistence(timeout: 5)); XCTAssertFalse(app.staticTexts["plantPhotoDate-\(plantID(1))"].label.hasPrefix("Foto inicial"))
+        capture("additional-image-error", app: app)
+        let retry = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plantPhotoRetry-additional-")).firstMatch
+        XCTAssertTrue(retry.isHittable); retry.tap(); XCTAssertTrue(error.waitForNonExistence(timeout: 5))
+        open(app); app.buttons["cancelAdditionalPhoto"].tap()
+        let care = app.buttons["detailRegisterCare-\(plantID(1))"]; reveal(care, in: app); XCTAssertTrue(care.isEnabled)
+    }
+    func testPreparationCancellationCameraUnavailableLongNameAndSpanishFallback() {
+        let app = XCUIApplication(), id = isolatedID()
+        launch(app, id: id, extra: ["--additional-photo-delay", "--storage-long-text", "-AppleLanguages", "(en)"])
+        open(app); XCTAssertEqual(app.buttons["saveAdditionalPhoto"].label, "Guardar foto")
+        XCTAssertTrue(app.staticTexts["Fixture 1: mi planta junto a la ventana del salón"].exists)
+        app.buttons["additionalPhotoCamera"].tap()
+        XCTAssertTrue(app.staticTexts["La cámara no está disponible en este dispositivo."].waitForExistence(timeout: 5))
+        capture("additional-long-empty", app: app)
+        let asset = app.buttons["fixture-additional-A"]; revealPhoto(asset, app: app); asset.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["additionalPhotoLoading"].firstMatch.waitForExistence(timeout: 2))
+        app.buttons["cancelAdditionalPhoto"].tap(); XCTAssertTrue(app.navigationBars["Añadir foto"].waitForNonExistence(timeout: 5))
+        open(app); XCTAssertTrue(app.images["additionalPhotoPlaceholder"].exists); app.buttons["cancelAdditionalPhoto"].tap()
+        app.terminate(); app.launchArguments = ["--storage-test-id", id, "--storage-verify", "--storage-long-text", "--photo-verify", ";", "-AppleLanguages", "(es)"]
+        app.launch(); XCTAssertTrue(app.buttons["plantCard-\(plantID(1))"].waitForExistence(timeout: 10))
+    }
+}
+
 final class SystemGalleryUITests: PlantCareAIUITestCase {
+    func testAdditionalRealGalleryReplacementCancelReselectSaveAndReopen() {
+        let app = XCUIApplication(), id = isolatedID()
+        app.launchArguments = ["--storage-test-id", id, "--storage-seed", "-AppleLanguages", "(es)"]
+        app.launch(); let card = app.buttons["plantCard-\(plantID(1))"]
+        XCTAssertTrue(card.waitForExistence(timeout: 10)); card.tap()
+        let add = app.buttons["detailAddPhoto-\(plantID(1))"]; XCTAssertTrue(add.waitForExistence(timeout: 5)); reveal(add, in: app); add.tap()
+        func select(_ index: Int) {
+            let gallery = app.buttons["additionalPhotoGallery"]; reveal(gallery, in: app); gallery.tap()
+            let asset = app.images.matching(identifier: "PXGGridLayout-Info").element(boundBy: index)
+            XCTAssertTrue(asset.waitForExistence(timeout: 10)); asset.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+            XCTAssertTrue(app.navigationBars["Fotos"].waitForNonExistence(timeout: 10))
+        }
+        select(0); let preview = app.images["additionalPhotoPreview"]; XCTAssertTrue(preview.waitForExistence(timeout: 10))
+        let original = preview.value as? String; XCTAssertTrue(["160 × 80", "80 × 160"].contains(original ?? ""))
+        app.buttons["additionalPhotoGallery"].tap(); let cancel = app.navigationBars["Fotos"].buttons["Cancel"]
+        XCTAssertTrue(cancel.waitForExistence(timeout: 5)); cancel.tap(); XCTAssertEqual(preview.value as? String, original)
+        select(1); expectation(for: NSPredicate(format: "value != %@", original ?? ""), evaluatedWith: preview); waitForExpectations(timeout: 10)
+        select(1); let save = app.buttons["saveAdditionalPhoto"]; expectation(for: NSPredicate(format: "enabled == true"), evaluatedWith: save); waitForExpectations(timeout: 10)
+        let expectedAsset = preview.value as? String == "160 × 80" ? "gallery-A" : "gallery-B"
+        reveal(save, in: app); save.tap(); XCTAssertTrue(app.navigationBars["Añadir foto"].waitForNonExistence(timeout: 10))
+        app.terminate(); app.launchArguments = ["--storage-test-id", id, "--storage-verify", "--photo-verify", "\(expectedAsset):0;", "-AppleLanguages", "(es)"]
+        app.launch(); assertCards(app); app.buttons["plantCard-\(plantID(1))"].tap()
+        let date = app.staticTexts["plantPhotoDate-\(plantID(1))"]; XCTAssertTrue(date.waitForExistence(timeout: 5)); XCTAssertTrue(date.label.hasPrefix("Foto inicial"))
+        let previous = app.buttons["plantPhotoPrevious-\(plantID(1))"]; reveal(previous, in: app); previous.tap()
+        XCTAssertFalse(date.label.hasPrefix("Foto inicial"))
+    }
     func testRealGalleryPickerSelectReplaceCancelAndReselect() {
         let app = XCUIApplication()
         app.launchArguments = ["--storage-test-id", isolatedID(), "-AppleLanguages", "(es)", "-AppleLocale", "es_ES"]

@@ -65,6 +65,12 @@ No crear pantalla independiente de actividad en el MVP. El detalle puede mostrar
 
 ## Componentes, estados y accesibilidad
 
+### Fotos locales: delta autorizado (2026-10-12, ADR011)
+
+Detalle loaded añade «Añadir foto» bajo identidad, separado de Registrar cuidado. Paginador superior conserva foto4:3/radio22: fecha visible («Foto inicial · fecha de alta» o día humano), swipe horizontal y ‹ › de44pt, sin wrap; una sola foto oculta controles. Nueva foto seleccionada después de commit incluso retroactiva; reentrada inicia en inicial, portadas de Mis plantas intactas. Metadata incompleta/error y bytes loading/error/retry son estados independientes; fecha y demás acciones siguen disponibles, sin contador parcial presentado como total.
+
+Modal nativo «Añadir foto», Cancelar/grabber/scroll, nombre persisted multilínea, preview vacía4:3/radio22, fecha compacta editable y cápsulas de galería/cámara de igual tamaño más «Guardar foto». Sin identificación/propuestas/manual/IA/nota. Reemplazo fallido o cancelado conserva preview/fecha; error local ofrece retry explícito; validación/commit bloquean cambios y commit impide cerrar. «Foto guardada» complementa la imagen realmente seleccionada, no sustituye persistencia. Error/retry de cada imagen y botones paginadores conservan objetivos ≥44pt y etiquetas españolas/fallback. La cache no monta originales de todas las páginas.
+
 ### Último riego: delta autorizado (2026-10-12)
 
 Mis plantas muestra debajo de especie y antes de ubicación una gota decorativa y caption medium: «Último riego: hoy» o fecha breve española sin punto («8 oct 2026»); loaded(nil) muestra «Sin riegos registrados» en tono secundario. No acción rápida nueva ni consejo en tarjetas. En el box Cuidados del detalle, encima de Registrar cuidado, fila SurfaceMuted/radio12 y círculo CareMint con gota; etiqueta «Último riego» y fecha («Hoy, 12 oct 2026» solo si es hoy real). Ausencia real lleva gota outline y etiqueta/valor en dos líneas.

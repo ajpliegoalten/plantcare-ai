@@ -34,6 +34,10 @@ struct PlantCareAIApp: App {
                 let fixture = PlantCreationTestFixture(mode: arguments[position + 1])
                 repository = LocalPlantRepository(root: testRoot, beforeCommit: { try fixture.beforeCommit() })
             }
+            if let position = arguments.firstIndex(of: "--additional-photo-fixture"), arguments.indices.contains(position + 1) {
+                let fixture = PlantPhotoTestFixture(mode: arguments[position + 1])
+                repository = LocalPlantRepository(root: testRoot, beforePhotoCommit: { try fixture.beforeCommit($0) })
+            }
             load = StorageFixtureLoad(root: testRoot, repository: repository, seed: arguments.contains("--storage-seed"), corrupt: arguments.contains("--storage-corrupt"))
         }
         #endif
@@ -46,6 +50,27 @@ struct PlantCareAIApp: App {
         }
         #endif
         let viewModel = PlantListViewModel(loadPlants: load, loadPhoto: LoadInitialPlantPhoto(repository: repository), loadDetail: LoadPlantDetail(repository: repository), update: UpdatePlant(repository: repository), registerCare: RegisterCareEvent(repository: repository), loadLastWatering: lastWatering)
+        var photoReader: any PlantPhotoRepository = repository
+        #if DEBUG && targetEnvironment(simulator)
+        if let position = arguments.firstIndex(of: "--additional-photo-read-fixture"), arguments.indices.contains(position + 1),
+           let idPosition = arguments.firstIndex(of: "--storage-test-id"), arguments.indices.contains(idPosition + 1),
+           UUID(uuidString: arguments[idPosition + 1]) != nil {
+            photoReader = PlantPhotoReadTestFixture(repository: repository, mode: arguments[position + 1])
+        }
+        #endif
+        viewModel.makePhotoPager = { plant in
+            PlantPhotoPagerViewModel(plant: plant, loadMetadata: LoadPlantPhotos(repository: photoReader),
+                loadAdditional: LoadPlantPhoto(repository: photoReader), loadInitial: LoadInitialPlantPhoto(repository: repository))
+        }
+        viewModel.makeAddPhoto = { plant, onSaved in
+            let draft = AddPlantPhotoViewModel(plant: plant, prepare: PrepareIdentificationPhoto(preparer: LocalIdentificationPhotoPreparer()),
+                validate: LocalPreparedPlantPhotoValidator(), camera: CheckCameraAccess(access: SystemCameraAccess()),
+                add: AddPlantPhoto(repository: repository), onSaved: onSaved)
+            #if DEBUG && targetEnvironment(simulator)
+            if arguments.contains("--additional-photo-fixture") { draft.testSelections = IdentificationPhotoTestFixture.selections() }
+            #endif
+            return draft
+        }
         var consentRepository: any ExternalAIConsentRepository = UserDefaultsExternalAIConsentRepository(defaults: .standard)
         #if DEBUG && targetEnvironment(simulator)
         var consentFixture: ExternalAIConsentTestFixture?
