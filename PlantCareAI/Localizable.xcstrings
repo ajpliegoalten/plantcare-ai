@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "es",
   "strings" : {
+    "lastWatering.title" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Último riego" } } } },
+    "lastWatering.none" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin riegos registrados" } } } },
+    "lastWatering.card %@" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Último riego: %@" } } } },
     "care.title" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Registrar cuidado" } } } },
     "care.belongs" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "El registro se guardará exclusivamente para este ejemplar" } } } },
     "care.kind" : { "extractionState" : "manual", "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Tipo de cuidado" } } } },

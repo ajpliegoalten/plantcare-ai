@@ -85,7 +85,9 @@ class PlantCareAIUITestCase: XCTestCase {
             let card = app.buttons["plantCard-\(plantID(index))"]
             XCTAssertTrue(card.waitForExistence(timeout: 10))
             reveal(card, in: app)
-            let loaded = NSPredicate(format: "value == %@", "Foto cargada")
+            // Seeded fixtures have no events: assert BOTH exact photo status and
+            // successful summary absence, not a substring that could hide stale data.
+            let loaded = NSPredicate(format: "value == %@", "Foto cargada, Sin riegos registrados")
             expectation(for: loaded, evaluatedWith: card)
             waitForExpectations(timeout: 10)
             XCTAssertEqual(card.label, index == 1 ? "Fixture 1, Monstera deliciosa, Ventana" : "Fixture 2, Monstera deliciosa")
@@ -1280,6 +1282,146 @@ final class SavePlantUITests: PlantCareAIUITestCase {
 
 }
 
+final class LastWateringHintUITests: PlantCareAIUITestCase {
+    private let advice = "Antes de regar, comprueba la humedad del sustrato."
+    private func summary(_ app: XCUIApplication, detail: Bool = true, index: Int = 1) -> XCUIElement {
+        app.descendants(matching: .any)["\(detail ? "detail" : "card")LastWatering-\(plantID(index))"].firstMatch
+    }
+    private func start(_ app: XCUIApplication, id: String, extra: [String] = []) {
+        app.launchArguments = ["--storage-test-id", id, "--storage-seed", "-AppleLanguages", "(es)"] + (extra.contains("--care-fixture") ? [] : ["--care-fixture", "success"]) + extra
+        app.launch()
+        XCTAssertTrue(app.buttons["plantCard-\(plantID(1))"].waitForExistence(timeout: 10))
+    }
+    private func open(_ app: XCUIApplication, index: Int = 1) {
+        let card = app.buttons["plantCard-\(plantID(index))"]
+        reveal(card, in: app); card.tap()
+        XCTAssertTrue(app.staticTexts["selectedPlant-\(plantID(index))"].waitForExistence(timeout: 10))
+    }
+    private func form(_ app: XCUIApplication) {
+        let button = app.buttons["detailRegisterCare-\(plantID(1))"]
+        reveal(button, in: app); button.tap()
+        XCTAssertTrue(app.navigationBars["Registrar cuidado"].waitForExistence(timeout: 5))
+    }
+    private func commit(_ app: XCUIApplication, kind: String = "watering", yesterday: Bool = false) {
+        form(app); app.buttons["careKind-\(kind)"].tap()
+        if yesterday { app.buttons["careYesterday"].tap() }
+        let save = app.buttons["saveCare"]; reveal(save, in: app); save.tap()
+        XCTAssertTrue(app.navigationBars["Registrar cuidado"].waitForNonExistence(timeout: 10))
+        XCTAssertTrue(app.descendants(matching: .any)["careConfirmation"].firstMatch.waitForExistence(timeout: 5))
+    }
+    private func assertHidden(_ app: XCUIApplication, detail: Bool) {
+        XCTAssertFalse(summary(app, detail: detail).exists)
+        XCTAssertFalse(app.buttons["Reintentar último riego"].exists)
+        if detail {
+            XCTAssertFalse(app.staticTexts["Sin riegos registrados"].exists)
+            XCTAssertFalse(app.staticTexts["Último riego"].exists)
+            let button = app.buttons["detailRegisterCare-\(plantID(1))"]
+            reveal(button, in: app); XCTAssertTrue(button.isEnabled)
+            XCTAssertTrue(app.staticTexts[advice].exists)
+            XCTAssertTrue(app.staticTexts["detailCare-light-\(plantID(1))"].exists)
+        } else {
+            XCTAssertFalse((app.buttons["plantCard-\(plantID(1))"].value as? String ?? "").contains("riego"))
+            XCTAssertFalse(app.staticTexts[advice].exists)
+        }
+    }
+
+    func testAbsenceTodayRetroactiveOtherCancelIsolationAndPersistence() {
+        let app = XCUIApplication(), id = isolatedID(); start(app, id: id)
+        let card = app.buttons["plantCard-\(plantID(1))"]
+        XCTAssertTrue(summary(app, detail: false).waitForExistence(timeout: 8))
+        XCTAssertTrue((card.value as? String ?? "").contains("Sin riegos registrados"))
+        XCTAssertFalse(app.staticTexts[advice].exists); capture("last-list-none", app: app)
+        open(app)
+        XCTAssertTrue(summary(app).waitForExistence(timeout: 8)); XCTAssertEqual(summary(app).value as? String, "Sin riegos registrados")
+        reveal(summary(app), in: app); capture("last-detail-none", app: app)
+        form(app); app.buttons["careKind-watering"].tap(); app.buttons["cancelCare"].tap()
+        XCTAssertTrue(app.navigationBars["Registrar cuidado"].waitForNonExistence(timeout: 5))
+        XCTAssertEqual(summary(app).value as? String, "Sin riegos registrados")
+        commit(app, kind: "fertilizing")
+        XCTAssertEqual(summary(app).value as? String, "Sin riegos registrados")
+        commit(app)
+        XCTAssertTrue(summary(app).waitForExistence(timeout: 8))
+        XCTAssertTrue(NSPredicate(format: "value BEGINSWITH %@", "Hoy, ").evaluate(with: summary(app)))
+        let today = summary(app).value as? String
+        reveal(summary(app), in: app); capture("last-detail-today", app: app)
+        commit(app, yesterday: true)
+        XCTAssertTrue(summary(app).waitForExistence(timeout: 8))
+        XCTAssertEqual(summary(app).value as? String, today)
+        back(app)
+        XCTAssertTrue(summary(app, detail: false).waitForExistence(timeout: 8))
+        XCTAssertTrue((card.value as? String ?? "").contains("Último riego: hoy"))
+        capture("last-list-today", app: app)
+        open(app, index: 2)
+        XCTAssertTrue(summary(app, index: 2).waitForExistence(timeout: 8))
+        XCTAssertEqual(summary(app, index: 2).value as? String, "Sin riegos registrados")
+        app.terminate(); app.launchArguments = ["--storage-test-id", id, "--storage-verify", "-AppleLanguages", "(es)"]; app.launch()
+        XCTAssertTrue(summary(app, detail: false).waitForExistence(timeout: 10))
+        XCTAssertFalse(app.staticTexts["storageErrorMessage"].exists)
+        XCTAssertTrue((app.buttons["plantCard-\(plantID(1))"].value as? String ?? "").contains("Último riego: hoy"))
+        open(app); XCTAssertTrue(summary(app).waitForExistence(timeout: 8)); XCTAssertEqual(summary(app).value as? String, today)
+    }
+
+    func testLoadingCompletelyAbsentThenNormalLoadedWithoutPhotoDependency() {
+        let app = XCUIApplication(); start(app, id: isolatedID(), extra: ["--last-watering-fixture", "slow"])
+        assertHidden(app, detail: false); capture("last-list-loading-hidden", app: app)
+        open(app); assertHidden(app, detail: true); capture("last-detail-loading-hidden", app: app)
+        XCTAssertTrue(summary(app).waitForExistence(timeout: 20)); XCTAssertEqual(summary(app).value as? String, "Sin riegos registrados")
+    }
+
+    func testFailedHiddenNoRetryAndLifecycleForegroundRecovery() {
+        let app = XCUIApplication(); start(app, id: isolatedID(), extra: ["--last-watering-fixture", "fail-first"])
+        assertHidden(app, detail: false); capture("last-list-failed-hidden", app: app)
+        open(app); assertHidden(app, detail: true); capture("last-detail-failed-hidden", app: app)
+        XCUIDevice.shared.press(.home); app.activate()
+        XCTAssertTrue(summary(app).waitForExistence(timeout: 10)); XCTAssertEqual(summary(app).value as? String, "Sin riegos registrados")
+        back(app); XCTAssertTrue(summary(app, detail: false).waitForExistence(timeout: 10))
+    }
+
+    func testPostCommitReadFailureKeepsRealConfirmationAndHiddenSummary() {
+        let app = XCUIApplication(); start(app, id: isolatedID(), extra: ["--last-watering-fixture", "fail-after-commit"])
+        open(app); XCTAssertTrue(summary(app).waitForExistence(timeout: 8))
+        commit(app); assertHidden(app, detail: true)
+        XCTAssertTrue(app.descendants(matching: .any)["careConfirmation"].firstMatch.exists)
+        XCTAssertFalse(app.staticTexts["careError"].exists); capture("last-confirmed-read-failed", app: app)
+        back(app); assertHidden(app, detail: false)
+        XCTAssertTrue(summary(app, detail: false, index: 2).exists)
+        XCTAssertEqual(summary(app, detail: false, index: 2).value as? String, "Sin riegos registrados")
+    }
+
+    func testFailedSaveDoesNotInvalidateAndRetryUpdatesAfterCommitOnly() {
+        let app = XCUIApplication(); start(app, id: isolatedID(), extra: ["--care-fixture", "fail-first"])
+        open(app); XCTAssertTrue(summary(app).waitForExistence(timeout: 8))
+        form(app); app.buttons["careKind-watering"].tap()
+        reveal(app.buttons["saveCare"], in: app); app.buttons["saveCare"].tap()
+        XCTAssertTrue(app.staticTexts["careError"].waitForExistence(timeout: 5))
+        app.buttons["cancelCare"].tap(); XCTAssertTrue(app.navigationBars["Registrar cuidado"].waitForNonExistence(timeout: 5))
+        XCTAssertEqual(summary(app).value as? String, "Sin riegos registrados")
+        commit(app); XCTAssertTrue(summary(app).waitForExistence(timeout: 8))
+        XCTAssertTrue((summary(app).value as? String ?? "").hasPrefix("Hoy, "))
+    }
+
+    func testEarlierDateEnglishFallbackLongTextAndReachableCTA() {
+        let app = XCUIApplication(), id = isolatedID()
+        app.launchArguments = ["--storage-test-id", id, "--storage-seed", "--storage-long-text", "-AppleLanguages", "(en)"]
+        app.launch(); XCTAssertTrue(summary(app, detail: false).waitForExistence(timeout: 10))
+        XCTAssertEqual(app.staticTexts["collectionTitle"].label, "Mis plantas")
+        XCTAssertFalse(app.staticTexts[advice].exists); open(app)
+        XCTAssertTrue(summary(app).waitForExistence(timeout: 8)); commit(app, yesterday: true)
+        var calendar = Calendar(identifier: .gregorian); calendar.timeZone = .current
+        let previous = calendar.date(byAdding: .day, value: -1, to: calendar.startOfDay(for: Date()))!
+        let formatter = DateFormatter(); formatter.locale = Locale(identifier: "es_ES"); formatter.calendar = calendar
+        formatter.timeZone = .current; formatter.dateFormat = "d MMM yyyy"
+        let expected = formatter.string(from: previous).replacingOccurrences(of: ".", with: "")
+        XCTAssertEqual(summary(app).value as? String, expected)
+        reveal(summary(app), in: app); capture("last-long-detail-earlier", app: app)
+        XCTAssertTrue(app.staticTexts[advice].exists)
+        let disclaimer = app.staticTexts["detailDisclaimer"]; reveal(disclaimer, in: app); XCTAssertTrue(disclaimer.isHittable)
+        back(app); reveal(app.buttons["plantCard-\(plantID(1))"], in: app)
+        XCTAssertTrue((app.buttons["plantCard-\(plantID(1))"].value as? String ?? "").contains("Último riego: \(expected)"))
+        XCTAssertTrue(app.staticTexts["collectionTitle"].isHittable); capture("last-long-list-earlier", app: app)
+    }
+}
+
 final class StoredCollectionUITests: PlantCareAIUITestCase {
     func testDetailRedesignCareGridAndFunctionalWatering() {
         let app = XCUIApplication(), id = isolatedID()
@@ -1727,12 +1869,18 @@ final class PlantCardsUITests: PlantCareAIUITestCase {
             reveal(card, in: app)
             // Photo region of first, text/content region of second.
             let offset = CGVector(dx: 0.5, dy: index == 1 ? 0.25 : 0.85)
+            let viewport = app.scrollViews["collectionViewport"]
+            let minimumY = viewport.frame.minY + 8
+            let maximumY = min(viewport.frame.maxY - 8, app.frame.maxY - 60)
             for _ in 0..<15 {
                 let targetY = card.frame.minY + card.frame.height * offset.dy
-                if targetY < app.frame.minY + 100 { app.swipeDown() }
-                else if targetY > app.frame.maxY - 60 { app.swipeUp() }
+                if targetY < minimumY { app.swipeDown() }
+                else if targetY > maximumY { app.swipeUp() }
                 else { break }
             }
+            let targetY = card.frame.minY + card.frame.height * offset.dy
+            XCTAssertGreaterThanOrEqual(targetY, minimumY)
+            XCTAssertLessThanOrEqual(targetY, maximumY)
             capture("card-\(index)", app: app)
             card.coordinate(withNormalizedOffset: offset).tap()
             let selected = app.staticTexts["selectedPlant-\(plantID(index))"]
@@ -1750,7 +1898,7 @@ final class PlantCardsUITests: PlantCareAIUITestCase {
         app.launch()
         let first = app.buttons["plantCard-\(plantID(1))"]
         XCTAssertTrue(first.waitForExistence(timeout: 10))
-        let failed = NSPredicate(format: "value == %@", "No se pudo cargar la foto")
+        let failed = NSPredicate(format: "value == %@", "No se pudo cargar la foto, Sin riegos registrados")
         expectation(for: failed, evaluatedWith: first)
         waitForExpectations(timeout: 10)
         capture("photo-failure", app: app)
@@ -1765,7 +1913,7 @@ final class PlantCardsUITests: PlantCareAIUITestCase {
         XCTAssertFalse(app.staticTexts["storageErrorMessage"].exists)
         let second = app.buttons["plantCard-\(plantID(2))"]
         reveal(second, in: app)
-        expectation(for: NSPredicate(format: "value == %@", "Foto cargada"), evaluatedWith: second)
+        expectation(for: NSPredicate(format: "value == %@", "Foto cargada, Sin riegos registrados"), evaluatedWith: second)
         waitForExpectations(timeout: 10)
         for _ in 0..<8 where !first.isHittable { app.swipeDown() }
         first.tap()

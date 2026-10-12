@@ -37,7 +37,15 @@ struct PlantCareAIApp: App {
             load = StorageFixtureLoad(root: testRoot, repository: repository, seed: arguments.contains("--storage-seed"), corrupt: arguments.contains("--storage-corrupt"))
         }
         #endif
-        let viewModel = PlantListViewModel(loadPlants: load, loadPhoto: LoadInitialPlantPhoto(repository: repository), loadDetail: LoadPlantDetail(repository: repository), update: UpdatePlant(repository: repository), registerCare: RegisterCareEvent(repository: repository))
+        var lastWatering: any LoadLastWateringUseCase = LoadLastWatering(repository: repository)
+        #if DEBUG && targetEnvironment(simulator)
+        if let position = arguments.firstIndex(of: "--last-watering-fixture"), arguments.indices.contains(position + 1),
+           let idPosition = arguments.firstIndex(of: "--storage-test-id"), arguments.indices.contains(idPosition + 1),
+           UUID(uuidString: arguments[idPosition + 1]) != nil {
+            lastWatering = LastWateringReadTestFixture(load: lastWatering, mode: arguments[position + 1])
+        }
+        #endif
+        let viewModel = PlantListViewModel(loadPlants: load, loadPhoto: LoadInitialPlantPhoto(repository: repository), loadDetail: LoadPlantDetail(repository: repository), update: UpdatePlant(repository: repository), registerCare: RegisterCareEvent(repository: repository), loadLastWatering: lastWatering)
         var consentRepository: any ExternalAIConsentRepository = UserDefaultsExternalAIConsentRepository(defaults: .standard)
         #if DEBUG && targetEnvironment(simulator)
         var consentFixture: ExternalAIConsentTestFixture?

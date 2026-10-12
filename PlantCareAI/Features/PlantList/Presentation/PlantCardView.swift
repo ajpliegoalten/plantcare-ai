@@ -2,6 +2,13 @@ import SwiftUI
 
 struct PlantCardView: View {
     @ObservedObject var viewModel: PlantCardViewModel
+    @ObservedObject private var lastWatering: LastWateringHintViewModel
+    @Environment(\.scenePhase) private var scenePhase
+
+    init(viewModel: PlantCardViewModel) {
+        self.viewModel = viewModel
+        self.lastWatering = viewModel.lastWatering
+    }
 
     private var selectionLabel: String {
         ([viewModel.plant.name, viewModel.plant.confirmedSpecies] +
@@ -20,6 +27,9 @@ struct PlantCardView: View {
                         Text(viewModel.plant.confirmedSpecies)
                             .font(.body)
                             .foregroundStyle(Color("TextSecondary"))
+                        if case .loaded = lastWatering.state {
+                            LastWateringHintView(viewModel: lastWatering, style: .compactCard)
+                        }
                         if let location = viewModel.plant.location {
                             Text(location)
                                 .font(.body)
@@ -34,7 +44,7 @@ struct PlantCardView: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel(selectionLabel)
-            .accessibilityValue(Text(photoAccessibilityValue))
+            .accessibilityValue(Text(accessibilityValue))
             .accessibilityHint(Text("collection.select.hint"))
             .accessibilityIdentifier("plantCard-\(viewModel.id)")
 
@@ -56,7 +66,9 @@ struct PlantCardView: View {
         .clipShape(RoundedRectangle(cornerRadius: 22))
         .overlay(RoundedRectangle(cornerRadius: 22).stroke(Color("Outline"), lineWidth: 0.5))
         .task { await viewModel.load() }
-        .onDisappear { viewModel.cancelLoading() }
+        .onAppear { lastWatering.appear() }
+        .onDisappear { viewModel.cancelLoading(); lastWatering.disappear() }
+        .onChange(of: scenePhase) { _, phase in if phase == .active { lastWatering.foreground() } }
     }
 
     private var photo: some View {
@@ -97,5 +109,15 @@ struct PlantCardView: View {
         case .loaded: return "collection.photo.loaded"
         case .failed: return "collection.photo.error"
         }
+    }
+
+    private var accessibilityValue: String {
+        let photo: String
+        switch viewModel.photoState {
+        case .idle, .loading: photo = String(localized: "collection.photo.loading")
+        case .loaded: photo = String(localized: "collection.photo.loaded")
+        case .failed: photo = String(localized: "collection.photo.error")
+        }
+        return [photo, lastWatering.value(compact: true)].compactMap { $0 }.joined(separator: ", ")
     }
 }
