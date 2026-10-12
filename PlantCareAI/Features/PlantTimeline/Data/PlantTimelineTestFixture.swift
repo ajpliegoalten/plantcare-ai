@@ -27,13 +27,24 @@ struct PlantTimelineFixtureLoad: LoadPlantsUseCase {
     func execute() async throws -> [Plant] {
         let plants = try await base.execute()
         if seed, let plant = plants.first {
-            if mode != "photosOnly" {
+            if mode != "photosOnly" && mode != "scrollPhotos" {
                 for event in Self.events(for: plant.id) { _ = try await repository.saveCareEvent(event) }
             }
-            let prepared = try await LocalIdentificationPhotoPreparer().prepare(StorageTestFixture.photo(2))
-            _ = try await repository.savePhoto(Self.photo(for: plant.id), jpeg: prepared.jpeg)
+            if mode == "scrollPhotos" {
+                let pink = try await LocalIdentificationPhotoPreparer().prepare(StorageTestFixture.photo(1))
+                let blue = try await LocalIdentificationPhotoPreparer().prepare(StorageTestFixture.photo(2))
+                for index in 10...17 {
+                    let photo = PlantPhoto(id: Self.id(index), plantID: plant.id,
+                        occurredAt: Date(timeIntervalSince1970: 86400), createdAt: Date(timeIntervalSince1970: Double(205000 + index)),
+                        timeZoneIdentifier: "Africa/Abidjan", width: 640, height: 480)
+                    _ = try await repository.savePhoto(photo, jpeg: index.isMultiple(of: 2) ? pink.jpeg : blue.jpeg)
+                }
+            } else {
+                let prepared = try await LocalIdentificationPhotoPreparer().prepare(StorageTestFixture.photo(2))
+                _ = try await repository.savePhoto(Self.photo(for: plant.id), jpeg: prepared.jpeg)
+            }
             // B's event is intentionally distinct, so isolation assertions have a sentinel.
-            if mode != "photosOnly", plants.count > 1 {
+            if mode != "photosOnly", mode != "scrollPhotos", plants.count > 1 {
                 _ = try await repository.saveCareEvent(CareEvent(id: Self.id(20), plantID: plants[1].id, kind: .other,
                     occurredAt: Date(timeIntervalSince1970: 172800), note: "SOLO PLANTA B",
                     createdAt: Date(timeIntervalSince1970: 206000), timeZoneIdentifier: "Africa/Abidjan"))

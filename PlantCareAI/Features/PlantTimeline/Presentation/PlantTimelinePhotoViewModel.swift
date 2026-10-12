@@ -22,6 +22,9 @@ final class PlantTimelinePhotoViewModel: ObservableObject {
     private var lru: [PlantTimelineIdentity] = []
     private var active = false
     private var generation = 0
+    private var viewportTask: Task<Void, Never>?
+    private var viewportFrames: [PlantTimelineIdentity: CGRect] = [:]
+    private var viewportBounds: CGRect = .zero
 
     init(plantID: UUID, loadInitial: LoadInitialPlantPhoto, loadAdditional: LoadPlantPhoto) {
         self.plantID = plantID
@@ -53,6 +56,46 @@ final class PlantTimelinePhotoViewModel: ObservableObject {
     func appear() { active = true }
     func setEntries(_ entries: [PlantTimelineEntry]) {
         allowed = Set(entries.filter { $0.plantID == plantID && $0.isPhoto }.map(\.id))
+        // Fast metadata refreshes can be coalesced by SwiftUI without changing
+        // geometry. Replay the last viewport after clearing the image session.
+        if !viewportFrames.isEmpty { scheduleViewport(frames: viewportFrames, bounds: viewportBounds) }
+    }
+
+    // Geometry preferences arrive during layout/accessibility snapshots. Coalesce
+    // them and publish image states outside that transaction, not reentrantly.
+    func scheduleViewport(frames: [PlantTimelineIdentity: CGRect], bounds: CGRect) {
+        guard active else { return }
+        viewportFrames = frames; viewportBounds = bounds
+        guard viewportTask == nil else { return }
+        let session = generation
+        viewportTask = Task { [weak self] in
+            await Task.yield()
+            guard !Task.isCancelled, let self, self.active, session == self.generation else { return }
+            self.viewportTask = nil
+            self.updateViewport(frames: self.viewportFrames, bounds: self.viewportBounds)
+        }
+    }
+
+    // LazyVStack appearance means mounted/prefetched, not actually onscreen.
+    // Reconcile geometry instead, so revisiting an evicted, still mounted row
+    // requests its image without waiting for another onAppear callback.
+    func updateViewport(frames: [PlantTimelineIdentity: CGRect], bounds: CGRect) {
+        guard active else { return }
+        let candidates = frames.compactMap { identity, frame -> (PlantTimelineIdentity, CGFloat)? in
+            guard allowed.contains(identity) else { return nil }
+            let intersection = frame.intersection(bounds)
+            guard !intersection.isNull, intersection.width > 0, intersection.height > 0 else { return nil }
+            return (identity, intersection.width * intersection.height)
+        }.sorted {
+            if $0.1 != $1.1 { return $0.1 > $1.1 }
+            return $0.0.stableKey < $1.0.stableKey
+        }
+        // Never admit more visible requests than the bounded cache can retain.
+        let desired = Set(candidates.prefix(3).map { $0.0 })
+        let previous = Set(owners.filter { $0.value.contains(defaultOwner) }.map { $0.key })
+        guard desired != previous else { return }
+        for identity in previous.subtracting(desired) { hide(identity) }
+        for identity in candidates.prefix(3).map({ $0.0 }) { show(identity) }
     }
 
     func show(_ identity: PlantTimelineIdentity, owner: UUID? = nil) {
@@ -61,7 +104,10 @@ final class PlantTimelinePhotoViewModel: ObservableObject {
         hiding.removeValue(forKey: identity)?.cancel()
         visible.insert(identity)
         if cache[identity] != nil { touch(identity); return }
-        if running[identity] != nil, tokens[identity] != nil { states[identity] = .loading; return }
+        if running[identity] != nil, tokens[identity] != nil {
+            if state(for: identity) != .loading { states[identity] = .loading }
+            return
+        }
         guard state(for: identity) == .idle else { return }
         enqueue(identity)
     }
@@ -122,7 +168,8 @@ final class PlantTimelinePhotoViewModel: ObservableObject {
             if let image {
                 cache[identity] = image; touch(identity); states[identity] = .loaded
                 while cache.count > 3 {
-                    let victim = lru.removeFirst(); cache[victim] = nil; states[victim] = .idle
+                    let victim = lru.first(where: { !visible.contains($0) }) ?? lru[0]
+                    lru.removeAll { $0 == victim }; cache[victim] = nil; states[victim] = .idle
                     // No reload on eviction; only a subsequent row appearance requests it.
                 }
             } else { states[identity] = .failed }
@@ -134,12 +181,14 @@ final class PlantTimelinePhotoViewModel: ObservableObject {
     private func touch(_ identity: PlantTimelineIdentity) {
         lru.removeAll { $0 == identity }; lru.append(identity)
     }
-    func reset() {
+    func reset(preservingViewport: Bool = false) {
+        viewportTask?.cancel(); viewportTask = nil
+        if !preservingViewport { viewportFrames = [:]; viewportBounds = .zero }
         generation += 1; tasks.values.forEach { $0.cancel() }; running = [:]; tokens = [:]
         hiding.values.forEach { $0.cancel() }; hiding = [:]; owners = [:]
         queue = []; visible = []; allowed = []; cache = [:]; lru = []; states = [:]
     }
     func disappear() { active = false; reset() }
 
-    deinit { tasks.values.forEach { $0.cancel() }; hiding.values.forEach { $0.cancel() } }
+    deinit { viewportTask?.cancel(); tasks.values.forEach { $0.cancel() }; hiding.values.forEach { $0.cancel() } }
 }

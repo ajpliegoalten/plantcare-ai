@@ -48,7 +48,7 @@ final class PlantTimelineViewModel: ObservableObject {
         generation += 1; let token = generation
         state = .loading; entries = []; groups = []
         // A metadata refresh is a new image session, not stale completeness.
-        photos.reset()
+        photos.reset(preservingViewport: true)
         request = Task { [weak self, load, plantID] in
             do {
                 let result = try await load.execute(for: plantID)

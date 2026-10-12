@@ -7,6 +7,7 @@ struct PlantTimelineView: View {
     init(viewModel: PlantTimelineViewModel) { _viewModel = StateObject(wrappedValue: viewModel) }
 
     var body: some View {
+        GeometryReader { viewport in
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 20) {
                 switch viewModel.state {
@@ -42,6 +43,11 @@ struct PlantTimelineView: View {
         }
         .foregroundStyle(Color("TextPrimary"))
         .background(Color("Background").ignoresSafeArea())
+        .coordinateSpace(name: "plantTimelineViewport")
+        .onPreferenceChange(PhotoFrames.self) { frames in
+            viewModel.photos.scheduleViewport(frames: frames, bounds: CGRect(origin: .zero, size: viewport.size))
+        }
+        }
         .navigationTitle(Text("timeline.title")).navigationBarTitleDisplayMode(.inline)
         .accessibilityIdentifier("plantTimeline-\(viewModel.plantID)")
         .onAppear { viewModel.appear() }
@@ -109,11 +115,17 @@ struct PlantTimelineView: View {
         }
     }
 
+    private struct PhotoFrames: PreferenceKey {
+        static var defaultValue: [PlantTimelineIdentity: CGRect] { [:] }
+        static func reduce(value: inout [PlantTimelineIdentity: CGRect], nextValue: () -> [PlantTimelineIdentity: CGRect]) {
+            value.merge(nextValue(), uniquingKeysWith: { _, new in new })
+        }
+    }
+
     private struct TimelinePhoto: View {
         @ObservedObject var viewModel: PlantTimelinePhotoViewModel
         let identity: PlantTimelineIdentity
         let initial: Bool
-        @State private var visibilityOwner = UUID()
         var body: some View {
             VStack(alignment: .leading, spacing: 8) {
                 Color("SurfaceMuted").aspectRatio(initial ? 1 : 4 / 3, contentMode: .fit)
@@ -130,13 +142,23 @@ struct PlantTimelineView: View {
                             }.frame(width: geometry.size.width, height: geometry.size.height)
                         }
                     }.clipped().clipShape(RoundedRectangle(cornerRadius: 12))
+                    .background {
+                        GeometryReader { geometry in
+                            Color.clear.preference(key: PhotoFrames.self,
+                                value: [identity: geometry.frame(in: .named("plantTimelineViewport"))])
+                        }
+                    }
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel(Text(initial ? "detail.photo.initial" : "timeline.photograph"))
+                    .accessibilityValue(imageValue)
                     .accessibilityIdentifier("timelinePhoto-" + identity.stableKey)
                 if !initial { TimelinePhotoError(viewModel: viewModel, identity: identity) }
             }
-            .onAppear { viewModel.show(identity, owner: visibilityOwner) }
-            .onDisappear { viewModel.hide(identity, owner: visibilityOwner) }
+        }
+        private var imageValue: Text {
+            if viewModel.image(for: identity) != nil { return Text("collection.photo.loaded") }
+            if viewModel.state(for: identity) == .failed { return Text("detail.photo.error") }
+            return Text("detail.photo.loading")
         }
     }
 

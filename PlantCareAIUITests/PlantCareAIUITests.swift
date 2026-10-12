@@ -2354,6 +2354,39 @@ final class PlantTimelineUITests: PlantCareAIUITestCase {
         XCTAssertTrue(error.waitForNonExistence(timeout: 5)); XCTAssertTrue(row.exists)
         capture("timeline-photo-recovered", app: app)
     }
+    func testEightPhotosScrollBothDirectionsReloadsActualImagesWithoutLeavingHistory() {
+        let app = XCUIApplication(), id = isolatedID()
+        launch(app, id: id, mode: "scrollPhotos"); open(app); stableHistory(app)
+        func showPhoto(_ identity: String, goingDown: Bool) {
+            let photo = app.descendants(matching: .any)["timelinePhoto-" + identity].firstMatch
+            let top = app.navigationBars["Historial de cuidados"].frame.maxY + 10
+            let bottom = app.frame.maxY - 50
+            for _ in 0..<24 {
+                if photo.exists && photo.frame.midY > top && photo.frame.midY < bottom { break }
+                app.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: goingDown ? 0.75 : 0.4))
+                    .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: goingDown ? 0.45 : 0.7)))
+            }
+            XCTAssertTrue(photo.exists); XCTAssertGreaterThan(photo.frame.midY, top); XCTAssertLessThan(photo.frame.midY, bottom)
+            // Existence alone also passes for placeholders: demand the actual decoded image.
+            expectation(for: NSPredicate(format: "value == %@", "Foto cargada"), evaluatedWith: photo)
+            waitForExpectations(timeout: 5)
+            XCTAssertFalse(app.staticTexts["timelinePhotoError-" + identity].exists)
+        }
+        for number in stride(from: 17, through: 10, by: -1) { showPhoto(key(number, type: "additional"), goingDown: true) }
+        showPhoto("initial-" + plantID(1), goingDown: true)
+        capture("timeline-scroll-eight-bottom", app: app)
+        for number in 10...17 { showPhoto(key(number, type: "additional"), goingDown: false) }
+        capture("timeline-scroll-eight-return-top", app: app)
+        // Rapid reversal while asynchronous reads can still be cancelled/draining.
+        for _ in 0..<3 { app.swipeUp() }
+        for _ in 0..<3 { app.swipeDown() }
+        showPhoto(key(17, type: "additional"), goingDown: false)
+        XCTAssertTrue(app.navigationBars["Historial de cuidados"].exists)
+        timelineBack(app); back(app)
+        let other = app.buttons["plantCard-\(plantID(2))"]; reveal(other, in: app); other.tap(); open(app, index: 2)
+        XCTAssertTrue(app.staticTexts["timelineNoRecords"].waitForExistence(timeout: 5))
+        XCTAssertFalse(entry(key(17, type: "additional"), app: app).exists)
+    }
     func testPushNativeBackAndGesturePreserveAdditionalSelectionRealExitResets() {
         let app = XCUIApplication(); launch(app, id: isolatedID(), mode: "photosOnly")
         let next = app.buttons["plantPhotoNext-\(plantID(1))"]; XCTAssertTrue(next.waitForExistence(timeout: 5)); next.tap()
