@@ -1,7 +1,7 @@
 import Foundation
 
 struct CareEvent: Equatable, Sendable, Identifiable {
-    enum Kind: String, Sendable { case watering }
+    enum Kind: String, Sendable, CaseIterable { case watering, fertilizing, pruning, repotting, other }
     let id: UUID
     let plantID: UUID
     let kind: Kind

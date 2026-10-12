@@ -3,7 +3,7 @@ import SwiftUI
 struct PlantDetailView: View {
     @StateObject private var viewModel: PlantDetailViewModel
     @State private var editor: EditPlantViewModel?
-    @State private var wateringEditor: QuickWateringViewModel?
+    @State private var careEditor: RegisterCareViewModel?
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     init(viewModel: PlantDetailViewModel) {
@@ -23,7 +23,7 @@ struct PlantDetailView: View {
                 case .loaded(let plant):
                     photo
                     identity(plant)
-                    wateringPreview
+                    careRegistration
                     careSheet(plant.careSheet)
                 }
             }
@@ -45,7 +45,7 @@ struct PlantDetailView: View {
             }
         }
         .sheet(item: $editor) { EditPlantView(viewModel: $0) }
-        .sheet(item: $wateringEditor) { QuickWateringView(viewModel: $0) }
+        .sheet(item: $careEditor) { RegisterCareView(viewModel: $0) }
         .accessibilityIdentifier("plantDetail-\(viewModel.id)")
         .task { await viewModel.load() }
         .onDisappear { viewModel.cancelLoading() }
@@ -94,26 +94,26 @@ struct PlantDetailView: View {
         .shadow(color: Color("Primary").opacity(0.04), radius: 10, y: 3)
     }
 
-    private var wateringPreview: some View {
+    private var careRegistration: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Label("detail.watering.title", systemImage: "drop.fill")
+                Label("detail.care.registrationTitle", systemImage: "leaf.fill")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(Color("CareTerracotta"))
             }
-            if viewModel.wateringConfirmation != nil {
-                Label("watering.confirmed", systemImage: "checkmark.circle.fill")
-                    .accessibilityIdentifier("wateringConfirmation")
+            if viewModel.careConfirmation != nil {
+                Label("care.confirmed", systemImage: "checkmark.circle.fill")
+                    .accessibilityIdentifier("careConfirmation")
             }
-            Button { wateringEditor = viewModel.wateringEditor() } label: {
-                Label("detail.watering.register", systemImage: "drop.fill")
+            Button { careEditor = viewModel.careEditor() } label: {
+                Label("detail.care.register", systemImage: "leaf.fill")
                     .font(.body.weight(.semibold))
                     .frame(maxWidth: .infinity, minHeight: 52)
                     .foregroundStyle(Color("Primary"))
                     .background(Color("CareMint"), in: Capsule())
             }
             .buttonStyle(.plain)
-            .accessibilityIdentifier("detailRegisterWatering-\(viewModel.id)")
+            .accessibilityIdentifier("detailRegisterCare-\(viewModel.id)")
             Text("detail.watering.checkSubstrate")
                 .font(.footnote)
                 .foregroundStyle(Color("TextSecondary"))

@@ -16,30 +16,30 @@ final class PlantDetailViewModel: ObservableObject {
     private var metadataPending = false
     private let update: UpdatePlant
     private let onUpdated: @MainActor (Plant) -> Void
-    private let registerWatering: RegisterWatering?
-    @Published private(set) var wateringConfirmation: CareEvent?
-    private var wateringSession: UUID?
+    private let registerCare: RegisterCareEvent?
+    @Published private(set) var careConfirmation: CareEvent?
+    private var careSession: UUID?
 
-    init(id: UUID, loadDetail: LoadPlantDetail, loadPhoto: LoadInitialPlantPhoto, update: UpdatePlant, registerWatering: RegisterWatering? = nil, onUpdated: @escaping @MainActor (Plant) -> Void = { _ in }) {
+    init(id: UUID, loadDetail: LoadPlantDetail, loadPhoto: LoadInitialPlantPhoto, update: UpdatePlant, registerCare: RegisterCareEvent? = nil, onUpdated: @escaping @MainActor (Plant) -> Void = { _ in }) {
         self.id = id
         self.loadDetail = loadDetail
         self.loadPhoto = loadPhoto
         self.update = update
         self.onUpdated = onUpdated
-        self.registerWatering = registerWatering
+        self.registerCare = registerCare
     }
 
     private var formPhoto: UIImage? { if case .loaded(let image) = photoState { return image }; return nil }
 
-    func wateringEditor() -> QuickWateringViewModel? {
-        guard case .loaded(let plant) = state, let registerWatering else { return nil }
-        wateringConfirmation = nil
+    func careEditor() -> RegisterCareViewModel? {
+        guard case .loaded(let plant) = state, let registerCare else { return nil }
+        careConfirmation = nil
         let session = UUID()
-        wateringSession = session
-        return QuickWateringViewModel(plant: plant, photo: formPhoto, register: registerWatering) { [weak self] event in
-            guard let self, self.wateringSession == session, event.plantID == self.id else { return }
-            self.wateringConfirmation = event
-            self.wateringSession = nil
+        careSession = session
+        return RegisterCareViewModel(plant: plant, photo: formPhoto, register: registerCare) { [weak self] event in
+            guard let self, self.careSession == session, event.plantID == self.id else { return }
+            self.careConfirmation = event
+            self.careSession = nil
         }
     }
 

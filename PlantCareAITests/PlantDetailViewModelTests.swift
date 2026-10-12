@@ -7,38 +7,39 @@ final class PlantDetailViewModelTests: XCTestCase {
     func testWateringFactoryLoadedOnlySnapshotPhotosAndConfirmationWithoutReload() async throws {
         let repository = DetailRepository()
         let events = DetailWateringRepository()
-        let vm = model(1, repository, watering: RegisterWatering(repository: events))
-        XCTAssertNil(vm.wateringEditor())
+        let vm = model(1, repository, watering: RegisterCareEvent(repository: events))
+        XCTAssertNil(vm.careEditor())
         let load = Task { await vm.load() }
         await repository.wait(count: 1)
-        XCTAssertNotNil(vm.wateringEditor()) // Pending photograph is not a metadata blocker.
+        XCTAssertNotNil(vm.careEditor()) // Pending photograph is not a metadata blocker.
         await repository.resolvePhoto(0, .success(StorageTestFixture.photo(1))); await load.value
         guard case .loaded(let image) = vm.photoState else { return XCTFail() }
-        let editor = try XCTUnwrap(vm.editor()), watering = try XCTUnwrap(vm.wateringEditor())
+        let editor = try XCTUnwrap(vm.editor()), watering = try XCTUnwrap(vm.careEditor())
         XCTAssertTrue(editor.photo === image); XCTAssertTrue(watering.photo === image)
         XCTAssertEqual(editor.originalName, StorageTestFixture.plant(1).name)
         let before = await repository.counts()
-        await watering.save()
-        XCTAssertEqual(vm.wateringConfirmation?.plantID, vm.id)
+        watering.selectKind(.watering); await watering.save()
+        XCTAssertEqual(vm.careConfirmation?.plantID, vm.id)
         assertPlant(vm, 1)
         let after = await repository.counts()
         XCTAssertEqual(before.0, after.0); XCTAssertEqual(before.1, after.1); XCTAssertEqual(after.2, 0)
-        let reopened = try XCTUnwrap(vm.wateringEditor())
-        XCTAssertNotEqual(reopened.id, watering.id); XCTAssertNil(vm.wateringConfirmation)
+        let reopened = try XCTUnwrap(vm.careEditor())
+        XCTAssertNotEqual(reopened.id, watering.id); XCTAssertNil(vm.careConfirmation)
+        XCTAssertNil(reopened.selectedKind)
         XCTAssertEqual(reopened.note, "")
     }
 
     func testWateringAbsentFailedAndFailedPhotoAvailability() async {
-        let register = RegisterWatering(repository: DetailWateringRepository())
+        let register = RegisterCareEvent(repository: DetailWateringRepository())
         let absent = model(1, DetailRepository(plants: []), watering: register)
-        await absent.load(); XCTAssertNil(absent.wateringEditor())
+        await absent.load(); XCTAssertNil(absent.careEditor())
         let failed = model(1, DetailRepository(failure: .storage), watering: register)
-        await failed.load(); XCTAssertNil(failed.wateringEditor())
+        await failed.load(); XCTAssertNil(failed.careEditor())
         let repository = DetailRepository()
         let vm = model(1, repository, watering: register)
         let load = Task { await vm.load() }; await repository.wait(count: 1)
         await repository.resolvePhoto(0, .failure(PlantStorageError.photoMissing)); await load.value
-        XCTAssertNotNil(vm.wateringEditor()); XCTAssertNil(vm.wateringEditor()?.photo)
+        XCTAssertNotNil(vm.careEditor()); XCTAssertNil(vm.careEditor()?.photo)
     }
     func testEditorAvailabilityAndCommitRejectsLateMetadata() async {
         let repository = DetailRepository(suspendMetadata: true)
@@ -57,8 +58,8 @@ final class PlantDetailViewModelTests: XCTestCase {
         let absent = model(1, DetailRepository(plants: [])); await absent.load(); XCTAssertNil(absent.editor())
         let failed = model(1, DetailRepository(failure: .storage)); await failed.load(); XCTAssertNil(failed.editor())
     }
-    private func model(_ index: Int = 1, _ repository: DetailRepository, watering: RegisterWatering? = nil) -> PlantDetailViewModel {
-        PlantDetailViewModel(id: StorageTestFixture.plant(index).id, loadDetail: LoadPlantDetail(repository: repository), loadPhoto: LoadInitialPlantPhoto(repository: repository), update: UpdatePlant(repository: repository), registerWatering: watering)
+    private func model(_ index: Int = 1, _ repository: DetailRepository, watering: RegisterCareEvent? = nil) -> PlantDetailViewModel {
+        PlantDetailViewModel(id: StorageTestFixture.plant(index).id, loadDetail: LoadPlantDetail(repository: repository), loadPhoto: LoadInitialPlantPhoto(repository: repository), update: UpdatePlant(repository: repository), registerCare: watering)
     }
     private func assertPlant(_ model: PlantDetailViewModel, _ index: Int, file: StaticString = #filePath, line: UInt = #line) {
         guard case .loaded(let plant) = model.state else { return XCTFail("Metadata missing", file: file, line: line) }

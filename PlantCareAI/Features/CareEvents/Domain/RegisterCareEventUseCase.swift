@@ -1,6 +1,6 @@
 import Foundation
 
-struct RegisterWatering {
+struct RegisterCareEvent {
     let repository: any CareEventRepository
 
     func execute(event: CareEvent, now: Date) async throws -> CareEvent {

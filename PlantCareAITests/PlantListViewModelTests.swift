@@ -27,15 +27,15 @@ final class PlantListViewModelTests: XCTestCase {
         let repository = LocalPlantRepository(root: root)
         for index in 1...2 { try await repository.savePlant(StorageTestFixture.plant(index), initialPhoto: StorageTestFixture.photo(index)) }
         let model = PlantListViewModel(loadPlants: LoadPlants(repository: repository), loadPhoto: LoadInitialPlantPhoto(repository: repository),
-            loadDetail: LoadPlantDetail(repository: repository), update: UpdatePlant(repository: repository), registerWatering: RegisterWatering(repository: repository))
+            loadDetail: LoadPlantDetail(repository: repository), update: UpdatePlant(repository: repository), registerCare: RegisterCareEvent(repository: repository))
         await model.load()
         let cards = model.cards
         await cards[0].load()
         guard case .loaded(let image) = cards[0].photoState else { return XCTFail() }
         let detail = model.detailViewModel(id: cards[0].id)
-        XCTAssertNil(detail.wateringEditor())
+        XCTAssertNil(detail.careEditor())
         await detail.load()
-        let watering = try XCTUnwrap(detail.wateringEditor()); await watering.save()
+        let watering = try XCTUnwrap(detail.careEditor()); watering.selectKind(.watering); await watering.save()
         XCTAssertEqual(watering.state, .saved)
         XCTAssertTrue(model.cards[0] === cards[0]); XCTAssertTrue(model.cards[1] === cards[1])
         guard case .loaded(let retained) = cards[0].photoState else { return XCTFail() }
@@ -43,7 +43,7 @@ final class PlantListViewModelTests: XCTestCase {
         guard case .loaded(let plants) = model.state else { return XCTFail() }
         XCTAssertEqual(plants, (1...2).map(StorageTestFixture.plant))
         let events = try await repository.loadCareEvents(for: cards[0].id)
-        XCTAssertEqual(events.count, 1); XCTAssertEqual(events.first, detail.wateringConfirmation)
+        XCTAssertEqual(events.count, 1); XCTAssertEqual(events.first, detail.careConfirmation)
         let other = try await repository.loadCareEvents(for: cards[1].id); XCTAssertEqual(other, [])
     }
     func testCreatedPlantKeepsExistingCardsAndPhotoStatesOrdersAndDeduplicatesCallback() async {

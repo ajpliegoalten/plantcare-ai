@@ -2,12 +2,50 @@ import XCTest
 @testable import PlantCareAI
 
 @MainActor
-final class QuickWateringViewModelTests: XCTestCase {
+final class RegisterCareViewModelTests: XCTestCase {
+    func testEmptyExclusiveTogglePreservesDraftAndNeverDispatchesWithoutKind() async {
+        let repository = SuspendedWateringRepository()
+        let vm = RegisterCareViewModel(plant: StorageTestFixture.plant(1), register: RegisterCareEvent(repository: repository), onSaved: { _ in XCTFail() })
+        XCTAssertNil(vm.selectedKind); XCTAssertFalse(vm.canSave)
+        await vm.save()
+        vm.setNote("🌿\n  interior"); vm.selectDay(offset: -1)
+        let date = vm.occurredAt
+        vm.selectKind(.fertilizing); XCTAssertEqual(vm.selectedKind, .fertilizing); XCTAssertTrue(vm.canSave)
+        vm.selectKind(.pruning); XCTAssertEqual(vm.selectedKind, .pruning)
+        vm.selectKind(.pruning); XCTAssertNil(vm.selectedKind); XCTAssertFalse(vm.canSave)
+        await vm.save()
+        XCTAssertEqual(vm.note, "🌿\n  interior"); XCTAssertEqual(vm.occurredAt, date)
+        let events = await repository.events; XCTAssertTrue(events.isEmpty)
+    }
+
+    func testEveryKindAndChangingKindAfterFailureCreatesNewPayloadIdentity() async {
+        for kind in CareEvent.Kind.allCases {
+            let repository = SuspendedWateringRepository()
+            var callbacks: [CareEvent] = []
+            let vm = RegisterCareViewModel(plant: StorageTestFixture.plant(1), register: RegisterCareEvent(repository: repository), onSaved: { callbacks.append($0) })
+            vm.selectKind(kind)
+            let first = Task { await vm.save() }; await repository.waitForDispatch()
+            let original = await repository.events[0]
+            XCTAssertEqual(original.kind, kind)
+            await repository.finish(.failure(CareEventError.storage)); await first.value
+            vm.selectKind(kind) // deselect, clear error and cached retry
+            XCTAssertEqual(vm.state, .editing); await vm.save()
+            vm.selectKind(kind == .other ? .watering : .other)
+            let second = Task { await vm.save() }; await repository.waitForDispatch()
+            let changed = await repository.events[1]
+            XCTAssertNotEqual(original.id, changed.id); XCTAssertNotEqual(original.kind, changed.kind)
+            XCTAssertEqual(original.occurredAt, changed.occurredAt)
+            await repository.finish(.success(changed)); await second.value
+            XCTAssertEqual(callbacks, [changed]); XCTAssertEqual(vm.state, .saved)
+            vm.selectKind(kind); XCTAssertEqual(vm.selectedKind, changed.kind)
+        }
+    }
+
     func testPickerRangeIncludesSelectedInstantAcrossEastwardZoneAndClockRegression() {
         let repository = SuspendedWateringRepository()
         var clock = ISO8601DateFormatter().date(from: "2026-01-12T12:00:00Z")!
         var zone = TimeZone(identifier: "America/Los_Angeles")!
-        let vm = QuickWateringViewModel(plant: StorageTestFixture.plant(1), register: RegisterWatering(repository: repository),
+        let vm = RegisterCareViewModel(plant: StorageTestFixture.plant(1), register: RegisterCareEvent(repository: repository),
             now: { clock }, zone: { zone }, onSaved: { _ in XCTFail() })
         let selected = vm.occurredAt
         zone = TimeZone(identifier: "Europe/Madrid")!
@@ -22,7 +60,8 @@ final class QuickWateringViewModelTests: XCTestCase {
         let repository = SuspendedWateringRepository()
         let now = Date(timeIntervalSince1970: 1_800_000_000)
         var zone = TimeZone(identifier: "Europe/Madrid")!
-        let vm = QuickWateringViewModel(plant: StorageTestFixture.plant(1), register: RegisterWatering(repository: repository), now: { now }, zone: { zone }, onSaved: { _ in XCTFail() })
+        let vm = RegisterCareViewModel(plant: StorageTestFixture.plant(1), register: RegisterCareEvent(repository: repository), now: { now }, zone: { zone }, onSaved: { _ in XCTFail() })
+        vm.selectKind(.watering)
         let absolute = vm.occurredAt
         let originalDay = vm.calendar.component(.day, from: absolute)
         zone = TimeZone(identifier: "America/Los_Angeles")!
@@ -40,13 +79,15 @@ final class QuickWateringViewModelTests: XCTestCase {
         var clock = now
         var zone = TimeZone(identifier: "Europe/Madrid")!
         var callbacks: [CareEvent] = []
-        let vm = QuickWateringViewModel(plant: StorageTestFixture.plant(1), register: RegisterWatering(repository: repository),
+        let vm = RegisterCareViewModel(plant: StorageTestFixture.plant(1), register: RegisterCareEvent(repository: repository),
             now: { clock }, zone: { zone }, onSaved: { callbacks.append($0) })
         vm.setNote(" \nAgua\n🌿 \n")
+        vm.selectKind(.watering)
         let first = Task { await vm.save() }
         await repository.waitForDispatch()
         XCTAssertTrue(vm.isSaving)
-        vm.setNote("blocked"); vm.selectDay(offset: -1)
+        vm.setNote("blocked"); vm.selectDay(offset: -1); vm.selectKind(.pruning)
+        XCTAssertEqual(vm.selectedKind, .watering)
         await vm.save()
         let original = await repository.events[0]
         await repository.finish(.failure(CareEventError.storage)); await first.value
@@ -70,7 +111,8 @@ final class QuickWateringViewModelTests: XCTestCase {
         let repository = SuspendedWateringRepository()
         var zone = TimeZone(identifier: "Europe/Madrid")!
         let now = Date(timeIntervalSince1970: 1_800_000_000)
-        let vm = QuickWateringViewModel(plant: StorageTestFixture.plant(1), register: RegisterWatering(repository: repository), now: { now }, zone: { zone }, onSaved: { _ in })
+        let vm = RegisterCareViewModel(plant: StorageTestFixture.plant(1), register: RegisterCareEvent(repository: repository), now: { now }, zone: { zone }, onSaved: { _ in })
+        vm.selectKind(.watering)
         let first = Task { await vm.save() }; await repository.waitForDispatch()
         let original = await repository.events[0]
         await repository.finish(.failure(CareEventError.storage)); await first.value
@@ -82,7 +124,8 @@ final class QuickWateringViewModelTests: XCTestCase {
         XCTAssertEqual(edited.timeZoneIdentifier, zone.identifier); XCTAssertNil(edited.note)
         XCTAssertEqual(edited.occurredAt, vm.yesterday)
         await repository.finish(.success(edited)); await second.value
-        let fresh = QuickWateringViewModel(plant: vm.plant, register: RegisterWatering(repository: repository), now: { now }, zone: { zone }, onSaved: { _ in })
+        let fresh = RegisterCareViewModel(plant: vm.plant, register: RegisterCareEvent(repository: repository), now: { now }, zone: { zone }, onSaved: { _ in })
+        XCTAssertNil(fresh.selectedKind); XCTAssertFalse(fresh.canSave)
         XCTAssertNotEqual(fresh.id, vm.id); XCTAssertEqual(fresh.note, ""); XCTAssertEqual(fresh.occurredAt, fresh.today)
     }
 }

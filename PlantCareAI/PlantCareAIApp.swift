@@ -26,8 +26,8 @@ struct PlantCareAIApp: App {
            arguments.indices.contains(position + 1), let id = UUID(uuidString: arguments[position + 1]) {
             let testRoot = URL.applicationSupportDirectory.appendingPathComponent("StorageTests").appendingPathComponent(id.uuidString)
             repository = LocalPlantRepository(root: testRoot)
-            if let position = arguments.firstIndex(of: "--watering-fixture"), arguments.indices.contains(position + 1) {
-                let fixture = WateringTestFixture(root: testRoot, mode: arguments[position + 1])
+            if let position = arguments.firstIndex(of: "--care-fixture"), arguments.indices.contains(position + 1) {
+                let fixture = CareEventTestFixture(root: testRoot, mode: arguments[position + 1])
                 repository = LocalPlantRepository(root: testRoot, beforeCareCommit: { try fixture.beforeCareCommit($0) })
             }
             if let position = arguments.firstIndex(of: "--plant-creation-fixture"), arguments.indices.contains(position + 1) {
@@ -37,7 +37,7 @@ struct PlantCareAIApp: App {
             load = StorageFixtureLoad(root: testRoot, repository: repository, seed: arguments.contains("--storage-seed"), corrupt: arguments.contains("--storage-corrupt"))
         }
         #endif
-        let viewModel = PlantListViewModel(loadPlants: load, loadPhoto: LoadInitialPlantPhoto(repository: repository), loadDetail: LoadPlantDetail(repository: repository), update: UpdatePlant(repository: repository), registerWatering: RegisterWatering(repository: repository))
+        let viewModel = PlantListViewModel(loadPlants: load, loadPhoto: LoadInitialPlantPhoto(repository: repository), loadDetail: LoadPlantDetail(repository: repository), update: UpdatePlant(repository: repository), registerCare: RegisterCareEvent(repository: repository))
         var consentRepository: any ExternalAIConsentRepository = UserDefaultsExternalAIConsentRepository(defaults: .standard)
         #if DEBUG && targetEnvironment(simulator)
         var consentFixture: ExternalAIConsentTestFixture?

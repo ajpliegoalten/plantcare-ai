@@ -57,8 +57,8 @@ actor LocalPlantRepository: PlantRepository, CareEventRepository {
     }
 
     func saveCareEvent(_ event: CareEvent) async throws -> CareEvent {
-        let event = RegisterWatering.normalized(event)
-        try RegisterWatering.validateStructure(event)
+        let event = RegisterCareEvent.normalized(event)
+        try RegisterCareEvent.validateStructure(event)
         let context: ModelContext
         do { context = try store() } catch { throw CareEventError.storage }
         do {
@@ -71,7 +71,7 @@ actor LocalPlantRepository: PlantRepository, CareEventRepository {
                 guard confirmed == event else { throw CareEventError.conflict }
                 return confirmed
             }
-            try RegisterWatering.validateInsertion(event, now: now())
+            try RegisterCareEvent.validateInsertion(event, now: now())
             context.insert(PersistedCareEvent(event))
             try beforeCareCommit(event)
             try beforeCommit()

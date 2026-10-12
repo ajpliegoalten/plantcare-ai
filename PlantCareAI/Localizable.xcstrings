@@ -1,19 +1,25 @@
 {
   "sourceLanguage" : "es",
   "strings" : {
-    "watering.title" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Registrar riego" } } } },
-    "watering.belongs" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "El registro se guardará exclusivamente para este ejemplar" } } } },
-    "watering.date" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Fecha" } } } },
-    "watering.note" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Nota (opcional)" } } } },
-    "watering.today" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Hoy" } } } },
-    "watering.yesterday" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Ayer" } } } },
-    "watering.save" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Guardar riego" } } } },
-    "watering.saving" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Guardando riego…" } } } },
-    "watering.retry" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Reintentar guardado" } } } },
-    "watering.error" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudo guardar el riego en este dispositivo. Inténtalo de nuevo." } } } },
-    "watering.validation" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Selecciona una fecha válida que no sea futura." } } } },
-    "watering.notFound" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Esta planta ya no está guardada en este dispositivo." } } } },
-    "watering.confirmed" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Riego registrado" } } } },
+    "care.title" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Registrar cuidado" } } } },
+    "care.belongs" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "El registro se guardará exclusivamente para este ejemplar" } } } },
+    "care.kind" : { "extractionState" : "manual", "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Tipo de cuidado" } } } },
+    "care.kind.watering" : { "extractionState" : "manual", "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Riego" } } } },
+    "care.kind.fertilizing" : { "extractionState" : "manual", "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Abonado" } } } },
+    "care.kind.pruning" : { "extractionState" : "manual", "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Poda" } } } },
+    "care.kind.repotting" : { "extractionState" : "manual", "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Trasplante" } } } },
+    "care.kind.other" : { "extractionState" : "manual", "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Otro" } } } },
+    "care.date" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Fecha" } } } },
+    "care.note" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Nota (opcional)" } } } },
+    "care.today" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Hoy" } } } },
+    "care.yesterday" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Ayer" } } } },
+    "care.save" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Guardar cuidado" } } } },
+    "care.saving" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Guardando cuidado…" } } } },
+    "care.retry" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Reintentar guardado" } } } },
+    "care.error" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudo guardar el cuidado en este dispositivo. Inténtalo de nuevo." } } } },
+    "care.validation" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Selecciona una fecha válida que no sea futura." } } } },
+    "care.notFound" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Esta planta ya no está guardada en este dispositivo." } } } },
+    "care.confirmed" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Cuidado registrado" } } } },
     "Care invocations: %@" : {
 
     },
@@ -555,24 +561,24 @@
         }
       }
     },
-    "detail.watering.register" : {
+    "detail.care.register" : {
       "extractionState" : "manual",
       "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Registrar riego"
+            "value" : "Registrar cuidado"
           }
         }
       }
     },
-    "detail.watering.title" : {
+    "detail.care.registrationTitle" : {
       "extractionState" : "manual",
       "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Riego"
+            "value" : "Cuidados"
           }
         }
       }

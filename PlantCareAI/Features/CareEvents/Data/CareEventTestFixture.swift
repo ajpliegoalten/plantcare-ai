@@ -2,7 +2,7 @@
 import Foundation
 
 // Opt-in UUID-scoped simulator store only. Expected dispatch payloads are not product history.
-final class WateringTestFixture: @unchecked Sendable {
+final class CareEventTestFixture: @unchecked Sendable {
     private struct Payload: Codable, Equatable {
         let id: UUID
         let plantID: UUID
@@ -32,7 +32,7 @@ final class WateringTestFixture: @unchecked Sendable {
     func beforeCareCommit(_ event: CareEvent) throws {
         lock.lock(); defer { lock.unlock() }
         attempts += 1
-        let url = root.appendingPathComponent("WateringExpected.json")
+        let url = root.appendingPathComponent("CareExpected.json")
         var expected = FileManager.default.fileExists(atPath: url.path) ? try JSONDecoder().decode([Payload].self, from: Data(contentsOf: url)) : []
         let payload = Payload(event)
         if let existing = expected.first(where: { $0.id == payload.id }) {
@@ -44,23 +44,41 @@ final class WateringTestFixture: @unchecked Sendable {
     }
 
     static func verify(root: URL, repository: LocalPlantRepository, count: Int, arguments: [String] = ProcessInfo.processInfo.arguments) async throws {
-        let url = root.appendingPathComponent("WateringExpected.json")
+        let url = root.appendingPathComponent("CareExpected.json")
         let expected = FileManager.default.fileExists(atPath: url.path) ? try JSONDecoder().decode([Payload].self, from: Data(contentsOf: url)) : []
         let actual = try await repository.loadCareEvents(for: StorageTestFixture.plant(1).id)
         let other = try await repository.loadCareEvents(for: StorageTestFixture.plant(2).id)
         guard actual.count == count, other.isEmpty,
-              actual.map(Payload.init).sorted(by: { $0.id.uuidString < $1.id.uuidString }) == expected.sorted(by: { $0.id.uuidString < $1.id.uuidString }) else { throw CareEventError.storage }
-        if let position = arguments.firstIndex(of: "--watering-expected-offset"), arguments.indices.contains(position + 1), let offset = Int(arguments[position + 1]) {
+              actual.map(Payload.init).sorted(by: { $0.id.uuidString < $1.id.uuidString }) == expected.filter({ payload in actual.contains(where: { $0.id == payload.id }) }).sorted(by: { $0.id.uuidString < $1.id.uuidString }) else { throw CareEventError.storage }
+        if let position = arguments.firstIndex(of: "--care-expected-offset"), arguments.indices.contains(position + 1), let offset = Int(arguments[position + 1]) {
             for event in actual {
-                let calendar = RegisterWatering.calendar(in: try RegisterWatering.zone(event.timeZoneIdentifier))
+                let calendar = RegisterCareEvent.calendar(in: try RegisterCareEvent.zone(event.timeZoneIdentifier))
                 guard event.occurredAt == calendar.date(byAdding: .day, value: offset, to: calendar.startOfDay(for: event.createdAt)) else { throw CareEventError.storage }
             }
         }
-        if let position = arguments.firstIndex(of: "--watering-expected-note-base64") {
+        if let position = arguments.firstIndex(of: "--care-expected-note-base64") {
             guard arguments.indices.contains(position + 1), let data = Data(base64Encoded: arguments[position + 1]),
                   let note = String(data: data, encoding: .utf8) else { throw CareEventError.storage }
             guard actual.allSatisfy({ CareEvent.identicalNotes($0.note, note) }) else { throw CareEventError.storage }
-        } else { guard actual.allSatisfy({ $0.note == nil }) else { throw CareEventError.storage } }
+        } else if !arguments.contains("--care-expectations-base64") { guard actual.allSatisfy({ $0.note == nil }) else { throw CareEventError.storage } }
+        if let position = arguments.firstIndex(of: "--care-expectations-base64") {
+            struct Expectation: Decodable { let kind: String; let note: String?; let offset: Int }
+            guard arguments.indices.contains(position + 1), let data = Data(base64Encoded: arguments[position + 1]) else { throw CareEventError.storage }
+            let independent = try JSONDecoder().decode([Expectation].self, from: data)
+            var unmatched = actual
+            for wanted in independent {
+                guard let index = unmatched.firstIndex(where: { event in
+                    guard let zone = try? RegisterCareEvent.zone(event.timeZoneIdentifier) else { return false }
+                    let calendar = RegisterCareEvent.calendar(in: zone)
+                    return event.kind.rawValue == wanted.kind && CareEvent.identicalNotes(event.note, wanted.note) &&
+                        event.occurredAt == calendar.date(byAdding: .day, value: wanted.offset, to: calendar.startOfDay(for: event.createdAt))
+                }) else { throw CareEventError.storage }
+                unmatched.remove(at: index)
+            }
+            guard unmatched.isEmpty else { throw CareEventError.storage }
+        } else {
+            guard actual.allSatisfy({ $0.kind == .watering }) else { throw CareEventError.storage }
+        }
     }
 }
 #endif
