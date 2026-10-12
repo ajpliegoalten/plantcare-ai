@@ -487,13 +487,35 @@ extension PlantCareAIUITestCase {
         app.textViews["manualSpeciesName"].exists ? app.textViews["manualSpeciesName"] : app.textFields["manualSpeciesName"]
     }
 
+    fileprivate func selectAllAndDelete(_ field: XCUIElement, app: XCUIApplication, captureName: String, editorParagraphSelection: Bool = false) {
+        if editorParagraphSelection {
+            // Apple's native paragraph-selection gesture includes wrapped lines.
+            // Require a selection menu; the caller's exact empty assertion after
+            // one delete rejects partial selection (including multiple paragraphs).
+            field.tap(withNumberOfTaps: 3, numberOfTouches: 1)
+            let copy = app.descendants(matching: .any).matching(NSPredicate(format: "label == 'Copiar' OR label == 'Copy'")).firstMatch
+            XCTAssertTrue(copy.waitForExistence(timeout: 3))
+        } else {
+            // Preserve the already-verified manual form's native menu interaction.
+            field.press(forDuration: 1.2)
+            let selectAll = app.descendants(matching: .any).matching(NSPredicate(format: "label == 'Seleccionar todo' OR label == 'Select All'")).firstMatch
+            let next = app.buttons.matching(NSPredicate(format: "label == 'Adelante' OR label == 'Next'")).firstMatch
+            for _ in 0..<3 where !selectAll.exists {
+                guard next.waitForExistence(timeout: 2) else { break }
+                next.tap()
+            }
+            XCTAssertTrue(selectAll.waitForExistence(timeout: 3))
+            selectAll.tap()
+        }
+        capture(captureName, app: app)
+        field.typeText(XCUIKeyboardKey.delete.rawValue)
+    }
+
     fileprivate func typeManual(_ name: String, app: XCUIApplication) {
         let field = manualField(app)
         XCTAssertTrue(field.waitForExistence(timeout: 5)); revealInPhoto(field, app: app); field.tap()
         if !(field.value as? String ?? "").isEmpty && field.value as? String != field.placeholderValue {
-            let old = field.value as? String ?? ""
-            field.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
-            field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: old.count))
+            selectAllAndDelete(field, app: app, captureName: "manual-native-select-all")
             // A native empty TextField can expose its placeholder as value;
             // TextView generally exposes an empty string. Neither is residual text.
             let cleared = field.value as? String
@@ -1228,7 +1250,7 @@ final class SavePlantUITests: PlantCareAIUITestCase {
 }
 
 final class StoredCollectionUITests: PlantCareAIUITestCase {
-    func testDetailRedesignCareGridAndUnavailableWatering() {
+    func testDetailRedesignCareGridAndFunctionalWatering() {
         let app = XCUIApplication(), id = isolatedID()
         app.launchArguments = ["--storage-test-id", id, "--storage-seed", "-AppleLanguages", "(es)"]
         app.launch()
@@ -1243,11 +1265,10 @@ final class StoredCollectionUITests: PlantCareAIUITestCase {
         let register = app.buttons["detailRegisterWatering-\(plantID(1))"]
         XCTAssertTrue(register.exists)
         reveal(register, in: app)
-        XCTAssertFalse(register.isEnabled)
+        XCTAssertTrue(register.isEnabled)
         XCTAssertEqual(register.label, "Registrar riego")
-        XCTAssertEqual(app.staticTexts["detailWateringComingSoon"].label, "Próximamente")
-        XCTAssertEqual(app.staticTexts["detailWateringUnavailable"].label,
-                       "El registro y la fecha del último riego estarán disponibles próximamente.")
+        XCTAssertFalse(app.staticTexts["detailWateringComingSoon"].exists)
+        XCTAssertFalse(app.staticTexts["detailWateringUnavailable"].exists)
         XCTAssertGreaterThanOrEqual(register.frame.height, 44)
         capture("redesign-watering-preview", app: app)
         for text in ["Óptimo estado", "Sustrato moderadamente seco", "Riego recomendado hoy", "Ciclo: ~9-11 d"] {
@@ -1319,11 +1340,7 @@ extension PlantCareAIUITestCase {
         XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5))
         let old = field.value as? String ?? ""
         if !old.isEmpty {
-            // Native selection gestures/modified keys need not select all.
-            // Tap trailing whitespace explicitly to place the caret at the end,
-            // then delete the known current value using ordinary text events.
-            field.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
-            field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: old.count))
+            selectAllAndDelete(field, app: app, captureName: "edit-native-select-all", editorParagraphSelection: true)
             XCTAssertEqual(field.value as? String, "")
         }
         if !value.isEmpty { field.typeText(value) }
@@ -1331,6 +1348,8 @@ extension PlantCareAIUITestCase {
     }
 
     fileprivate func saveEditor(_ app: XCUIApplication) {
+        if app.keyboards.firstMatch.exists { finishTyping(app) }
+        reveal(app.buttons["saveEditPlant"], in: app)
         app.buttons["saveEditPlant"].tap()
         XCTAssertTrue(app.navigationBars["Editar planta"].waitForNonExistence(timeout: 10))
     }
@@ -1340,6 +1359,150 @@ extension PlantCareAIUITestCase {
         XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 5))
     }
 
+}
+
+final class QuickWateringUITests: PlantCareAIUITestCase {
+    func testLongNamesMultilineNoteKeyboardScrollAndHomogeneousEditor() {
+        let app = XCUIApplication(), id = isolatedID()
+        app.launchArguments = ["--storage-test-id", id, "--storage-seed", "--storage-long-text", "--watering-fixture", "success", "-AppleLanguages", "(es)"]
+        app.launch(); openEditor(1, app: app)
+        let original = "Fixture 1: mi planta junto a la ventana del salón"
+        XCTAssertEqual(app.staticTexts["plantFormName"].label, original)
+        XCTAssertEqual(app.staticTexts["plantFormSubtitle"].label, "Monstera deliciosa — especie confirmada de este ejemplar")
+        let edited = String(repeating: "Mi planta junto a la ventana del salón ", count: 8)
+        replace("editPlantName", with: edited, app: app)
+        XCTAssertEqual(app.staticTexts["plantFormName"].label, original) // Header is persisted opening snapshot, not draft.
+        finishTyping(app)
+        reveal(app.buttons["saveEditPlant"], in: app)
+        XCTAssertTrue(app.buttons["saveEditPlant"].isHittable)
+        XCTAssertLessThanOrEqual(app.buttons["saveEditPlant"].frame.maxX, app.frame.maxX)
+        capture("edit-long-scroll", app: app)
+        app.buttons["cancelEditPlant"].tap()
+        openWatering(app, fromCollection: false)
+        XCTAssertEqual(app.staticTexts["plantFormName"].label, original)
+        let note = app.textViews["wateringNote"].exists ? app.textViews["wateringNote"] : app.textFields["wateringNote"]
+        let value = String(repeating: "Agua para este ejemplar.\n", count: 25) + "Fin"
+        note.tap(); note.typeText(value)
+        XCTAssertEqual(note.value as? String, value)
+        capture("watering-long-keyboard", app: app)
+        app.buttons["dismissWateringKeyboard"].tap()
+        reveal(app.buttons["saveWatering"], in: app)
+        XCTAssertTrue(app.buttons["saveWatering"].isHittable)
+        XCTAssertLessThanOrEqual(app.buttons["saveWatering"].frame.maxX, app.frame.maxX)
+        capture("watering-long-scroll", app: app)
+        save(app)
+        verify(app, id: id, count: 1, extra: ["--storage-verify", "--storage-long-text", "--watering-expected-note-base64", Data(value.utf8).base64EncodedString()])
+    }
+    private func openWatering(_ app: XCUIApplication, index: Int = 1, fromCollection: Bool = true) {
+        if fromCollection {
+            let card = app.buttons["plantCard-\(plantID(index))"]
+            XCTAssertTrue(card.waitForExistence(timeout: 10)); reveal(card, in: app); card.tap()
+        }
+        let register = app.buttons["detailRegisterWatering-\(plantID(index))"]
+        XCTAssertTrue(register.waitForExistence(timeout: 10)); reveal(register, in: app); register.tap()
+        XCTAssertTrue(app.navigationBars["Registrar riego"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["wateringToday"].isSelected)
+        let note = app.textViews["wateringNote"].exists ? app.textViews["wateringNote"] : app.textFields["wateringNote"]
+        XCTAssertEqual(note.value as? String, "")
+        XCTAssertFalse(app.staticTexts["wateringConfirmation"].exists)
+    }
+
+    private func save(_ app: XCUIApplication) {
+        let button = app.buttons["saveWatering"]
+        reveal(button, in: app); button.tap()
+        XCTAssertTrue(app.navigationBars["Registrar riego"].waitForNonExistence(timeout: 10))
+        XCTAssertTrue(app.descendants(matching: .any)["wateringConfirmation"].firstMatch.waitForExistence(timeout: 5))
+        XCTAssertEqual(app.descendants(matching: .any)["wateringConfirmation"].firstMatch.label, "Riego registrado")
+        XCTAssertFalse(app.buttons["Deshacer"].exists)
+    }
+
+    private func verify(_ app: XCUIApplication, id: String, count: Int, extra: [String] = []) {
+        app.terminate()
+        app.launchArguments = ["--storage-test-id", id, "--watering-verify", String(count), "-AppleLanguages", "(es)"] + extra
+        app.launch()
+        XCTAssertTrue(app.buttons["plantCard-\(plantID(1))"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.staticTexts["storageErrorMessage"].exists)
+        XCTAssertFalse(app.descendants(matching: .any)["wateringConfirmation"].firstMatch.exists)
+    }
+
+    func testTwoTapDefaultRealCommitRelaunchAndNewIntentionSameDay() {
+        let app = XCUIApplication(), id = isolatedID()
+        app.launchArguments = ["--storage-test-id", id, "--storage-seed", "--watering-fixture", "success", "-AppleLanguages", "(es)"]
+        app.launch(); openWatering(app)
+        XCTAssertTrue(app.staticTexts["Fixture 1"].exists)
+        XCTAssertTrue(app.staticTexts["El registro se guardará exclusivamente para este ejemplar"].exists)
+        XCTAssertEqual(app.buttons["saveWatering"].label, "Guardar riego")
+        XCTAssertEqual(app.buttons["cancelWatering"].label, "Cancelar")
+        capture("watering-default", app: app)
+        save(app) // Register + Save: exactly two taps from loaded detail.
+        capture("watering-confirmed", app: app)
+        verify(app, id: id, count: 1, extra: ["--storage-verify", "--watering-expected-offset", "0"])
+        app.terminate()
+        app.launchArguments += ["--watering-fixture", "success"]
+        app.launch(); openWatering(app); save(app)
+        verify(app, id: id, count: 2, extra: ["--storage-verify", "--watering-expected-offset", "0"])
+    }
+
+    func testDateNoteCancelGestureAndFreshDraft() {
+        let app = XCUIApplication(), id = isolatedID()
+        app.launchArguments = ["--storage-test-id", id, "--storage-seed", "--watering-fixture", "success", "-AppleLanguages", "(es)"]
+        app.launch(); openWatering(app)
+        app.buttons["wateringYesterday"].tap()
+        XCTAssertTrue(app.buttons["wateringYesterday"].isSelected)
+        app.buttons["cancelWatering"].tap()
+        XCTAssertTrue(app.navigationBars["Registrar riego"].waitForNonExistence(timeout: 5))
+        openWatering(app, fromCollection: false)
+        let bar = app.navigationBars["Registrar riego"]
+        bar.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.5)).press(forDuration: 0.05,
+            thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.9)))
+        XCTAssertTrue(bar.waitForNonExistence(timeout: 5))
+        verify(app, id: id, count: 0, extra: ["--storage-verify"])
+        app.terminate(); app.launchArguments += ["--watering-fixture", "success"]; app.launch()
+        openWatering(app); app.buttons["wateringYesterday"].tap()
+        let note = app.textViews["wateringNote"].exists ? app.textViews["wateringNote"] : app.textFields["wateringNote"]
+        // Avoid iOS double-space-to-period keyboard substitution; still exercise trim and multiline input.
+        let draft = " \nAgua\nSegunda línea\n "
+        note.tap(); note.typeText(draft)
+        XCTAssertEqual(note.value as? String, draft)
+        capture("watering-keyboard-note", app: app)
+        app.buttons["dismissWateringKeyboard"].tap()
+        save(app)
+        verify(app, id: id, count: 1, extra: ["--storage-verify", "--watering-expected-offset", "-1", "--watering-expected-note-base64", Data("Agua\nSegunda línea".utf8).base64EncodedString()])
+    }
+
+    func testLocalFailureKeepsDraftAndRetryCommitsOnePayload() {
+        let app = XCUIApplication(), id = isolatedID()
+        app.launchArguments = ["--storage-test-id", id, "--storage-seed", "--watering-fixture", "fail-first", "-AppleLanguages", "(es)"]
+        app.launch(); openWatering(app)
+        app.buttons["saveWatering"].tap()
+        let error = app.staticTexts["wateringError"]
+        XCTAssertTrue(error.waitForExistence(timeout: 5))
+        XCTAssertEqual(error.label, "No se pudo guardar el riego en este dispositivo. Inténtalo de nuevo.")
+        XCTAssertEqual(app.buttons["saveWatering"].label, "Reintentar guardado")
+        XCTAssertTrue(app.buttons["cancelWatering"].isEnabled)
+        capture("watering-local-error", app: app)
+        save(app)
+        verify(app, id: id, count: 1, extra: ["--storage-verify"])
+    }
+
+    func testBusyBlocksFieldsCancelAndGestureWithMissingPhoto() {
+        let app = XCUIApplication(), id = isolatedID()
+        app.launchArguments = ["--storage-test-id", id, "--storage-seed", "--storage-photo-missing", "--watering-fixture", "busy", "-AppleLanguages", "(es)"]
+        app.launch(); openWatering(app)
+        capture("watering-placeholder", app: app)
+        app.buttons["saveWatering"].tap()
+        XCTAssertTrue(app.activityIndicators["wateringSaving"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.buttons["cancelWatering"].isEnabled)
+        XCTAssertFalse(app.buttons["saveWatering"].isEnabled)
+        XCTAssertFalse(app.buttons["wateringYesterday"].isEnabled)
+        capture("watering-busy", app: app)
+        let bar = app.navigationBars["Registrar riego"]
+        bar.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.5)).press(forDuration: 0.05,
+            thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.9)))
+        XCTAssertTrue(bar.waitForNonExistence(timeout: 10))
+        XCTAssertTrue(app.descendants(matching: .any)["wateringConfirmation"].firstMatch.exists)
+        verify(app, id: id, count: 1)
+    }
 }
 
 final class EditPlantUITests: PlantCareAIUITestCase {

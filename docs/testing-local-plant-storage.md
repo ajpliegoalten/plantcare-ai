@@ -1,5 +1,11 @@
 # Verificación local de almacenamiento, tarjetas, detalle y edición
 
+## Quick-watering: schema aditivo y fixture local
+
+`LocalCareEventRepositoryTests` genera V1 real en disco con solo PersistedPlant; libera contexto/container y abre V2, compara ambos modelos/JPEG/cero eventos, registra y reabre siete campos. Cubre rollback, retry, conflicto solo zona, duplicado tras retroceso de reloj, orden, ausencia y corrupción. Selección focalizada: RegisterWateringTests/QuickWateringViewModelTests/LocalCareEventRepositoryTests más repositorio y callers de detalle/lista/editor.
+
+Debug Simulator, siempre `--storage-test-id <UUID>`: `--watering-fixture success|fail-first|busy` inyecta fallo únicamente antes del commit de eventos (no rompe seed). Busy retiene el actor12s para observar bloqueo; no demoras en producción. Captura payload de despacho en WateringExpected.json dentro del fixture, compara literalmente los siete campos al relanzar con `--watering-verify <count>` y exige B sin eventos. `--watering-expected-offset 0|-1` comprueba día gregoriano relativo al createdAt/origen; `--watering-expected-note-base64 <UTF8-base64>` transporta expectativa multilínea en un argumento ASCII y compara String decodificado exacto; sin nota exige nil. Combinar `--storage-verify` para ambos Plant/JPEG exactos, excepto foto ausente intencionada. Sin reseed/desinstalar al verificar. Cleanup UUID existente elimina también el sidecar. No equivale a cronología productiva ni constante de contador.
+
 Desde la raíz del worktree, Xcode 26.2 / iPhone Simulator instalado:
 
 Verificación habitual: un único iPhone Simulator estándar, tamaño de texto normal y una sola apariencia. Mantener `./init.sh`, pruebas unitarias y UI funcionales, escenarios de persistencia/aislamiento/reapertura e inspección visual básica. No lanzar ejecuciones duplicadas con la sesión activa. SE/pantallas pequeñas, Dynamic Type aumentado/máximo, VoiceOver/Accessibility Inspector y matrices adicionales de apariencia quedan fuera de esta rutina y **solo se ejecutan si el usuario las solicita expresamente**. Conservar soporte y aserciones funcionales; no declarar aprobadas comprobaciones no ejecutadas.

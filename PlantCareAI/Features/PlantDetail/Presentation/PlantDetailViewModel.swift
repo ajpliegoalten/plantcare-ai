@@ -16,18 +16,36 @@ final class PlantDetailViewModel: ObservableObject {
     private var metadataPending = false
     private let update: UpdatePlant
     private let onUpdated: @MainActor (Plant) -> Void
+    private let registerWatering: RegisterWatering?
+    @Published private(set) var wateringConfirmation: CareEvent?
+    private var wateringSession: UUID?
 
-    init(id: UUID, loadDetail: LoadPlantDetail, loadPhoto: LoadInitialPlantPhoto, update: UpdatePlant, onUpdated: @escaping @MainActor (Plant) -> Void = { _ in }) {
+    init(id: UUID, loadDetail: LoadPlantDetail, loadPhoto: LoadInitialPlantPhoto, update: UpdatePlant, registerWatering: RegisterWatering? = nil, onUpdated: @escaping @MainActor (Plant) -> Void = { _ in }) {
         self.id = id
         self.loadDetail = loadDetail
         self.loadPhoto = loadPhoto
         self.update = update
         self.onUpdated = onUpdated
+        self.registerWatering = registerWatering
+    }
+
+    private var formPhoto: UIImage? { if case .loaded(let image) = photoState { return image }; return nil }
+
+    func wateringEditor() -> QuickWateringViewModel? {
+        guard case .loaded(let plant) = state, let registerWatering else { return nil }
+        wateringConfirmation = nil
+        let session = UUID()
+        wateringSession = session
+        return QuickWateringViewModel(plant: plant, photo: formPhoto, register: registerWatering) { [weak self] event in
+            guard let self, self.wateringSession == session, event.plantID == self.id else { return }
+            self.wateringConfirmation = event
+            self.wateringSession = nil
+        }
     }
 
     func editor() -> EditPlantViewModel? {
         guard case .loaded(let plant) = state else { return nil }
-        return EditPlantViewModel(plant: plant, update: update) { [weak self] plant in
+        return EditPlantViewModel(plant: plant, photo: formPhoto, update: update) { [weak self] plant in
             self?.applyUpdatedPlant(plant)
         }
     }
@@ -105,6 +123,9 @@ final class PlantDetailViewModel: ObservableObject {
     static func formattedDate(_ date: Date, timeZone: TimeZone = .current) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "es_ES")
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timeZone
+        formatter.calendar = calendar
         formatter.timeZone = timeZone
         formatter.dateStyle = .long
         formatter.timeStyle = .none

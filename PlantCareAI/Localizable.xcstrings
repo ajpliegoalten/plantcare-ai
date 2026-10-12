@@ -1,6 +1,19 @@
 {
   "sourceLanguage" : "es",
   "strings" : {
+    "watering.title" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Registrar riego" } } } },
+    "watering.belongs" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "El registro se guardará exclusivamente para este ejemplar" } } } },
+    "watering.date" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Fecha" } } } },
+    "watering.note" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Nota (opcional)" } } } },
+    "watering.today" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Hoy" } } } },
+    "watering.yesterday" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Ayer" } } } },
+    "watering.save" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Guardar riego" } } } },
+    "watering.saving" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Guardando riego…" } } } },
+    "watering.retry" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Reintentar guardado" } } } },
+    "watering.error" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudo guardar el riego en este dispositivo. Inténtalo de nuevo." } } } },
+    "watering.validation" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Selecciona una fecha válida que no sea futura." } } } },
+    "watering.notFound" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Esta planta ya no está guardada en este dispositivo." } } } },
+    "watering.confirmed" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Riego registrado" } } } },
     "Care invocations: %@" : {
 
     },
@@ -553,17 +566,6 @@
         }
       }
     },
-    "detail.watering.soon" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Próximamente"
-          }
-        }
-      }
-    },
     "detail.watering.title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -571,17 +573,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Riego"
-          }
-        }
-      }
-    },
-    "detail.watering.unavailable" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El registro y la fecha del último riego estarán disponibles próximamente."
           }
         }
       }

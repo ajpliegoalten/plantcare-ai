@@ -10,6 +10,7 @@ final class PlantListViewModel: ObservableObject {
     @Published private(set) var cards: [PlantCardViewModel] = []
     private var hasLoaded = false
     private let update: UpdatePlant
+    private let registerWatering: RegisterWatering?
     private var metadataGeneration = 0
     @Published private(set) var newlyAddedPlantID: UUID?
     #if DEBUG && targetEnvironment(simulator)
@@ -18,11 +19,12 @@ final class PlantListViewModel: ObservableObject {
     #endif
     var makeIdentificationPhoto: (() -> IdentificationPhotoViewModel)?
 
-    init(loadPlants: any LoadPlantsUseCase, loadPhoto: LoadInitialPlantPhoto, loadDetail: LoadPlantDetail, update: UpdatePlant) {
+    init(loadPlants: any LoadPlantsUseCase, loadPhoto: LoadInitialPlantPhoto, loadDetail: LoadPlantDetail, update: UpdatePlant, registerWatering: RegisterWatering? = nil) {
         self.loadPlants = loadPlants
         self.loadPhoto = loadPhoto
         self.loadDetail = loadDetail
         self.update = update
+        self.registerWatering = registerWatering
     }
 
     func load() async {
@@ -67,7 +69,7 @@ final class PlantListViewModel: ObservableObject {
     }
 
     func detailViewModel(id: UUID) -> PlantDetailViewModel {
-        PlantDetailViewModel(id: id, loadDetail: loadDetail, loadPhoto: loadPhoto, update: update) { [weak self] plant in
+        PlantDetailViewModel(id: id, loadDetail: loadDetail, loadPhoto: loadPhoto, update: update, registerWatering: registerWatering) { [weak self] plant in
             self?.applyUpdatedPlant(plant)
         }
     }

@@ -3,6 +3,7 @@ import SwiftUI
 struct PlantDetailView: View {
     @StateObject private var viewModel: PlantDetailViewModel
     @State private var editor: EditPlantViewModel?
+    @State private var wateringEditor: QuickWateringViewModel?
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     init(viewModel: PlantDetailViewModel) {
@@ -44,6 +45,7 @@ struct PlantDetailView: View {
             }
         }
         .sheet(item: $editor) { EditPlantView(viewModel: $0) }
+        .sheet(item: $wateringEditor) { QuickWateringView(viewModel: $0) }
         .accessibilityIdentifier("plantDetail-\(viewModel.id)")
         .task { await viewModel.load() }
         .onDisappear { viewModel.cancelLoading() }
@@ -92,26 +94,18 @@ struct PlantDetailView: View {
         .shadow(color: Color("Primary").opacity(0.04), radius: 10, y: 3)
     }
 
-    // A visual placeholder only. Quick-watering will own real dates and writes.
     private var wateringPreview: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Label("detail.watering.title", systemImage: "drop.fill")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(Color("CareTerracotta"))
-                Spacer(minLength: 0)
-                Text("detail.watering.soon")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Color("TextSecondary"))
-                    .padding(.horizontal, 8).padding(.vertical, 4)
-                    .background(Color("SurfaceMuted"), in: Capsule())
-                    .accessibilityIdentifier("detailWateringComingSoon")
             }
-            Text("detail.watering.unavailable")
-                .font(.subheadline)
-                .foregroundStyle(Color("TextSecondary"))
-                .accessibilityIdentifier("detailWateringUnavailable")
-            Button {} label: {
+            if viewModel.wateringConfirmation != nil {
+                Label("watering.confirmed", systemImage: "checkmark.circle.fill")
+                    .accessibilityIdentifier("wateringConfirmation")
+            }
+            Button { wateringEditor = viewModel.wateringEditor() } label: {
                 Label("detail.watering.register", systemImage: "drop.fill")
                     .font(.body.weight(.semibold))
                     .frame(maxWidth: .infinity, minHeight: 52)
@@ -119,8 +113,6 @@ struct PlantDetailView: View {
                     .background(Color("CareMint"), in: Capsule())
             }
             .buttonStyle(.plain)
-            .disabled(true)
-            .accessibilityHint(Text("detail.watering.unavailable"))
             .accessibilityIdentifier("detailRegisterWatering-\(viewModel.id)")
             Text("detail.watering.checkSubstrate")
                 .font(.footnote)
