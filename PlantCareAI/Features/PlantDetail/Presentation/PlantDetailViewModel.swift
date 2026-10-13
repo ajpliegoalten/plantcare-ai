@@ -27,18 +27,76 @@ final class PlantDetailViewModel: ObservableObject {
     var makePhotoPager: ((Plant) -> PlantPhotoPagerViewModel)?
     private var photoSession: UUID?
     var makeAnalysis: ((UUID, PlantPhotoIdentity) -> PlantPhotoAnalysisViewModel?)?
+    enum DeletionState { case idle, confirming, deleting, failed, deleted }
+    @Published private(set) var deletionState: DeletionState = .idle
+    @Published var showingDeletionConfirmation = false
+    @Published private(set) var deletionError: PlantDeletionError?
+    private var deletionTarget: Plant?
+    var deletePlant: (any DeletePlantUseCase)?
+    var hasPresentedEditor = false
+    var onDeleted: @MainActor (Plant) -> Void = { _ in }
+    var canAct: Bool { deletionState == .idle }
+    var deletionName: String { deletionTarget?.name ?? "" }
+
+    func requestDeletion() {
+        guard canAct, !hasPresentedEditor, deletePlant != nil, case .loaded(let plant) = state else { return }
+        deletionTarget = plant; deletionError = nil
+        deletionState = .confirming; showingDeletionConfirmation = true
+    }
+
+    func abandonDeletion() {
+        guard deletionState != .deleting, deletionState != .deleted else { return }
+        deletionTarget = nil; deletionError = nil
+        showingDeletionConfirmation = false; deletionState = .idle
+    }
+
+    func confirmDeletion() {
+        guard deletionState == .confirming || (deletionState == .failed && deletionError == .storage),
+              let expected = deletionTarget, let deletePlant else { return }
+        showingDeletionConfirmation = false; deletionState = .deleting
+        metadataGeneration += 1; metadataPending = false
+        // Strong owner until the non-cancelable dispatched commit is acknowledged.
+        Task { [self] in
+            do {
+                let canonical = try await deletePlant.execute(expected)
+                invalidateDeletedPlant()
+                onDeleted(canonical)
+            } catch {
+                deletionError = (error as? PlantDeletionError) ?? .storage
+                deletionState = .failed
+            }
+        }
+    }
+
+    func reloadAfterDeletionFailure() async {
+        guard deletionState == .failed, deletionError != .storage else { return }
+        abandonDeletion(); metadataGeneration += 1; metadataPending = false
+        photoGeneration += 1; photoState = .idle
+        photoPager?.disappear(); photoPager = nil; state = .loading
+        await load()
+    }
+
+    func invalidateDeletedPlant() {
+        guard deletionState != .deleted else { return }
+        deletionState = .deleted; deletionTarget = nil; deletionError = nil
+        showingDeletionConfirmation = false
+        metadataGeneration += 1; photoGeneration += 1; metadataPending = false
+        careSession = nil; photoSession = nil; careConfirmation = nil; photoConfirmation = nil
+        photoState = .idle; photoPager?.invalidateDeletedPlant(); photoPager = nil
+        lastWatering.invalidateDeletedPlant(); state = .notFound
+    }
 
     func analysisEditor() -> PlantPhotoAnalysisViewModel? {
-        guard case .loaded = state, photoPager?.canAnalyze == true else { return nil }
+        guard canAct, case .loaded = state, photoPager?.canAnalyze == true else { return nil }
         return makeAnalysis?(id, photoPager?.selected ?? .initial(id))
     }
 
     func photoEditor() -> AddPlantPhotoViewModel? {
-        guard case .loaded(let plant) = state, let makeAddPhoto else { return nil }
+        guard canAct, case .loaded(let plant) = state, let makeAddPhoto else { return nil }
         photoConfirmation = nil
         let session = UUID(); photoSession = session
         return makeAddPhoto(plant) { [weak self] photo, image in
-            guard let self, self.photoSession == session, photo.plantID == self.id else { return }
+            guard let self, self.canAct, self.photoSession == session, photo.plantID == self.id else { return }
             self.photoSession = nil; self.photoConfirmation = photo
             self.photoPager?.committed(photo, image: image)
         }
@@ -61,7 +119,7 @@ final class PlantDetailViewModel: ObservableObject {
     }
 
     func applyHistoryDeletion(_ entry: PlantTimelineEntry) {
-        guard entry.plantID == id else { return }
+        guard canAct, entry.plantID == id else { return }
         switch entry {
         case .care(let event): if event.kind == .watering { lastWatering.invalidate() }
         case .additional(let photo): photoPager?.deleted(photo); photoPager?.refreshAnalyses()
@@ -70,17 +128,17 @@ final class PlantDetailViewModel: ObservableObject {
     }
 
     func analysisSaved(_ record: SavedPlantPhotoAnalysis) {
-        guard record.plantID == id else { return }
+        guard canAct, record.plantID == id else { return }
         photoPager?.refreshAnalyses()
     }
 
     func careEditor() -> RegisterCareViewModel? {
-        guard case .loaded(let plant) = state, let registerCare else { return nil }
+        guard canAct, case .loaded(let plant) = state, let registerCare else { return nil }
         careConfirmation = nil
         let session = UUID()
         careSession = session
         return RegisterCareViewModel(plant: plant, photo: formPhoto, register: registerCare) { [weak self] event in
-            guard let self, self.careSession == session, event.plantID == self.id else { return }
+            guard let self, self.canAct, self.careSession == session, event.plantID == self.id else { return }
             self.careConfirmation = event
             self.careSession = nil
             if event.kind == .watering {
@@ -91,14 +149,14 @@ final class PlantDetailViewModel: ObservableObject {
     }
 
     func editor() -> EditPlantViewModel? {
-        guard case .loaded(let plant) = state else { return nil }
+        guard canAct, case .loaded(let plant) = state else { return nil }
         return EditPlantViewModel(plant: plant, photo: formPhoto, update: update) { [weak self] plant in
             self?.applyUpdatedPlant(plant)
         }
     }
 
     func applyUpdatedPlant(_ plant: Plant) {
-        guard plant.id == id else { return }
+        guard canAct, plant.id == id else { return }
         metadataGeneration += 1
         metadataPending = false
         state = .loaded(plant)
@@ -106,6 +164,7 @@ final class PlantDetailViewModel: ObservableObject {
     }
 
     func load() async {
+        guard canAct else { return }
         if case .loaded = state {
             lastWatering.appear()
             if let photoPager { photoPager.appear(); return }
@@ -162,6 +221,8 @@ final class PlantDetailViewModel: ObservableObject {
     }
 
     func cancelLoading(preservingPhotoSelection: Bool = false) {
+        guard deletionState != .deleting, deletionState != .deleted else { return }
+        abandonDeletion()
         photoPager?.disappear(preservingSelection: preservingPhotoSelection)
         photoConfirmation = nil
         photoSession = nil

@@ -47,6 +47,14 @@ struct PlantCareAIApp: App {
                 repository = LocalPlantRepository(root: testRoot, beforeDeletionCommit: { try fixture.beforeCommit() })
             }
             load = StorageFixtureLoad(root: testRoot, repository: repository, seed: arguments.contains("--storage-seed"), corrupt: arguments.contains("--storage-corrupt"))
+            if let position = arguments.firstIndex(of: "--delete-plant-fixture"), arguments.indices.contains(position + 1) {
+                let fixture = DeletePlantTestFixture(mode: arguments[position + 1])
+                repository = LocalPlantRepository(root: testRoot, beforeDeletionCommit: { try fixture.beforeCommit() })
+                let base = StorageFixtureLoad(root: testRoot, repository: repository, seed: arguments.contains("--storage-seed"), corrupt: false)
+                let verifyPosition = arguments.firstIndex(of: "--delete-plant-verify")
+                let verify = verifyPosition.flatMap { arguments.indices.contains($0 + 1) ? arguments[$0 + 1] : nil }
+                load = DeletePlantFixtureLoad(base: base, repository: repository, root: testRoot, seed: arguments.contains("--storage-seed"), verify: verify)
+            }
             if let position = arguments.firstIndex(of: "--timeline-fixture"), arguments.indices.contains(position + 1) {
                 load = PlantTimelineFixtureLoad(base: load, repository: repository,
                     seed: arguments.contains("--storage-seed"), mode: arguments[position + 1])
@@ -67,6 +75,7 @@ struct PlantCareAIApp: App {
         }
         #endif
         let viewModel = PlantListViewModel(loadPlants: load, loadPhoto: LoadInitialPlantPhoto(repository: repository), loadDetail: LoadPlantDetail(repository: repository), update: UpdatePlant(repository: repository), registerCare: RegisterCareEvent(repository: repository), loadLastWatering: lastWatering)
+        viewModel.deletePlant = DeletePlant(repository: repository)
         var photoReader: any PlantPhotoRepository = repository
         #if DEBUG && targetEnvironment(simulator)
         if let position = arguments.firstIndex(of: "--additional-photo-read-fixture"), arguments.indices.contains(position + 1),

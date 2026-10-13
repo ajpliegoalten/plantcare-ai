@@ -4,7 +4,7 @@ import ImageIO
 import UniformTypeIdentifiers
 
 // One instance per store, composed by the app. Its actor serializes duplicate checks and publication.
-actor LocalPlantRepository: PlantRepository, CareEventRepository, PlantPhotoRepository, CareEventDeletingRepository, PlantPhotoDeletingRepository, PlantPhotoAnalysisStoring, AcceptedPlantPhotoAnalysisReading {
+actor LocalPlantRepository: PlantRepository, CareEventRepository, PlantPhotoRepository, CareEventDeletingRepository, PlantPhotoDeletingRepository, PlantPhotoAnalysisStoring, AcceptedPlantPhotoAnalysisReading, PlantDeletingRepository {
     private let root: URL
     private var container: ModelContainer?
     private var context: ModelContext?
@@ -161,6 +161,65 @@ actor LocalPlantRepository: PlantRepository, CareEventRepository, PlantPhotoRepo
             let file = additionalPhotos.appendingPathComponent(reference)
             if FileManager.default.fileExists(atPath: file.path) { try FileManager.default.removeItem(at: file) }
         } catch { /* Best effort; never reinsert metadata or claim rollback. */ }
+        return canonical
+    }
+
+    func deletePlant(_ expected: Plant) async throws -> Plant {
+        let context: ModelContext
+        let plants: [PersistedPlant]
+        let events: [PersistedCareEvent]
+        let additional: [PersistedPlantPhoto]
+        let analyses: [PersistedPlantPhotoAnalysis]
+        let record: PersistedPlant
+        let canonical: Plant
+        do {
+            context = try store()
+            // A cached context still needs global validation before a destructive mutation.
+            plants = try context.fetch(FetchDescriptor<PersistedPlant>())
+            let domains = try plants.map { try $0.domain() }
+            let ids = Set(domains.map(\.id))
+            guard ids.count == domains.count else { throw PlantDeletionError.readFailure }
+            events = try context.fetch(FetchDescriptor<PersistedCareEvent>())
+            var eventIDs = Set<UUID>()
+            for event in events {
+                let value = try event.domain()
+                guard ids.contains(value.plantID), eventIDs.insert(value.id).inserted else { throw PlantDeletionError.readFailure }
+            }
+            additional = try context.fetch(FetchDescriptor<PersistedPlantPhoto>())
+            var photoIDs = Set<UUID>()
+            for photo in additional {
+                let value = try photo.domain()
+                guard ids.contains(value.plantID), photoIDs.insert(value.id).inserted else { throw PlantDeletionError.readFailure }
+            }
+            _ = try validatedAnalyses(context)
+            analyses = try context.fetch(FetchDescriptor<PersistedPlantPhotoAnalysis>())
+            guard let found = plants.first(where: { $0.id == expected.id }) else { throw PlantDeletionError.notFound }
+            record = found; canonical = try found.domain()
+            guard canonical == expected else { throw PlantDeletionError.conflict }
+        } catch {
+            if let error = error as? PlantDeletionError { throw error }
+            throw PlantDeletionError.readFailure
+        }
+        let children = additional.filter { $0.plantID == canonical.id }
+        let files = [photos.appendingPathComponent(record.photoReference)] + children.map {
+            additionalPhotos.appendingPathComponent($0.photoReference)
+        }
+        do {
+            for analysis in analyses where analysis.plantID == canonical.id { context.delete(analysis) }
+            for event in events where event.plantID == canonical.id { context.delete(event) }
+            for photo in children { context.delete(photo) }
+            context.delete(record)
+            try beforeDeletionCommit(); try beforeCommit(); try context.save()
+        } catch {
+            context.rollback()
+            throw PlantDeletionError.storage
+        }
+        for file in files {
+            do {
+                try beforeDeletionCleanup()
+                if FileManager.default.fileExists(atPath: file.path) { try FileManager.default.removeItem(at: file) }
+            } catch { /* Metadata committed: continue with every other own file. */ }
+        }
         return canonical
     }
 

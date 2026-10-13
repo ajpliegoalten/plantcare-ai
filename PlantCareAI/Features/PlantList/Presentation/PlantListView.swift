@@ -77,6 +77,9 @@ struct PlantListView: View {
                 IdentificationPhotoView(viewModel: draft)
             }
         }
+        .onChange(of: viewModel.deletionEvent) { _, event in
+            if event != nil { path = NavigationPath() }
+        }
     }
 
     private var contentAlignment: Alignment {

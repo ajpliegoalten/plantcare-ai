@@ -45,7 +45,7 @@ final class PlantTimelineViewModel: ObservableObject {
     }
 
     func analysisSaved(_ record: SavedPlantPhotoAnalysis) {
-        guard record.plantID == plantID else { return }
+        guard active, record.plantID == plantID else { return }
         generation += 1; request?.cancel(); request = nil
         savedAnalyses[record.identity] = record
         refresh(preservingPhotos: true)
@@ -144,7 +144,7 @@ final class PlantTimelineViewModel: ObservableObject {
         active = false; generation += 1; request?.cancel(); request = nil
         boundary?.cancel(); boundary = nil
         observers.forEach(NotificationCenter.default.removeObserver); observers = []
-        photos.disappear(); entries = []; groups = []; state = .idle
+        photos.disappear(); entries = []; groups = []; savedAnalyses = [:]; state = .idle
         if deletionState != .deleting { abandonDeletion() }
     }
 

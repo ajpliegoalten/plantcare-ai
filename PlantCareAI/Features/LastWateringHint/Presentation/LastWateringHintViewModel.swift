@@ -16,6 +16,12 @@ final class LastWateringHintViewModel: ObservableObject {
     private var boundary: Task<Void, Never>?
     private var generation = 0
     private var visible = false
+    private var deleted = false
+
+    func invalidateDeletedPlant() {
+        deleted = true; disappear(); generation += 1
+        request?.cancel(); request = nil; state = .idle
+    }
     private var observers: [NSObjectProtocol] = []
 
     init(plantID: UUID, load: (any LoadLastWateringUseCase)?, clock: @escaping () -> Date = Date.init,
@@ -33,6 +39,7 @@ final class LastWateringHintViewModel: ObservableObject {
     }
 
     func appear() {
+        guard !deleted else { return }
         visible = true
         observeContext()
         updateContext()
@@ -55,6 +62,7 @@ final class LastWateringHintViewModel: ObservableObject {
     }
 
     func invalidate() {
+        guard !deleted else { return }
         generation += 1
         request?.cancel(); request = nil
         state = .idle
@@ -63,6 +71,7 @@ final class LastWateringHintViewModel: ObservableObject {
 
     // Day/zone/clock changes only reformat; a failed read is not retried here.
     func updateContext() {
+        guard !deleted else { return }
         now = clock(); timeZone = zone()
         scheduleBoundary()
     }

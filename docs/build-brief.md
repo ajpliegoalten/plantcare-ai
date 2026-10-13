@@ -1,5 +1,13 @@
 # Brief de producto: PlantCare AI
 
+## Delta delete-plant (ADR015)
+
+Eliminar planta desde pie después de leyenda exige alerta humana y elimina ejemplar/ficha,
+inicial/adicionales/cuidados/definitivos propios, sin afectar otro ejemplar de misma especie. Un commit metadata,
+rollback pre-save/cleanup JPEG posterior best-effort; sin Deshacer/archivo/borrado seguro/remoto.
+Éxito vuelve a Mis plantas, última muestra vacío real con Añadir. Storage mantiene detalle/retry;
+obsolescencia/lectura exige Releer/reconfirmar. Sucede mención histórica de capacidad posterior.
+
 ## Delta aprobado: keep-analysis (2026-10-13, ADR014)
 
 Guardar análisis conserva explícitamente el resultado útil junto a la foto local seleccionada, sin duplicarla ni registrar cuidados. Un definitivo por identidad; insuficiencia no guardable y definitivo impide reanálisis. Commit local cierra modal, retry conserva intención sin IA. Texto íntegro orientativo debajo de foto en el mismo hito, disponible al relanzar/sin red/configuración. Delete adicional elimina su análisis en la misma transacción metadata y lo advierte; inicial protegida. Descarta pendiente: cierre sin guardar libera provisional. Contexto futuro usa textos propios anteriores por fecha de foto, nunca JPEG previos/fecha de aceptación. Sucede menciones históricas de guardar una foto nueva con análisis para este flujo sobre fotos ya locales.

@@ -62,6 +62,17 @@ final class PlantCardViewModelTests: XCTestCase {
         let afterEdit = await repository.ids(); XCTAssertEqual(afterEdit, ids)
     }
 
+    func testPlantDeletionTerminalRejectsPendingImageAndNeverReloadsRetainedCard() async {
+        let repository = CardPhotoRepository(), vm = card(1, repository)
+        let pending = Task { await vm.load() }
+        await repository.waitForRequests(1)
+        vm.invalidateDeletedPlant()
+        await repository.resolve(0, .success(StorageTestFixture.photo(1))); await pending.value
+        await vm.load(); await vm.retry(); vm.applyUpdatedPlant(StorageTestFixture.plant(1))
+        guard case .idle = vm.photoState else { return XCTFail("Deleted image revived") }
+        let ids = await repository.ids(); XCTAssertEqual(ids, [vm.id])
+    }
+
     func testFailureAndRetryAreIsolated() async {
         let repository = CardPhotoRepository()
         let first = card(1, repository), second = card(2, repository)

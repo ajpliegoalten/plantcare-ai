@@ -3,6 +3,25 @@ import XCTest
 
 @MainActor
 final class PlantPhotoPagerViewModelTests: XCTestCase {
+    func testPlantDeletionTerminalDropsInFlightMetadataAndSelectedImageWithoutReload() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let initial = LocalPlantRepository(root: root), plant = StorageTestFixture.plant(1), reads = PhotoReadGate()
+        try await initial.savePlant(plant, initialPhoto: StorageTestFixture.photo(1))
+        let photo = PlantTimelineFixtureLoad.photo(for: plant.id)
+        let vm = PlantPhotoPagerViewModel(plant: plant, loadMetadata: LoadPlantPhotos(repository: reads),
+            loadAdditional: LoadPlantPhoto(repository: reads), loadInitial: LoadInitialPlantPhoto(repository: initial))
+        vm.appear(); await reads.waitMetadata(1); await reads.metadata(0, .success([photo])); await wait { vm.isComplete }
+        vm.select(.additional(photo.id)); await reads.waitImages(1)
+        vm.refresh(); await reads.waitMetadata(2); vm.invalidateDeletedPlant()
+        await reads.metadata(1, .success([photo])); await reads.image(0, .success(StorageTestFixture.photo(2)))
+        await Task.yield(); vm.appear(); vm.refresh(); vm.retryImage(); vm.refreshAnalyses()
+        XCTAssertEqual(vm.cachedImageCount, 0); XCTAssertNil(vm.initialImage); XCTAssertFalse(vm.canAnalyze)
+        XCTAssertEqual(vm.descriptors.count, 1); XCTAssertEqual(vm.selected, .initial(plant.id))
+        let metadataCount = await reads.metadataPending.count, imageCount = await reads.imagesPending.count
+        XCTAssertEqual(metadataCount, 2); XCTAssertEqual(imageCount, 1)
+        guard case .idle = vm.imageState else { return XCTFail("Terminal image revived") }
+    }
     func testDeleteSuspendedSelectedFallbackInitialAndNonselectedPreservesIdentityAndCache() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }

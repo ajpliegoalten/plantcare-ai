@@ -1,5 +1,11 @@
 # Suite UI: cobertura y coste
 
+`DeletePlantUITests` cubre pie tras leyenda/texto largo, alerta nativa/cancel/selección, cascada y relaunch sin reseed,
+B íntegra mediante verifier real de cuatro entidades/JPEG, última→vacío, rollback/retry/×/Cancelar/reconfirmar,
+busy/back/gesto y JPEG faltante/fallback inglés. Flags opt-in Debug Simulator `--delete-plant-fixture normal|failOnce|failAlways|busy`
+y `--delete-plant-verify intact|deleted|empty` requieren `--storage-test-id` UUID. Release excluye fixtures/flags.
+Capturas opt-in focales pie/alerta/error/busy, no matrices. Comandos/resultados reales en `docs/handoffs/delete-plant.md`.
+
 Delta discard-analysis: ocho AnalyzeCurrentPhotoUITests (dos nuevos y seis conservados/actualizados), Descarta activa sin ayuda futura; guards Keep busy y regresión retry local. Verificación durable real inicial/adicional, insuficiencia/fallo local/relaunch y definitivo previo preservado por opt-in Debug en docs/testing-analyze-current-photo.md; evidencia por impacto en docs/handoffs/discard-analysis.md. Sin cambios a init.sh, PhotosPicker ni timeouts/retries.
 
 Delta keep-analysis: nueva `KeepAnalysisUITests` y acciones actualizadas en AnalyzeCurrentPhotoUITests, sin retirar assertions de provisional/insuficiencia/consent/selección. Guardado inicial/adicional, relaunch, texto íntegro bajo foto, retry sin HTTP, busy/cierre/gesto y cascada/retained pager. Fixtures UUID reales y selección por impacto en docs/testing-keep-analysis.md; conteos antiguos son históricos. No cambios al harness ni PhotosPicker serial.

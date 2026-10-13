@@ -11,6 +11,12 @@ final class PlantCardViewModel: ObservableObject, Identifiable {
     private let loadPhoto: LoadInitialPlantPhoto
     let lastWatering: LastWateringHintViewModel
     private var generation = 0
+    private var deleted = false
+
+    func invalidateDeletedPlant() {
+        deleted = true; generation += 1; photoState = .idle
+        lastWatering.invalidateDeletedPlant()
+    }
 
     init(plant: Plant, loadPhoto: LoadInitialPlantPhoto, loadLastWatering: (any LoadLastWateringUseCase)? = nil) {
         self.plant = plant
@@ -20,12 +26,12 @@ final class PlantCardViewModel: ObservableObject, Identifiable {
     }
 
     func applyUpdatedPlant(_ plant: Plant) {
-        guard plant.id == id else { return }
+        guard !deleted, plant.id == id else { return }
         self.plant = plant
     }
 
     func load() async {
-        guard case .idle = photoState else { return }
+        guard !deleted, case .idle = photoState else { return }
         generation += 1
         let request = generation
         photoState = .loading

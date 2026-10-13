@@ -1,5 +1,12 @@
 # Riesgos y preguntas abiertas
 
+## Delta delete-plant (ADR015)
+
+Cascada metadata no es transacción distribuida JPEG: cleanup fallido deja huérfanos hasta apertura validada de cuatro entidades.
+Metadata corrupta impide ambos cleanups. Sin borrado seguro/backups/Fotos/remotos/recuperación garantizados.
+Validación global O(n), actor único, sin multiproceso. Terminal/generaciones previenen resurrección; cierre no compensa commit.
+Obsolescencia exige nueva intención, nunca retry ciego.
+
 ## Delta keep-analysis (ADR014)
 
 Delta discard-analysis vigente: «sin huella» significa cero nuevo registro/foto local, no borrado seguro ni revocación del envío/consentimiento externo. Abandono solo Presentation conserva origen y definitivos; Guardar ya despachado bloquea descarte y su commit nunca se compensa con delete. Reabrir es nueva intención/posible consulta, no cache de provisional. Menciones de acciones inactivas ADR013 abajo son históricas.

@@ -3,6 +3,21 @@ import XCTest
 
 @MainActor
 final class PlantTimelineViewModelTests: XCTestCase {
+    func testAbandonedTimelinePurgesSavedTextsAndIgnoresLateAnalysisCallback() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let repository = LocalPlantRepository(root: root), plant = StorageTestFixture.plant(1)
+        _ = try await DeletePlantFixtureLoad(base: StorageFixtureLoad(root: root, repository: repository, seed: true, corrupt: false),
+            repository: repository, root: root, seed: true, verify: "intact").execute()
+        let vm = PlantTimelineViewModel(plantID: plant.id,
+            load: LoadPlantTimeline(detail: LoadPlantDetail(repository: repository), care: repository, photos: repository, analyses: repository),
+            photos: PlantTimelinePhotoViewModel(plantID: plant.id, read: { _, _ in Data() }))
+        vm.appear(); await wait { vm.state == .loaded }
+        XCTAssertEqual(vm.savedAnalyses.count, 2)
+        vm.disappear(); XCTAssertTrue(vm.savedAnalyses.isEmpty); XCTAssertTrue(vm.entries.isEmpty); XCTAssertTrue(vm.groups.isEmpty)
+        vm.analysisSaved(DeletePlantFixtureLoad.analyses(plant, index: 1)[0].record)
+        XCTAssertTrue(vm.savedAnalyses.isEmpty); XCTAssertEqual(vm.photos.cachedCount, 0); XCTAssertEqual(vm.state, .idle)
+    }
     func testPhotoFailureWithoutLoadedJPEGDoesNotClaimImageReadableOrNotify() async {
         let plant = StorageTestFixture.plant(1), load = TimelineLoadGate(), photo = PlantTimelineFixtureLoad.photo(for: StorageTestFixture.plant(1).id)
         let loader = PlantTimelinePhotoViewModel(plantID: plant.id, read: { _, _ in throw PlantPhotoError.photoCorrupt })

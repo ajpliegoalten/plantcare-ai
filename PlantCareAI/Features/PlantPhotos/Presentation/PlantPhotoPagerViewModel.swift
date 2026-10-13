@@ -22,6 +22,13 @@ final class PlantPhotoPagerViewModel: ObservableObject {
     private var metadataTask: Task<Void, Never>?
     private var imageTask: Task<Void, Never>?
     private var active = false
+    private var deleted = false
+
+    func invalidateDeletedPlant() {
+        deleted = true; disappear(); photos = []
+        descriptors = PlantPhotoDescriptor.ordered(plant: plant, photos: [])
+        metadataState = .idle
+    }
     private var reconciliationPending = false
     enum AnalysisState { case unknown, loaded(Set<PlantPhotoIdentity>), failed }
     @Published private(set) var analysisState: AnalysisState = .unknown
@@ -35,6 +42,7 @@ final class PlantPhotoPagerViewModel: ObservableObject {
     }
 
     func refreshAnalyses() {
+        guard !deleted else { return }
         analysisGeneration += 1; let token = analysisGeneration
         analysisTask?.cancel(); analysisState = .unknown
         guard let analysisReader else { return }
@@ -75,6 +83,7 @@ final class PlantPhotoPagerViewModel: ObservableObject {
     }
 
     func appear() {
+        guard !deleted else { return }
         refreshAnalyses()
         refreshDisplayZone()
         active = true
@@ -84,6 +93,7 @@ final class PlantPhotoPagerViewModel: ObservableObject {
     func refreshDisplayZone() { displayZone = .current }
 
     func refresh() {
+        guard !deleted else { return }
         guard active else { reconciliationPending = true; return }
         reconciliationPending = false
         metadataGeneration += 1; let request = metadataGeneration
@@ -125,6 +135,7 @@ final class PlantPhotoPagerViewModel: ObservableObject {
     func retryImage() { loadSelected(force: true) }
 
     func deleted(_ photo: PlantPhoto) {
+        guard !deleted else { return }
         guard photo.plantID == plant.id else { return }
         let identity = PlantPhotoIdentity.additional(photo.id)
         metadataGeneration += 1; metadataTask?.cancel(); metadataTask = nil
