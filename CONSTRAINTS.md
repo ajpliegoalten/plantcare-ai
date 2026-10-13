@@ -1,5 +1,8 @@
 # Restricciones operativas
 
+- MUST: aceptar análisis solo por intención explícita y commit local confirmado, sobre identidad/descriptor de foto existente. Un definitivo por planta/identidad, sin copiar JPEG ni crear cuidado/hito; insuficiencia rechazada en Domain/Data. Retry conserva UUID/payload literal y no llama IA; conflictos requieren nueva lectura/intención (ADR014).
+- MUST: conectar lectores reales de definitivos a contexto/timeline/elegibilidad, fallando cerrado ante errores. Borrar adicional y texto asociado en el mismo commit metadata, antes de cleanup best-effort; inicial protegida. Motivo: evitar reenvíos, huérfanos y falsas confirmaciones (ADR014).
+
 - MUST: éxito remoto de análisis NO persiste ni bloquea nuevas intenciones por provisional. Resultado/bytes pertenecen al modal; cierre cancela/invalida/libera. Solo definitivo de lector real bloquea esa foto. No almacén vacío fingido mientras `keep-analysis` no existe. Motivo: ADR013/Q1 aprobada.
 - MUST: contexto de análisis contiene un JPEG seleccionado y textos propios anteriores al día de foto (zona gregoriana fija por intención/retry), nunca JPEG históricos ni aceptación usada como captura. Aviso v5/notice-5 renovado, v4 no lo autoriza; identificación/cuidados conservan payloads mínimos. Motivo: ADR013/Q2 aprobada.
 

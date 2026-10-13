@@ -101,6 +101,10 @@ final class PlantListViewModel: ObservableObject {
         }
     }
 
+    func analysisSaved(_ record: SavedPlantPhotoAnalysis) {
+        details[record.plantID]?.value?.analysisSaved(record)
+    }
+
     func applyUpdatedPlant(_ plant: Plant) {
         guard case .loaded(let plants) = state, plants.contains(where: { $0.id == plant.id }) else { return }
         metadataGeneration += 1

@@ -3,6 +3,55 @@ import XCTest
 
 @MainActor
 final class PlantPhotoAnalysisViewModelTests: XCTestCase {
+    private func savingModel(_ store: AcceptanceSpy, provider: AnalysisProviderSpy,
+                             onSaved: @escaping @MainActor (SavedPlantPhotoAnalysis) -> Void = { _ in }) async -> PlantPhotoAnalysisViewModel {
+        let local = AnalysisLocalSpy(), consent = ConsentDouble()
+        await consent.configure(value: scope)
+        return PlantPhotoAnalysisViewModel(plantID: BuildPlantAnalysisContextTests.plantID,
+            identity: .initial(BuildPlantAnalysisContextTests.plantID), analyze: AnalyzePlantPhotoTests().useCase(local, provider),
+            authorize: .init(repository: consent, scope: scope), destination: nil,
+            queriedAt: BuildPlantAnalysisContextTests.date(300), keep: store, onSaved: onSaved, configurationIsCurrent: { true })
+    }
+
+    func testLocalSaveRetryKeepsLiteralSnapshotResultNoExtraHTTPAndCallbackOnce() async throws {
+        let store = AcceptanceSpy(), provider = AnalysisProviderSpy()
+        await store.configure(failure: .storage)
+        var records: [SavedPlantPhotoAnalysis] = []
+        let vm = await savingModel(store, provider: provider) { records.append($0) }
+        vm.start(); await wait { vm.state == .result }; XCTAssertTrue(vm.canSave)
+        let result = vm.result; vm.save(); vm.save(); await wait { vm.saveState == .failed }
+        XCTAssertEqual(vm.result, result); XCTAssertFalse(vm.saveNeedsNewIntent); XCTAssertTrue(records.isEmpty)
+        await store.configure(); vm.save(); vm.save(); await wait { vm.saveState == .saved }
+        let snapshots = await store.snapshots
+        XCTAssertEqual(snapshots.count, 2); XCTAssertEqual(snapshots[0], snapshots[1])
+        XCTAssertEqual(records, [snapshots[0].record])
+        let calls = await provider.calls; XCTAssertEqual(calls.count, 1)
+        vm.save(); XCTAssertEqual(records.count, 1); vm.close()
+    }
+
+    func testCommitBlocksCloseDoubleDispatchAndRecognizesResultAfterSuspension() async throws {
+        let store = AcceptanceSpy(), provider = AnalysisProviderSpy()
+        await store.configure(hold: true); var callbacks = 0
+        let vm = await savingModel(store, provider: provider) { _ in callbacks += 1 }
+        vm.start(); await wait { vm.state == .result }; vm.save(); vm.save()
+        XCTAssertEqual(vm.saveState, .saving); XCTAssertFalse(vm.close()); XCTAssertFalse(vm.closed)
+        for _ in 0..<1000 { if await store.continuation != nil { break }; await Task.yield() }
+        await store.release(); await wait { vm.saveState == .saved }
+        let snapshots = await store.snapshots; XCTAssertEqual(snapshots.count, 1); XCTAssertEqual(callbacks, 1)
+        XCTAssertTrue(vm.close())
+    }
+
+    func testConflictRequiresNewIntentAndClosingStorageFailureAbandonsRetry() async throws {
+        for failure in [KeepPlantPhotoAnalysisError.conflict, .notFound, .readFailure, .storage] {
+            let store = AcceptanceSpy(), provider = AnalysisProviderSpy(); await store.configure(failure: failure)
+            let vm = await savingModel(store, provider: provider)
+            vm.start(); await wait { vm.state == .result }; vm.save(); await wait { vm.saveState == .failed }
+            XCTAssertEqual(vm.saveNeedsNewIntent, failure != .storage)
+            if failure != .storage { vm.save(); let snapshots = await store.snapshots; XCTAssertEqual(snapshots.count, 1) }
+            XCTAssertTrue(vm.close()); vm.save(); XCTAssertNil(vm.result)
+            let snapshots = await store.snapshots; XCTAssertEqual(snapshots.count, 1)
+        }
+    }
     private let scope = ExternalAIConsent(recipient: "synthetic-analysis", noticeVersion: 5)
     private func make(local: AnalysisLocalSpy, provider: AnalysisProviderSpy, consent: ConsentDouble, current: @escaping () -> Bool = { true }) -> PlantPhotoAnalysisViewModel {
         let use = AnalyzePlantPhotoTests().useCase(local, provider)

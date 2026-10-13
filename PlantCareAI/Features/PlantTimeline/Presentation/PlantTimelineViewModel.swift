@@ -34,10 +34,26 @@ final class PlantTimelineViewModel: ObservableObject {
     private var observers: [NSObjectProtocol] = []
     var makeAnalysis: ((UUID, PlantPhotoIdentity) -> PlantPhotoAnalysisViewModel?)?
     @Published var analysisEditor: PlantPhotoAnalysisViewModel?
+    @Published private(set) var savedAnalyses: [PlantPhotoIdentity: SavedPlantPhotoAnalysis] = [:]
+
+    func savedAnalysis(for entry: PlantTimelineEntry) -> SavedPlantPhotoAnalysis? {
+        switch entry.id {
+        case .initial(let id): return savedAnalyses[.initial(id)]
+        case .additional(let id): return savedAnalyses[.additional(id)]
+        case .care: return nil
+        }
+    }
+
+    func analysisSaved(_ record: SavedPlantPhotoAnalysis) {
+        guard record.plantID == plantID else { return }
+        generation += 1; request?.cancel(); request = nil
+        savedAnalyses[record.identity] = record
+        refresh(preservingPhotos: true)
+    }
 
     func requestAnalysis(_ entry: PlantTimelineEntry) {
         guard state == .loaded, deletionState == .idle, analysisEditor == nil,
-              entry.plantID == plantID, entries.contains(entry) else { return }
+              entry.plantID == plantID, entries.contains(entry), savedAnalysis(for: entry) == nil else { return }
         let identity: PlantPhotoIdentity
         switch entry {
         case .initial(let plant): identity = .initial(plant.id)
@@ -74,21 +90,23 @@ final class PlantTimelineViewModel: ObservableObject {
         guard active else { return }
         updateContext(); refresh()
     }
-    func refresh() {
+    func refresh(preservingPhotos: Bool = false) {
         guard deletionState != .deleting else { deferredRefresh = true; return }
         guard active, request == nil else { return }
         generation += 1; let token = generation
-        state = .loading; entries = []; groups = []
+        state = .loading
+        if !preservingPhotos { entries = []; groups = []; savedAnalyses = [:] }
         // A metadata refresh is a new image session, not stale completeness.
-        photos.reset(preservingViewport: true)
+        if !preservingPhotos { photos.reset(preservingViewport: true) }
         request = Task { [weak self, load, plantID] in
             do {
-                let result = try await load.execute(for: plantID)
+                let result = try await load.snapshot(for: plantID)
                 try Task.checkCancellation()
                 guard let self, self.active, token == self.generation else { return }
                 self.request = nil
                 guard let result else { self.state = .notFound; return }
-                self.entries = result.filter { $0.plantID == plantID }
+                self.entries = result.entries.filter { $0.plantID == plantID }
+                self.savedAnalyses = result.analyses
                 self.photos.setEntries(self.entries)
                 self.updateContext(); self.state = .loaded
             } catch {
@@ -172,6 +190,7 @@ final class PlantTimelineViewModel: ObservableObject {
                 case .initial: return
                 }
                 entries.removeAll { $0.id == removed.id }
+                if case .additional(let photo) = removed { savedAnalyses.removeValue(forKey: .additional(photo.id)) }
                 if removed.isPhoto { photos.remove(removed.id) }
                 onDeleted(removed)
                 deletionState = .idle; deletionTarget = nil; deletionTask = nil

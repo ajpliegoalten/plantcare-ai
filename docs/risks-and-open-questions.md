@@ -1,5 +1,9 @@
 # Riesgos y preguntas abiertas
 
+## Delta keep-analysis (ADR014)
+
+Lector real/schema V4 aditivo sustituyen capacidad ausente ADR013 sin reescribir su evidencia. Unicidad/rollback/cascada serializados en un actor por almacén; sin garantía de multiproceso/downgrade/daño físico. Snapshot contextual/timeline secuencial. Save metadata no depende del JPEG; foto faltante conserva texto/error propio. Cleanup best-effort no implica borrado seguro/backups. Refresh fallido no revierte aceptación ni habilita reenvío. Calidad IA/compatibilidad remota fuera de fixtures; inferencia real exige permiso específico.
+
 ## Bloqueantes para la siguiente fase
 
 Ninguno identificado para definir las funcionalidades y comenzar una fase posterior, tras aprobar este brief. La credencial y el acceso efectivo a una API con visión sí serán necesarios antes de verificar las funciones de IA en un dispositivo.

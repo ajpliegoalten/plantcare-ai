@@ -81,7 +81,7 @@ struct PlantDetailView: View {
             }
         }
         .onChange(of: scenePhase) { _, phase in if phase == .active {
-            viewModel.lastWatering.foreground(); viewModel.photoPager?.refreshDisplayZone()
+            viewModel.lastWatering.foreground(); viewModel.photoPager?.refreshDisplayZone(); viewModel.photoPager?.refreshAnalyses()
         } }
         .onReceive(NotificationCenter.default.publisher(for: .NSSystemTimeZoneDidChange)) { _ in viewModel.photoPager?.refreshDisplayZone() }
     }
