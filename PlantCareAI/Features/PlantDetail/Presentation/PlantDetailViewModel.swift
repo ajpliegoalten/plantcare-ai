@@ -26,6 +26,12 @@ final class PlantDetailViewModel: ObservableObject {
     var makeAddPhoto: ((Plant, @escaping @MainActor (PlantPhoto, UIImage) -> Void) -> AddPlantPhotoViewModel)?
     var makePhotoPager: ((Plant) -> PlantPhotoPagerViewModel)?
     private var photoSession: UUID?
+    var makeAnalysis: ((UUID, PlantPhotoIdentity) -> PlantPhotoAnalysisViewModel?)?
+
+    func analysisEditor() -> PlantPhotoAnalysisViewModel? {
+        guard case .loaded = state else { return nil }
+        return makeAnalysis?(id, photoPager?.selected ?? .initial(id))
+    }
 
     func photoEditor() -> AddPlantPhotoViewModel? {
         guard case .loaded(let plant) = state, let makeAddPhoto else { return nil }

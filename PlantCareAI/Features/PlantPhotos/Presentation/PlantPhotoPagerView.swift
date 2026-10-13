@@ -3,6 +3,7 @@ import SwiftUI
 struct PlantPhotoPagerView: View {
     @ObservedObject var viewModel: PlantPhotoPagerViewModel
     let plantID: UUID
+    var analyze: (() -> Void)? = nil
 
     var body: some View {
         VStack(spacing: 8) {
@@ -29,6 +30,10 @@ struct PlantPhotoPagerView: View {
                     Button { withAnimation(.easeInOut(duration: 0.25)) { viewModel.next() } } label: { Image(systemName: "chevron.right").frame(minWidth: 44, minHeight: 44) }
                         .accessibilityLabel("plantPhotos.next").accessibilityIdentifier("plantPhotoNext-\(plantID)").disabled(!viewModel.canNext)
                 }
+            }
+            if let analyze {
+                Button(action: analyze) { Label("analysis.open", systemImage: "sparkles").frame(maxWidth: .infinity, minHeight: 44) }
+                    .buttonStyle(.bordered).buttonBorderShape(.capsule).accessibilityIdentifier("detailAnalyzePhoto-\(plantID)")
             }
             switch viewModel.metadataState {
             case .idle, .loading: ProgressView("plantPhotos.loadingMetadata")

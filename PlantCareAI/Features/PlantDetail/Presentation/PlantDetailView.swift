@@ -6,6 +6,7 @@ struct PlantDetailView: View {
     @State private var editor: EditPlantViewModel?
     @State private var careEditor: RegisterCareViewModel?
     @State private var photoEditor: AddPlantPhotoViewModel?
+    @State private var analysisEditor: PlantPhotoAnalysisViewModel?
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     private let isCoveredByHistory: () -> Bool
 
@@ -26,7 +27,8 @@ struct PlantDetailView: View {
                     Text("detail.storageError").accessibilityIdentifier("detailStorageError")
                 case .loaded(let plant):
                     if let pager = viewModel.photoPager {
-                        PlantPhotoPagerView(viewModel: pager, plantID: plant.id)
+                        PlantPhotoPagerView(viewModel: pager, plantID: plant.id,
+                            analyze: viewModel.makeAnalysis == nil ? nil : { analysisEditor = viewModel.analysisEditor() })
                     } else { photo }
                     identity(plant)
                     if viewModel.makeAddPhoto != nil {
@@ -65,6 +67,7 @@ struct PlantDetailView: View {
         .sheet(item: $editor) { EditPlantView(viewModel: $0) }
         .sheet(item: $careEditor) { RegisterCareView(viewModel: $0) }
         .sheet(item: $photoEditor) { AddPlantPhotoView(viewModel: $0, headerPhoto: viewModel.formPhoto, onFinished: { photoEditor = nil }) }
+        .sheet(item: $analysisEditor, onDismiss: { analysisEditor?.close() }) { PlantPhotoAnalysisView(viewModel: $0) }
         .onChange(of: viewModel.photoConfirmation) { _, confirmed in
             if confirmed != nil { photoEditor = nil }
         }
@@ -73,7 +76,7 @@ struct PlantDetailView: View {
         .onDisappear {
             // A presented sheet (or its camera cover) is not navigation away
             // from this plant: keep its session and confirmed page alive.
-            if photoEditor == nil && editor == nil && careEditor == nil {
+            if photoEditor == nil && editor == nil && careEditor == nil && analysisEditor == nil {
                 viewModel.cancelLoading(preservingPhotoSelection: isCoveredByHistory())
             }
         }

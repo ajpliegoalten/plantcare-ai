@@ -129,7 +129,7 @@ final class OpenAICompatibleCareSheetGenerationRepositoryTests: XCTestCase {
         let authorization = AuthorizeExternalAIOperation(repository: repository, scope: configuration.scope)
         let result = try await authorization.execute { XCTFail("v3 bypassed boundary"); return 0 }
         guard case .requiresConfirmation = result else { return XCTFail() }
-        XCTAssertEqual(configuration.scope.noticeVersion, 4); XCTAssertNotEqual(configuration.scope, old)
+        XCTAssertEqual(configuration.scope.noticeVersion, 5); XCTAssertNotEqual(configuration.scope, old)
         await repository.configure(failWrite: true)
         do { _ = try await authorization.execute(confirmed: true) { XCTFail("failed record bypassed boundary"); return 0 }; XCTFail() }
         catch { }

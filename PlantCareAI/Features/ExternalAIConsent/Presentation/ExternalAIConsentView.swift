@@ -3,6 +3,7 @@ import SwiftUI
 struct ExternalAIConsentView: View {
     var usesRealRecipient = false
     var destination: ExternalAIDestinationNotice?
+    var analyzingPhoto = false
     let accept: () -> Void
     let cancel: () -> Void
 
@@ -10,7 +11,8 @@ struct ExternalAIConsentView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    Text(usesRealRecipient ? "identifyCandidates.consentBody" : "externalAIConsent.body").accessibilityIdentifier("externalAIConsentBody")
+                    Text(usesRealRecipient ? "analysis.consentBody" : "externalAIConsent.body").accessibilityIdentifier("externalAIConsentBody")
+                    if analyzingPhoto { Text("analysis.consentOperation").font(.callout) }
                     if usesRealRecipient, let destination {
                         Text("identifyCandidates.destination").font(.headline)
                         Text(verbatim: destination.destination)
