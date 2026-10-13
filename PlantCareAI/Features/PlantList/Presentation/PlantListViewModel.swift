@@ -15,6 +15,8 @@ final class PlantListViewModel: ObservableObject {
     private let loadLastWatering: (any LoadLastWateringUseCase)?
     private var metadataGeneration = 0
     @Published private(set) var newlyAddedPlantID: UUID?
+    @Published private(set) var deletionEvent: UUID?
+    var deletePlant: (any DeletePlantUseCase)?
     #if DEBUG && targetEnvironment(simulator)
     var lastCareInvocationCount: Int?
     var lastIdentificationInvocationCount: Int?
@@ -47,7 +49,14 @@ final class PlantListViewModel: ObservableObject {
         do {
             let plants = try await loadPlants.execute()
             guard request == metadataGeneration else { return }
-            cards = plants.map { PlantCardViewModel(plant: $0, loadPhoto: loadPhoto, loadLastWatering: loadLastWatering) }
+            let retained = Dictionary(cards.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+            cards = plants.map { plant in
+                if let card = retained[plant.id] {
+                    if card.plant != plant { card.applyUpdatedPlant(plant) }
+                    return card
+                }
+                return PlantCardViewModel(plant: plant, loadPhoto: loadPhoto, loadLastWatering: loadLastWatering)
+            }
             state = .loaded(plants)
         }
         catch { if request == metadataGeneration { state = .failed } }
@@ -90,8 +99,25 @@ final class PlantListViewModel: ObservableObject {
         detail.makeAddPhoto = makeAddPhoto
         detail.makePhotoPager = makePhotoPager
         detail.makeAnalysis = makeAnalysis
+        detail.deletePlant = deletePlant
+        detail.onDeleted = { [weak self] plant in self?.applyDeletedPlant(plant) }
         details[id] = WeakDetail(detail)
         return detail
+    }
+
+    func applyDeletedPlant(_ plant: Plant) {
+        metadataGeneration += 1
+        cards.first { $0.id == plant.id }?.invalidateDeletedPlant()
+        cards.removeAll { $0.id == plant.id }
+        details[plant.id]?.value?.invalidateDeletedPlant(); details[plant.id] = nil
+        if newlyAddedPlantID == plant.id { newlyAddedPlantID = nil }
+        deletionEvent = UUID()
+        if case .loaded(let plants) = state {
+            state = .loaded(plants.filter { $0.id != plant.id })
+        } else {
+            hasLoaded = false
+            Task { await load() }
+        }
     }
 
     func applyHistoryDeletion(_ entry: PlantTimelineEntry) {

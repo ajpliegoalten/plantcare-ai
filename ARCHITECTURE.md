@@ -1,5 +1,13 @@
 # Arquitectura iOS: Clean Architecture + MVVM
 
+## Eliminación de ejemplar (ADR015)
+
+`Features/DeletePlant/Domain` define DeletePlantUseCase/PlantDeletingRepository y errores tipados.
+El mismo LocalPlantRepository implementa cascada validada de cuatro entidades, un save/rollback y cleanup por fichero posterior.
+App conecta tras overrides a ListVM/Detail real retenido. Detail posee intención/binding/error/terminal; callback canónico único
+purga solo UUID eliminado y publica evento UUID; ListView, dueño del path, vuelve a raíz. Card/pager/LastWatering tienen
+invalidación terminal. Sin schema/adaptador/ContentView nuevos. Fixture Data Debug Simulator usa almacén UUID/verifier real.
+
 ## Decisión transversal (2026-10-09)
 
 Organizar el código **por funcionalidad**, y dentro de cada funcionalidad separar explícitamente `Presentation`, `Domain` y `Data`, también en las primeras pantallas. Planificador, implementador y validador deben comprobar esta separación antes de dar una funcionalidad por terminada. `PlantCareAI.xcodeproj` contiene la app SwiftUI iPhone (iOS 17+) y las UI tests del scheme compartido; registra cada archivo Swift explícitamente en `project.pbxproj`.

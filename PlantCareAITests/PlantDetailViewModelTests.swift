@@ -4,6 +4,22 @@ import UIKit
 
 @MainActor
 final class PlantDetailViewModelTests: XCTestCase {
+    func testTerminalDeletionIgnoresLateInitialImageMetadataAndEditorCallback() async throws {
+        let repository = DetailRepository(), vm = model(1, repository)
+        let pending = Task { await vm.load() }; await repository.wait(count: 1)
+        let editor = try XCTUnwrap(vm.editor())
+        vm.invalidateDeletedPlant()
+        await repository.resolvePhoto(0, .success(StorageTestFixture.photo(1))); await pending.value
+        vm.applyUpdatedPlant(StorageTestFixture.plant(1)); await vm.load(); vm.analysisSaved(DeletePlantFixtureLoad.analyses(StorageTestFixture.plant(1), index: 1)[0].record)
+        XCTAssertEqual(vm.deletionState, .deleted); XCTAssertNil(vm.formPhoto); XCTAssertNil(vm.editor())
+        XCTAssertEqual(editor.id, vm.id)
+        guard case .notFound = vm.state, case .idle = vm.photoState else { return XCTFail("Terminal revived") }
+        let metadata = DetailRepository(suspendMetadata: true), other = model(1, metadata)
+        let late = Task { await other.load() }; await metadata.wait(metadata: true, count: 1)
+        other.invalidateDeletedPlant()
+        await metadata.resolveMetadata(0, .success([StorageTestFixture.plant(1)])); await late.value
+        guard case .notFound = other.state else { return XCTFail("Metadata revived") }
+    }
     func testAdditionalPhotoFactoryLoadedOnlySelectsCommitButEditorAndCareKeepInitialSnapshot() async throws {
         let repository = DetailRepository(), photos = PhotoTestRepository()
         let vm = model(1, repository, watering: RegisterCareEvent(repository: DetailWateringRepository()))

@@ -8,6 +8,20 @@ final class LastWateringHintViewModelTests: XCTestCase {
         XCTFail("Condition not reached")
     }
 
+    func testPlantDeletionPurgesLoadedAndInFlightAndPreventsRetainedObserverReload() async {
+        let loader = SuspendedWatering(), vm = LastWateringHintViewModel(plantID: UUID(), load: loader)
+        vm.appear(); await wait { await loader.count == 1 }
+        vm.invalidateDeletedPlant()
+        await loader.resolve(0, .success(Date())); await Task.yield()
+        vm.appear(); vm.foreground(); vm.invalidate(); vm.updateContext()
+        XCTAssertEqual(vm.state, .idle); XCTAssertNil(vm.value(compact: true))
+        let count = await loader.count; XCTAssertEqual(count, 1)
+        let loaded = LastWateringHintViewModel(plantID: UUID(), load: loader)
+        loaded.appear(); await wait { await loader.count == 2 }
+        await loader.resolve(1, .success(nil)); await wait { loaded.state == .loaded(nil) }
+        loaded.invalidateDeletedPlant(); XCTAssertEqual(loaded.state, .idle)
+    }
+
     func testIdleDeduplicationFailureNoLoopAndForegroundRecoveryThenCache() async {
         let loader = SuspendedWatering(), vm = LastWateringHintViewModel(plantID: UUID(), load: loader)
         XCTAssertEqual(vm.state, .idle); XCTAssertNil(vm.value(compact: true))

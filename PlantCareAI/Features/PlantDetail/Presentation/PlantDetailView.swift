@@ -45,6 +45,16 @@ struct PlantDetailView: View {
                     careRegistration
                     history(plant)
                     careSheet(plant.careSheet)
+                    if viewModel.deletePlant != nil {
+                        Button(role: .destructive) { viewModel.requestDeletion() } label: {
+                            Text("deletePlant.open").font(.body.weight(.semibold))
+                                .frame(maxWidth: .infinity, minHeight: 52)
+                                .foregroundStyle(.white)
+                                .background(Color(red: 0.60, green: 0.20, blue: 0.18), in: Capsule())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("deletePlant-\(plant.id)")
+                    }
                 }
             }
             .font(.body)
@@ -52,15 +62,36 @@ struct PlantDetailView: View {
             .fixedSize(horizontal: false, vertical: true)
             .padding(20)
             .frame(maxWidth: .infinity, alignment: .leading)
+            .disabled(!viewModel.canAct)
         }
         .background(Color("Background").ignoresSafeArea())
+        // Identify only the scroll content, not its safe-area siblings: otherwise
+        // SwiftUI propagates this ID over the busy indicator and error controls.
+        .accessibilityIdentifier("plantDetail-\(viewModel.id)")
         .navigationTitle(Text("detail.title"))
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(viewModel.deletionState == .deleting)
+        .safeAreaInset(edge: .top) {
+            if viewModel.deletionState == .deleting {
+                ProgressView("deletePlant.busy")
+                    .foregroundStyle(Color("TextPrimary")).tint(Color("PrimaryAction"))
+                    .padding().frame(maxWidth: .infinity)
+                    .background(Color("Background"))
+                    .accessibilityIdentifier("deletePlantBusy")
+            } else if viewModel.deletionState == .failed { deletionBanner }
+        }
+        .alert(Text("deletePlant.title"), isPresented: $viewModel.showingDeletionConfirmation) {
+            Button("deletePlant.cancel", role: .cancel) { viewModel.abandonDeletion() }
+            Button("deletePlant.confirm", role: .destructive) { viewModel.confirmDeletion() }
+        } message: {
+            Text(viewModel.deletionName + "\n\n" + String(localized: "deletePlant.message"))
+        }
         .toolbar {
             if case .loaded = viewModel.state {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { editor = viewModel.editor() } label: { Text("edit.open").frame(minWidth: 44, minHeight: 44) }
                         .accessibilityIdentifier("editPlant-\(viewModel.id)")
+                        .disabled(!viewModel.canAct)
                 }
             }
         }
@@ -68,10 +99,12 @@ struct PlantDetailView: View {
         .sheet(item: $careEditor) { RegisterCareView(viewModel: $0) }
         .sheet(item: $photoEditor) { AddPlantPhotoView(viewModel: $0, headerPhoto: viewModel.formPhoto, onFinished: { photoEditor = nil }) }
         .sheet(item: $analysisEditor, onDismiss: { analysisEditor?.close() }) { PlantPhotoAnalysisView(viewModel: $0) }
+        .onChange(of: editor != nil || careEditor != nil || photoEditor != nil || analysisEditor != nil) { _, presented in
+            viewModel.hasPresentedEditor = presented
+        }
         .onChange(of: viewModel.photoConfirmation) { _, confirmed in
             if confirmed != nil { photoEditor = nil }
         }
-        .accessibilityIdentifier("plantDetail-\(viewModel.id)")
         .task { await viewModel.load() }
         .onDisappear {
             // A presented sheet (or its camera cover) is not navigation away
@@ -81,9 +114,38 @@ struct PlantDetailView: View {
             }
         }
         .onChange(of: scenePhase) { _, phase in if phase == .active {
-            viewModel.lastWatering.foreground(); viewModel.photoPager?.refreshDisplayZone(); viewModel.photoPager?.refreshAnalyses()
+            if viewModel.canAct { viewModel.lastWatering.foreground(); viewModel.photoPager?.refreshDisplayZone(); viewModel.photoPager?.refreshAnalyses() }
         } }
         .onReceive(NotificationCenter.default.publisher(for: .NSSystemTimeZoneDidChange)) { _ in viewModel.photoPager?.refreshDisplayZone() }
+    }
+
+    private var deletionBanner: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Label("deletePlant.error", systemImage: "exclamationmark.triangle").font(.headline)
+                Spacer()
+                Button { viewModel.abandonDeletion() } label: {
+                    Image(systemName: "xmark").frame(minWidth: 44, minHeight: 44)
+                }.accessibilityLabel(Text("deletePlant.close")).accessibilityIdentifier("closeDeletePlantError")
+            }
+            Text(viewModel.deletionError == .storage ? "deletePlant.rollback" :
+                    viewModel.deletionError == .readFailure ? "deletePlant.readFailure" : "deletePlant.stale")
+            HStack {
+                if viewModel.deletionError == .storage {
+                    Button("deletePlant.retry") { viewModel.confirmDeletion() }
+                        .accessibilityIdentifier("retryDeletePlant")
+                } else {
+                    Button("deletePlant.reload") { Task { await viewModel.reloadAfterDeletionFailure() } }
+                        .accessibilityIdentifier("reloadDeletePlant")
+                }
+                Button("deletePlant.cancel") { viewModel.abandonDeletion() }
+                    .accessibilityIdentifier("cancelDeletePlantError")
+            }.buttonStyle(.bordered).controlSize(.large)
+        }
+        .padding(16).background(Color("SurfaceMuted"))
+        .tint(Color("PrimaryAction"))
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("deletePlantError")
     }
 
     private func history(_ plant: Plant) -> some View {

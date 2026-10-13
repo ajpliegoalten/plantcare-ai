@@ -65,6 +65,15 @@ No crear pantalla independiente de actividad en el MVP. El detalle puede mostrar
 
 ## Componentes, estados y accesibilidad
 
+### Eliminación de ejemplar — delta aprobado (2026-10-13)
+
+Último bloque desplazable loaded, DESPUÉS de `detailDisclaimer`: cápsula ≥52pt «Eliminar planta»,
+rojizo #99332E/texto blanco sobre crema. No toolbar/sticky footer/tarjeta verde.
+Alerta iOS «¿Eliminar esta planta?», nombre literal, cascada local/irreversibilidad, Cancelar/Eliminar destructivo.
+Busy superior «Eliminando planta…» sobre fondo crema opaco a ancho completo, sin superposición al scroll; texto TextPrimary/spinner verde.
+Acciones/back/gesto bloqueados, scroll conservado. Banner SurfaceMuted con controles PrimaryAction,
+warning/×/Cancelar; storage Reintentar, lectura/obsolescencia Releer sin prometer JPEG sano. Raíz sin toast/Deshacer.
+
 ### Análisis de fotografía — delta aprobado 2026-10-13
 
 Delta discard-analysis: «Descartar análisis» activo en la misma cápsula neutral SurfaceMuted/TextSecondary ≥52pt, con resultado útil o insuficiente y tras fallo local. Cierra directamente sin guardar, alerta, toast ni Deshacer; no borra foto origen/definitivos. Deshabilitado durante Guardar, con guard programático; Guardar/éxito conservan su ruta. Se retira ayuda de próxima versión, sin rediseñar modal ni CTA primaria. Sucede las menciones históricas de Descarta futuro/inactivo siguientes.

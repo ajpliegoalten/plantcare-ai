@@ -1,5 +1,13 @@
 # Modelo de dominio
 
+## Delta delete-plant — ADR015
+
+Snapshot Plant completo vigente confirma TODOS sus hijos actuales, incluso añadidos después de abrir alerta.
+Cambio de Plant requiere Releer/reconfirmar; ausencia no es éxito idempotente. Ficha embebida/cuidados/metadata fotos/definitivos
+inicial-adicional se eliminan en un save con rollback pre-save; JPEG propio posterior best-effort, no borrado seguro/inmediato garantizado.
+Inicial protegida en historial: solo planta completa la elimina. Otros UUIDs/consent/config/remotos intactos, sin archivo/Deshacer.
+Terminal impide resultados antiguos; raíz actualizada por callback canónico, no navegación optimista.
+
 Delta discard-analysis vigente: Descarta ya activo; abandono UI exclusivamente, foto origen/definitivos protegidos, útil/insuficiente/fallo local elegibles y commit protegido. Sucede las menciones de Descarta pendiente/futuro de los antecedentes ADR013/014 siguientes; ciclo vigente precisado abajo.
 
 ## Delta keep-analysis — ADR014

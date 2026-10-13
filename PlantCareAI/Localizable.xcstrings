@@ -1,6 +1,19 @@
 {
   "sourceLanguage" : "es",
   "strings" : {
+    "deletePlant.open" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Eliminar planta" } } } },
+    "deletePlant.title" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Eliminar esta planta?" } } } },
+    "deletePlant.message" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Se eliminarán esta planta, su ficha de cuidados, todas sus fotografías, cuidados registrados y análisis guardados del almacenamiento local. Esta acción no se puede deshacer." } } } },
+    "deletePlant.cancel" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Cancelar" } } } },
+    "deletePlant.confirm" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Eliminar" } } } },
+    "deletePlant.busy" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Eliminando planta…" } } } },
+    "deletePlant.error" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No pudimos eliminar la planta" } } } },
+    "deletePlant.rollback" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Los registros de la planta se han conservado. Puedes reintentar la eliminación." } } } },
+    "deletePlant.readFailure" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No pudimos leer el almacenamiento local. Relee el detalle antes de intentar eliminar." } } } },
+    "deletePlant.stale" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "La planta ha cambiado o ya no existe. Relee el detalle y confirma de nuevo." } } } },
+    "deletePlant.retry" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Reintentar" } } } },
+    "deletePlant.reload" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Releer" } } } },
+    "deletePlant.close" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Cerrar error" } } } },
     " " : {
 
     },

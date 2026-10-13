@@ -21,6 +21,56 @@ private actor CreationListLoader: LoadPlantsUseCase {
 
 @MainActor
 final class PlantListViewModelTests: XCTestCase {
+    func testDeletionDuringReloadPreservesOtherLoadedCardImageAndRejectsLatePreDeleteList() async {
+        let plants = (1...2).map(StorageTestFixture.plant)
+        let loader = DeletionReloadListLoader(plants: plants), repository = CardPhotoRepository()
+        let vm = PlantListViewModel(loadPlants: loader, loadPhoto: LoadInitialPlantPhoto(repository: repository),
+            loadDetail: LoadPlantDetail(repository: repository), update: UpdatePlant(repository: repository))
+        await vm.load(); let b = vm.cards[1]
+        let photo = Task { await b.load() }; await repository.waitForRequests(1)
+        await repository.resolve(0, .success(StorageTestFixture.photo(2))); await photo.value
+        guard case .loaded(let image) = b.photoState else { return XCTFail("Missing B image") }
+        vm.applyCreatedPlant(plants[0]) // Marker of an already acknowledged UUID, not another card.
+        let old = Task { await vm.retryLoad() }; await loader.wait()
+        vm.applyDeletedPlant(plants[0])
+        for _ in 0..<1000 {
+            if vm.cards.count == 1, case .loaded = vm.state { break }
+            try? await Task.sleep(for: .milliseconds(2))
+        }
+        XCTAssertEqual(vm.cards.count, 1); XCTAssertTrue(vm.cards[0] === b); XCTAssertNil(vm.newlyAddedPlantID)
+        await loader.release(); await old.value
+        XCTAssertEqual(vm.cards.map(\.id), [b.id]); XCTAssertTrue(vm.cards[0] === b)
+        guard case .loaded(let retained) = b.photoState else { return XCTFail("B image lost") }
+        XCTAssertTrue(retained === image)
+        let reads = await repository.ids(); XCTAssertEqual(reads, [b.id])
+    }
+    func testDeletionDuringInitialLoadReconcilesFullListAndRejectsLatePreDeleteSnapshot() async {
+        let plants = (1...2).map(StorageTestFixture.plant)
+        let loader = CreationListLoader(plants: [plants[1]]), repository = CardPhotoRepository()
+        let vm = PlantListViewModel(loadPlants: loader, loadPhoto: LoadInitialPlantPhoto(repository: repository),
+            loadDetail: LoadPlantDetail(repository: repository), update: UpdatePlant(repository: repository))
+        let old = Task { await vm.load() }
+        for _ in 0..<1000 { if await loader.calls == 1 { break }; await Task.yield() }
+        vm.applyDeletedPlant(plants[0])
+        for _ in 0..<1000 { if vm.cards.count == 1 { break }; try? await Task.sleep(for: .milliseconds(2)) }
+        XCTAssertEqual(vm.cards.map(\.id), [plants[1].id]); XCTAssertNotNil(vm.deletionEvent)
+        await loader.release(); await old.value
+        XCTAssertEqual(vm.cards.map(\.id), [plants[1].id]); XCTAssertNil(vm.newlyAddedPlantID)
+    }
+
+    func testDeletionWhileListFailedKeepsReadFailureNotFabricatedEmptySuccess() async {
+        let repository = CardPhotoRepository()
+        let loader = DeletionFailureListLoader()
+        let vm = PlantListViewModel(loadPlants: loader,
+            loadPhoto: LoadInitialPlantPhoto(repository: repository), loadDetail: LoadPlantDetail(repository: repository), update: UpdatePlant(repository: repository))
+        await vm.load(); vm.applyDeletedPlant(StorageTestFixture.plant(1))
+        for _ in 0..<1000 {
+            if await loader.calls == 2, case .failed = vm.state { break }
+            try? await Task.sleep(for: .milliseconds(2))
+        }
+        let calls = await loader.calls; XCTAssertEqual(calls, 2)
+        guard case .failed = vm.state else { return XCTFail("Read error fabricated as empty") }
+    }
     func testHistoryDeletionReusesVisibleDetailAndInvalidatesOnlyOwnWateringConsumersAndPager() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
@@ -174,4 +224,26 @@ final class PlantListViewModelTests: XCTestCase {
         guard case .failed = failed.state else { return XCTFail("Failure hidden") }
         XCTAssertTrue(failed.cards.isEmpty)
     }
+}
+
+private actor DeletionFailureListLoader: LoadPlantsUseCase {
+    var calls = 0
+    func execute() async throws -> [Plant] { calls += 1; throw PlantStorageError.storage }
+}
+
+private actor DeletionReloadListLoader: LoadPlantsUseCase {
+    let plants: [Plant]
+    private var calls = 0
+    private var held: CheckedContinuation<[Plant], Never>?
+    init(plants: [Plant]) { self.plants = plants }
+    func execute() async throws -> [Plant] {
+        calls += 1
+        if calls == 1 { return plants }
+        if calls == 2 { return await withCheckedContinuation { held = $0 } }
+        return [plants[1]]
+    }
+    func wait() async {
+        for _ in 0..<1000 { if held != nil { return }; await Task.yield() }
+    }
+    func release() { held?.resume(returning: plants); held = nil }
 }

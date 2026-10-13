@@ -1,5 +1,11 @@
 # Restricciones operativas
 
+- MUST: eliminar planta completa por snapshot Plant vigente y cascada de todos sus hijos actuales en un único save metadata,
+  con rollback pre-save/cleanup JPEG propio best-effort posterior. Única excepción a protección inicial de historial;
+  no encadenar deletes ni tratar notFound/conflict como éxito. Motivo: ADR015, evitar memoria parcial.
+- MUST: reconocer delete invalidando terminalmente consumidores/generaciones antes del callback de navegación;
+  consumidores retenidos no pueden recargar/revivir imágenes/textos del UUID eliminado. Motivo: ADR015.
+
 - MUST: aceptar análisis solo por intención explícita y commit local confirmado, sobre identidad/descriptor de foto existente. Un definitivo por planta/identidad, sin copiar JPEG ni crear cuidado/hito; insuficiencia rechazada en Domain/Data. Retry conserva UUID/payload literal y no llama IA; conflictos requieren nueva lectura/intención (ADR014).
 - MUST: conectar lectores reales de definitivos a contexto/timeline/elegibilidad, fallando cerrado ante errores. Borrar adicional y texto asociado en el mismo commit metadata, antes de cleanup best-effort; inicial protegida. Motivo: evitar reenvíos, huérfanos y falsas confirmaciones (ADR014).
 

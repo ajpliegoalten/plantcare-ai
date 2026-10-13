@@ -484,10 +484,11 @@
     "title": "Eliminar ejemplar y memoria local",
     "user_visible_behavior": "Tras confirmar eliminación, desaparecen planta, ficha, fotos, cuidados y análisis sin afectar a otras plantas.",
     "depends_on": ["plant-timeline", "keep-analysis"],
-    "status": "not_started",
+    "status": "accepted",
     "verification": ["Cancelar y confirmar borrado de una de dos plantas con memoria; reiniciar y verificar eliminación en cascada y conservación de la otra; gate estándar."],
-    "evidence": [],
-    "notes": "Sin archivado ni recuperación garantizada."
+    "evidence": ["2026-10-13 implementer: 104 IDs focales distintos Passed (97 unit + 7 UI), ledger IDporID DerivedData/evidence/delete-plant/implementer/selected-final-results.json; comandos/exits/logs/xcresults en commands.json y docs/handoffs/delete-plant.md. Fallos unit1/unit2/ui2 e interrupción wrapper ui1 preservados; reparaciones focales sin assertions debilitadas.", "Build Debug6/Release2 exit0; audit Release nm/strings/5keys sin fixtures/flags/config. Visual real final pie/alerta UI3 y busy/error opacos/verdes UI4, contraste7,324:1; estáticos PBX/JSON/diff/refs/memberships/traducciones pasan. 179inputs públicos finales SHA256bde9f9c34bbb0ff31efbf297b9ffd66125a209211294bfd6ff4dfdeab8150f0b y specSHA256985f8f6e2dc5269e06406d1d9c3ebc1dae449666a295356ee82fdf21a6edc0b2 byte-intacta. Gate completo pendiente exclusivamente validator."],
+    "validator_evidence": ["2026-10-13 validator independiente openai/gpt-6.1-sol ACCEPT: único gate final XCODE_XCCONFIG_FILE=DerivedData/evidence/delete-plant/validator/NoLocalizationExtraction.xcconfig caffeinate -dius ./init.sh exit0, build y ambas fases TEST EXECUTE SUCCEEDED; 388/388 Passed=294unit+92UIparallel+2Photosserial, cero failed/skipped/expectedFailures. Bundles DerivedData/TestResults/20261013-204342-28366/{parallel,gallery}.xcresult. 179inputs públicos antes/después exactos SHA256bde9f9c34bbb0ff31efbf297b9ffd66125a209211294bfd6ff4dfdeab8150f0b y spec aprobada SHA256985f8f6e2dc5269e06406d1d9c3ebc1dae449666a295356ee82fdf21a6edc0b2 intacta. Revisión independiente comportamiento/capas/seguridad/docs sin blockers; focales104/Release/visuales corroborados y reutilizados sin repetir. docs/validations/delete-plant.md. Orquestador persiste accepted; entrega local autorizada, sin push/PR/merge."],
+    "notes": "Aceptada tras validator independiente. Sin archivado/Deshacer/recuperación/borrado seguro garantizados. Nueva autorización integral sucede espera histórica sin reescribir spec. Cascada validada en mismo actor, save único/rollback/cleanup best-effort; pie rojizo tras leyenda/alerta nativa, error retry o Releer/busy/raíz y terminal de consumidores con B retenida. Gate final388/388 y spec aprobada intacta; entrega mediante commit local autorizado, sin push/PR/merge/APIreal/matrices. Evidencia anterior de gate pendiente es histórica, sucedida por aceptación independiente."
   },
   {
     "id": "recover-ai-failure",

@@ -2737,6 +2737,107 @@ final class PlantTimelineUITests: PlantCareAIUITestCase {
     }
 }
 
+final class DeletePlantUITests: PlantCareAIUITestCase {
+    private func launch(_ id: String, seed: Bool, mode: String = "normal", verify: String? = nil, extra: [String] = []) -> XCUIApplication {
+        let app = XCUIApplication()
+        app.launchArguments = ["--storage-test-id", id, "--delete-plant-fixture", mode, "-AppleLanguages", "(es)"] + extra
+        if seed { app.launchArguments.append("--storage-seed") }
+        if let verify { app.launchArguments += ["--delete-plant-verify", verify] }
+        app.launch(); return app
+    }
+    private func open(_ app: XCUIApplication, index: Int = 1) {
+        let card = app.buttons["plantCard-\(plantID(index))"]
+        XCTAssertTrue(card.waitForExistence(timeout: 10)); reveal(card, in: app); card.tap()
+        XCTAssertTrue(app.staticTexts["selectedPlant-\(plantID(index))"].waitForExistence(timeout: 5))
+    }
+    private func prompt(_ app: XCUIApplication, index: Int = 1) {
+        let button = app.buttons["deletePlant-\(plantID(index))"]
+        reveal(button, in: app); XCTAssertGreaterThanOrEqual(button.frame.height, 44); button.tap()
+        XCTAssertTrue(app.alerts["¿Eliminar esta planta?"].waitForExistence(timeout: 3))
+    }
+    func testFooterAfterDisclaimerNativeAlertCancelSelectionAndCascadeReopenOtherIntactThenEmpty() {
+        let id = isolatedID()
+        var app = launch(id, seed: true, extra: ["--storage-long-care"])
+        open(app)
+        let next = app.buttons["plantPhotoNext-\(plantID(1))"]
+        XCTAssertTrue(next.waitForExistence(timeout: 5)); next.tap()
+        let selected = app.staticTexts["plantPhotoDate-\(plantID(1))"].label
+        let footer = app.buttons["deletePlant-\(plantID(1))"]
+        reveal(footer, in: app)
+        XCTAssertGreaterThan(footer.frame.minY, app.staticTexts["detailDisclaimer"].frame.maxY)
+        capture("delete-plant-footer", app: app)
+        footer.tap(); let alert = app.alerts["¿Eliminar esta planta?"]
+        XCTAssertTrue(alert.waitForExistence(timeout: 3))
+        XCTAssertTrue(alert.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", "Esta acción no se puede deshacer")).firstMatch.exists)
+        capture("delete-plant-alert", app: app)
+        alert.buttons["Cancelar"].tap()
+        XCTAssertEqual(app.staticTexts["plantPhotoDate-\(plantID(1))"].label, selected)
+        back(app); app.terminate()
+        app = launch(id, seed: false, verify: "intact", extra: ["--storage-long-care"])
+        open(app); prompt(app); app.alerts.buttons["Eliminar"].tap()
+        XCTAssertTrue(app.staticTexts["collectionTitle"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.buttons["plantCard-\(plantID(1))"].exists)
+        XCTAssertTrue(app.buttons["plantCard-\(plantID(2))"].exists)
+        app.terminate(); app = launch(id, seed: false, verify: "deleted", extra: ["--storage-long-care"])
+        open(app, index: 2); prompt(app, index: 2); app.alerts.buttons["Eliminar"].tap()
+        XCTAssertTrue(app.staticTexts["collectionTitle"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["addPlantHeader"].isEnabled)
+        XCTAssertFalse(app.buttons["plantCard-\(plantID(2))"].exists)
+        app.terminate(); app = launch(id, seed: false, verify: "empty", extra: ["--storage-long-care"])
+        XCTAssertTrue(app.buttons["addPlantHeader"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.staticTexts["storageErrorMessage"].exists)
+    }
+    func testRollbackRetryAndBothAbandonControlsRequireFreshConfirmation() {
+        let id = isolatedID()
+        var app = launch(id, seed: true, mode: "failAlways")
+        open(app)
+        for close in ["closeDeletePlantError", "cancelDeletePlantError"] {
+            prompt(app); app.alerts.buttons["Eliminar"].tap()
+            XCTAssertTrue(app.buttons["retryDeletePlant"].waitForExistence(timeout: 5))
+            XCTAssertTrue(app.buttons["editPlant-\(plantID(1))"].exists)
+            capture("delete-plant-error", app: app)
+            app.buttons[close].tap(); XCTAssertFalse(app.buttons["retryDeletePlant"].exists)
+        }
+        back(app); app.terminate(); app = launch(id, seed: false, mode: "failOnce", verify: "intact")
+        open(app); prompt(app); app.alerts.buttons["Eliminar"].tap()
+        XCTAssertTrue(app.buttons["retryDeletePlant"].waitForExistence(timeout: 5))
+        app.buttons["retryDeletePlant"].tap()
+        XCTAssertTrue(app.staticTexts["collectionTitle"].waitForExistence(timeout: 10))
+        app.terminate(); app = launch(id, seed: false, verify: "deleted")
+        XCTAssertTrue(app.buttons["plantCard-\(plantID(2))"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.staticTexts["storageErrorMessage"].exists)
+    }
+    func testBusyBlocksBackGestureEditorAndOtherActionsUntilCanonicalCommit() {
+        let id = isolatedID(), app = launch(id, seed: true, mode: "busy")
+        open(app); prompt(app); app.alerts.buttons["Eliminar"].tap()
+        let busy = app.descendants(matching: .any)["deletePlantBusy"].firstMatch
+        XCTAssertTrue(busy.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["editPlant-\(plantID(1))"].isEnabled)
+        XCTAssertFalse(app.buttons["deletePlant-\(plantID(1))"].isEnabled)
+        XCTAssertFalse(app.navigationBars.buttons.matching(NSPredicate(format: "label == 'Atrás' OR label == 'Back'")).firstMatch.exists)
+        capture("delete-plant-busy", app: app)
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.01, dy: 0.5)).press(forDuration: 0.05,
+            thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.7, dy: 0.5)))
+        XCTAssertTrue(busy.exists)
+        XCTAssertTrue(app.staticTexts["collectionTitle"].waitForExistence(timeout: 20))
+        app.terminate()
+        let reopened = launch(id, seed: false, verify: "deleted")
+        XCTAssertTrue(reopened.buttons["plantCard-\(plantID(2))"].waitForExistence(timeout: 10))
+        XCTAssertFalse(reopened.staticTexts["storageErrorMessage"].exists)
+    }
+    func testMissingJPEGAndEnglishFallbackCanStillConfirmDeletion() {
+        let id = isolatedID()
+        let app = launch(id, seed: true, extra: ["--storage-photo-missing", "-AppleLanguages", "(en)"])
+        open(app); prompt(app)
+        app.alerts.buttons["Eliminar"].tap()
+        XCTAssertTrue(app.staticTexts["collectionTitle"].waitForExistence(timeout: 10))
+        app.terminate()
+        let reopened = launch(id, seed: false, verify: "deleted")
+        XCTAssertTrue(reopened.buttons["plantCard-\(plantID(2))"].waitForExistence(timeout: 10))
+        XCTAssertFalse(reopened.staticTexts["storageErrorMessage"].exists)
+    }
+}
+
 final class DeleteCareEventUITests: PlantCareAIUITestCase {
     func testPortraitCardPhotoAndWhitespaceNavigateAndPagerCropKeepsSwipesAndButtons() {
         let app = XCUIApplication()
