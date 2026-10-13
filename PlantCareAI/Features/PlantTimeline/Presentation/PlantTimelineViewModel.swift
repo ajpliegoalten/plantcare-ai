@@ -8,6 +8,20 @@ final class PlantTimelineViewModel: ObservableObject {
     let photos: PlantTimelinePhotoViewModel
     @Published private(set) var state: State = .idle
     @Published private(set) var groups: [PlantTimelineDateFormatter.Group] = []
+    enum DeletionState: Equatable { case idle, confirming, deleting, failed }
+    @Published private(set) var deletionState: DeletionState = .idle
+    // Native alert dismisses its binding before invoking the chosen action.
+    // Keep that flag separate from the confirmed snapshot/state until the action resolves.
+    @Published var showingDeletionConfirmation = false
+    @Published private(set) var deletionTarget: PlantTimelineEntry?
+    @Published private(set) var deletionNeedsReconciliation = false
+    @Published private(set) var deletionReadFailed = false
+    private(set) var deletionPhotoWasReadable = false
+    private let deleteCare: (any DeleteCareEventUseCase)?
+    private let deletePhoto: (any DeletePlantPhotoUseCase)?
+    private let onDeleted: @MainActor (PlantTimelineEntry) -> Void
+    private var deletionTask: Task<Void, Never>?
+    private var deferredRefresh = false
     private(set) var entries: [PlantTimelineEntry] = []
     private let load: any LoadPlantTimelineUseCase
     private let clock: () -> Date
@@ -20,9 +34,12 @@ final class PlantTimelineViewModel: ObservableObject {
     private var observers: [NSObjectProtocol] = []
 
     init(plantID: UUID, load: any LoadPlantTimelineUseCase, photos: PlantTimelinePhotoViewModel,
+         deleteCare: (any DeleteCareEventUseCase)? = nil, deletePhoto: (any DeletePlantPhotoUseCase)? = nil,
+         onDeleted: @escaping @MainActor (PlantTimelineEntry) -> Void = { _ in },
          clock: @escaping () -> Date = Date.init, zone: @escaping () -> TimeZone = { .current },
          sleep: @escaping @Sendable (TimeInterval) async throws -> Void = { try await Task.sleep(for: .seconds($0)) }) {
         self.plantID = plantID; self.load = load; self.photos = photos
+        self.deleteCare = deleteCare; self.deletePhoto = deletePhoto; self.onDeleted = onDeleted
         self.clock = clock; self.zone = zone; self.sleep = sleep
     }
 
@@ -44,6 +61,7 @@ final class PlantTimelineViewModel: ObservableObject {
         updateContext(); refresh()
     }
     func refresh() {
+        guard deletionState != .deleting else { deferredRefresh = true; return }
         guard active, request == nil else { return }
         generation += 1; let token = generation
         state = .loading; entries = []; groups = []
@@ -94,5 +112,83 @@ final class PlantTimelineViewModel: ObservableObject {
         boundary?.cancel(); boundary = nil
         observers.forEach(NotificationCenter.default.removeObserver); observers = []
         photos.disappear(); entries = []; groups = []; state = .idle
+        if deletionState != .deleting { abandonDeletion() }
+    }
+
+    func requestDeletion(_ entry: PlantTimelineEntry) {
+        guard state == .loaded, deletionState == .idle, entry.plantID == plantID,
+              entries.contains(entry) else { return }
+        switch entry {
+        case .initial: return
+        case .care: guard deleteCare != nil else { return }
+        case .additional: guard deletePhoto != nil else { return }
+        }
+        deletionTarget = entry; deletionNeedsReconciliation = false; deletionReadFailed = false
+        deletionPhotoWasReadable = photos.image(for: entry.id) != nil
+        deletionState = .confirming
+        showingDeletionConfirmation = true
+    }
+
+    func abandonDeletion() {
+        guard deletionState != .deleting else { return }
+        showingDeletionConfirmation = false
+        deletionTarget = nil; deletionState = .idle; deletionNeedsReconciliation = false
+        deletionReadFailed = false; deletionPhotoWasReadable = false
+    }
+
+    func confirmDeletion() {
+        guard deletionState == .confirming || deletionState == .failed,
+              !deletionNeedsReconciliation, let target = deletionTarget else { return }
+        if request != nil || state != .loaded { deferredRefresh = true }
+        generation += 1; request?.cancel(); request = nil
+        showingDeletionConfirmation = false
+        deletionState = .deleting
+        // Retain this owner until dispatched IO resolves: disappearing cannot cancel a commit.
+        deletionTask = Task { [self] in
+            do {
+                let removed: PlantTimelineEntry
+                switch target {
+                case .care(let event):
+                    guard let deleteCare else { return }
+                    removed = .care(try await deleteCare.execute(event))
+                case .additional(let photo):
+                    guard let deletePhoto else { return }
+                    removed = .additional(try await deletePhoto.execute(.additional(photo.id), expected: photo))
+                case .initial: return
+                }
+                entries.removeAll { $0.id == removed.id }
+                if removed.isPhoto { photos.remove(removed.id) }
+                onDeleted(removed)
+                deletionState = .idle; deletionTarget = nil; deletionTask = nil
+                updateContext()
+            } catch {
+                deletionReadFailed = (error as? CareEventError) == .readFailure || (error as? PlantPhotoError) == .readFailure
+                deletionNeedsReconciliation = (error as? CareEventError) == .notFound ||
+                    (error as? CareEventError) == .conflict || (error as? CareEventError) == .plantNotFound ||
+                    (error as? PlantPhotoError) == .notFound || (error as? PlantPhotoError) == .conflict ||
+                    (error as? PlantPhotoError) == .plantNotFound || deletionReadFailed
+                deletionState = .failed; deletionTask = nil
+                if deletionNeedsReconciliation { refresh() }
+            }
+            if deferredRefresh { deferredRefresh = false; refresh() }
+        }
+    }
+
+    var deletionIsPhoto: Bool { if case .additional = deletionTarget { return true }; return false }
+    var deletionContext: String {
+        guard let target = deletionTarget else { return "" }
+        let kind: String
+        switch target {
+        case .care(let event):
+            switch event.kind {
+            case .watering: kind = String(localized: "care.kind.watering")
+            case .fertilizing: kind = String(localized: "care.kind.fertilizing")
+            case .pruning: kind = String(localized: "care.kind.pruning")
+            case .repotting: kind = String(localized: "care.kind.repotting")
+            case .other: kind = String(localized: "care.kind.other")
+            }
+        default: kind = String(localized: "timeline.photograph")
+        }
+        return kind + " · " + PlantDetailViewModel.formattedDate(target.elementDate, timeZone: zone())
     }
 }

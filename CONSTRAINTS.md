@@ -1,5 +1,7 @@
 # Restricciones operativas
 
+- MUST: proteger la foto inicial de alta/portada por identidad discriminada y filtro Data, no por selección efímera del carrusel. Una adicional seleccionada sigue eliminable; nunca dirigir un delete adicional a Photos/Plant ni intercambiar UUID de entidades. Motivo: eliminación de historial aprobada (ADR012).
+
 - MUST: invocar todo transporte externo de IA dentro de `AuthorizeExternalAIOperation`, nunca usando solo una bandera UI. Antes de conectar un proveedor real, sustituir el destinatario provisional, actualizar aviso y renovar alcance; renovar también ante cambios materiales de destinatario, datos o finalidades. Motivo: la aceptación actual no autoriza silenciosamente un proveedor aún desconocido (ADR 003).
 
 - MUST: no editar `init.sh` mientras haya una ejecución activa del mismo; esperar su terminación antes de cambiar el arnés. Motivo: una edición en curso desalineó la lectura de Bash y produjo `r: command not found`/exit 127 después de build y tests correctos en `choose-identification-photo`; un resultado parcial no equivale a gate aprobado.

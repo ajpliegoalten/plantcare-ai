@@ -38,6 +38,10 @@ struct PlantCareAIApp: App {
                 let fixture = PlantPhotoTestFixture(mode: arguments[position + 1])
                 repository = LocalPlantRepository(root: testRoot, beforePhotoCommit: { try fixture.beforeCommit($0) })
             }
+            if let position = arguments.firstIndex(of: "--deletion-fixture"), arguments.indices.contains(position + 1) {
+                let fixture = HistoryDeletionTestFixture(mode: arguments[position + 1])
+                repository = LocalPlantRepository(root: testRoot, beforeDeletionCommit: { try fixture.beforeCommit() })
+            }
             load = StorageFixtureLoad(root: testRoot, repository: repository, seed: arguments.contains("--storage-seed"), corrupt: arguments.contains("--storage-corrupt"))
             if let position = arguments.firstIndex(of: "--timeline-fixture"), arguments.indices.contains(position + 1) {
                 load = PlantTimelineFixtureLoad(base: load, repository: repository,
@@ -75,11 +79,13 @@ struct PlantCareAIApp: App {
             timelineReader = PlantTimelineReadTestFixture(base: timelineReader)
         }
         #endif
-        viewModel.makeTimeline = { id in
+        viewModel.makeTimeline = { [weak viewModel] id in
             PlantTimelineViewModel(plantID: id,
                 load: timelineReader,
                 photos: PlantTimelinePhotoViewModel(plantID: id, loadInitial: LoadInitialPlantPhoto(repository: repository),
-                    loadAdditional: LoadPlantPhoto(repository: photoReader)))
+                    loadAdditional: LoadPlantPhoto(repository: photoReader)),
+                deleteCare: DeleteCareEvent(repository: repository), deletePhoto: DeletePlantPhoto(repository: repository),
+                onDeleted: { [weak viewModel] entry in viewModel?.applyHistoryDeletion(entry) })
         }
         viewModel.makeAddPhoto = { plant, onSaved in
             let draft = AddPlantPhotoViewModel(plant: plant, prepare: PrepareIdentificationPhoto(preparer: LocalIdentificationPhotoPreparer()),

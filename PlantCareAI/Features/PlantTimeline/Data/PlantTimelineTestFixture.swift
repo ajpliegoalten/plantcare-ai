@@ -64,4 +64,19 @@ actor PlantTimelineReadTestFixture: LoadPlantTimelineUseCase {
         return entries
     }
 }
+// Synchronous pre-save seam, scoped to the same opt-in UUID store. No network or sidecar.
+final class HistoryDeletionTestFixture: @unchecked Sendable {
+    private let lock = NSLock()
+    private var remainingFailures: Int
+    private let delay: TimeInterval
+    init(mode: String) {
+        remainingFailures = mode == "failOnce" ? 1 : (mode == "failAlways" ? Int.max : 0)
+        delay = mode == "busy" ? 12 : 0
+    }
+    func beforeCommit() throws {
+        lock.lock(); defer { lock.unlock() }
+        if delay > 0 { Thread.sleep(forTimeInterval: delay) }
+        if remainingFailures > 0 { remainingFailures -= 1; throw CareEventError.storage }
+    }
+}
 #endif

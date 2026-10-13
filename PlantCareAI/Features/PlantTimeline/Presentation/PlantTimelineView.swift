@@ -7,9 +7,17 @@ struct PlantTimelineView: View {
     init(viewModel: PlantTimelineViewModel) { _viewModel = StateObject(wrappedValue: viewModel) }
 
     var body: some View {
+        VStack(spacing: 0) {
+            if viewModel.deletionState == .failed { deletionBanner }
+            if viewModel.deletionState == .deleting {
+                ProgressView("timeline.delete.busy").padding().accessibilityIdentifier("deletionBusy")
+            }
         GeometryReader { viewport in
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: 20) {
+            // Metadata views are lightweight; image IO still follows the actual
+            // viewport (cache3/concurrency2). Avoid iOS26 lazy estimate loops on
+            // long rows invalidated by native alerts.
+            VStack(alignment: .leading, spacing: 20) {
                 switch viewModel.state {
                 case .idle, .loading: ProgressView().frame(maxWidth: .infinity)
                 case .notFound: Text("detail.notFound")
@@ -48,28 +56,34 @@ struct PlantTimelineView: View {
             viewModel.photos.scheduleViewport(frames: frames, bounds: CGRect(origin: .zero, size: viewport.size))
         }
         }
-        .navigationTitle(Text("timeline.title")).navigationBarTitleDisplayMode(.inline)
         .accessibilityIdentifier("plantTimeline-\(viewModel.plantID)")
+        }
+        .navigationTitle(Text("timeline.title")).navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(viewModel.deletionState == .deleting)
+        .alert(viewModel.deletionIsPhoto ? Text("timeline.delete.photo.title") : Text("timeline.delete.care.title"),
+               isPresented: $viewModel.showingDeletionConfirmation) {
+            Button("timeline.delete.cancel", role: .cancel) { viewModel.abandonDeletion() }
+            Button("timeline.delete.confirm", role: .destructive) { viewModel.confirmDeletion() }
+        } message: {
+            Text(viewModel.deletionContext + "\n\n" + String(localized: viewModel.deletionIsPhoto ? "timeline.delete.photo.message" : "timeline.delete.care.message"))
+        }
         .onAppear { viewModel.appear() }
         .onDisappear { viewModel.disappear() }
         .onChange(of: scenePhase) { _, phase in if phase == .active { viewModel.foreground() } }
     }
 
+
     private func row(_ entry: PlantTimelineEntry) -> some View {
         HStack(alignment: .top, spacing: 12) {
-            VStack(spacing: 0) {
-                Image(systemName: symbol(entry)).font(.body).foregroundStyle(Color("Primary"))
-                    .frame(width: 28, height: 32)
-                    .accessibilityHidden(true)
-                Rectangle().fill(Color("Outline").opacity(0.5)).frame(width: 1).accessibilityHidden(true)
-            }.accessibilityHidden(true)
+            Image(systemName: symbol(entry)).font(.body).foregroundStyle(Color("Primary"))
+                .frame(width: 28, height: 32).accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 12) {
                 switch entry {
                 case .care(let event):
-                    Text(title(event.kind)).font(.headline)
+                    deletionHeader(entry, title: title(event.kind))
                     if let note = event.note { Text(note).fixedSize(horizontal: false, vertical: true) }
                 case .additional:
-                    Text("timeline.photograph").font(.headline)
+                    deletionHeader(entry, title: "timeline.photograph")
                     TimelinePhoto(viewModel: viewModel.photos, identity: entry.id, initial: false)
                 case .initial:
                     HStack(alignment: .top, spacing: 12) {
@@ -89,6 +103,67 @@ struct PlantTimelineView: View {
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("timelineEntry-" + entry.id.stableKey)
         }
+        // Decoration must not compete with a long card for an unbounded height
+        // during LazyVStack's estimated-size pass. A background never sizes the row.
+        .background {
+            Connector().stroke(Color("Outline").opacity(0.5), lineWidth: 1)
+                .allowsHitTesting(false).accessibilityHidden(true)
+        }
+    }
+
+    private struct Connector: Shape {
+        func path(in rect: CGRect) -> Path {
+            var path = Path()
+            guard rect.height > 32 else { return path }
+            path.move(to: CGPoint(x: 14, y: 32))
+            path.addLine(to: CGPoint(x: 14, y: rect.height))
+            return path
+        }
+    }
+
+    private func deletionHeader(_ entry: PlantTimelineEntry, title: LocalizedStringKey) -> some View {
+        HStack {
+            Text(title).font(.headline)
+            Spacer(minLength: 8)
+            Button { viewModel.requestDeletion(entry) } label: {
+                // One-point margin avoids a transformed AX frame rounding below44pt.
+                Image(systemName: "trash").frame(minWidth: 45, minHeight: 45)
+            }
+            .foregroundStyle(Color("TextSecondary"))
+            .accessibilityLabel(entry.isPhoto ? Text("timeline.delete.photo.accessibility") :
+                Text("timeline.delete.care.accessibility") + Text(" ") + Text(title))
+            .accessibilityIdentifier("deleteTimeline-" + entry.id.stableKey)
+            .disabled(viewModel.deletionState != .idle)
+        }
+    }
+
+    private var deletionBanner: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .top) {
+                Image(systemName: "exclamationmark.triangle.fill").accessibilityHidden(true)
+                Text(viewModel.deletionIsPhoto ? "timeline.delete.photo.error" : "timeline.delete.care.error").font(.headline)
+                Spacer()
+                Button { viewModel.abandonDeletion() } label: {
+                    Image(systemName: "xmark").frame(minWidth: 45, minHeight: 45)
+                }.accessibilityLabel(Text("timeline.delete.close")).accessibilityIdentifier("closeDeletionError")
+            }
+            Text(viewModel.deletionReadFailed ? "timeline.delete.readFailure" : (viewModel.deletionNeedsReconciliation ? "timeline.delete.stale" :
+                    (viewModel.deletionIsPhoto ? (viewModel.deletionPhotoWasReadable ? "timeline.delete.photo.rollback" : "timeline.delete.photo.recordRetained") : "timeline.delete.care.rollback")))
+                .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 16) {
+                if !viewModel.deletionNeedsReconciliation {
+                    Button("timeline.delete.retry") { viewModel.confirmDeletion() }
+                        .frame(minHeight: 45).accessibilityIdentifier("retryDeletion")
+                }
+                Button("timeline.delete.cancel") { viewModel.abandonDeletion() }
+                    .frame(minHeight: 45).accessibilityIdentifier("cancelDeletionError")
+            }
+            .foregroundStyle(Color("PrimaryAction"))
+        }
+        .padding(16).foregroundStyle(Color("TextPrimary"))
+        .background(Color("SurfaceMuted"))
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("deletionError")
     }
 
     private func title(_ kind: CareEvent.Kind) -> LocalizedStringKey {

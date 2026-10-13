@@ -23,6 +23,11 @@ final class PlantListViewModel: ObservableObject {
     var makeAddPhoto: ((Plant, @escaping @MainActor (PlantPhoto, UIImage) -> Void) -> AddPlantPhotoViewModel)?
     var makePhotoPager: ((Plant) -> PlantPhotoPagerViewModel)?
     var makeTimeline: ((UUID) -> PlantTimelineViewModel)?
+    private var details: [UUID: WeakDetail] = [:]
+    private final class WeakDetail {
+        weak var value: PlantDetailViewModel?
+        init(_ value: PlantDetailViewModel) { self.value = value }
+    }
 
     init(loadPlants: any LoadPlantsUseCase, loadPhoto: LoadInitialPlantPhoto, loadDetail: LoadPlantDetail, update: UpdatePlant, registerCare: RegisterCareEvent? = nil, loadLastWatering: (any LoadLastWateringUseCase)? = nil) {
         self.loadPlants = loadPlants
@@ -75,6 +80,7 @@ final class PlantListViewModel: ObservableObject {
     }
 
     func detailViewModel(id: UUID) -> PlantDetailViewModel {
+        if let retained = details[id]?.value { return retained }
         let detail = PlantDetailViewModel(id: id, loadDetail: loadDetail, loadPhoto: loadPhoto, update: update, registerCare: registerCare, loadLastWatering: loadLastWatering, onWatering: { [weak self] id in
             self?.cards.first { $0.id == id }?.lastWatering.invalidate()
         }) { [weak self] plant in
@@ -82,7 +88,15 @@ final class PlantListViewModel: ObservableObject {
         }
         detail.makeAddPhoto = makeAddPhoto
         detail.makePhotoPager = makePhotoPager
+        details[id] = WeakDetail(detail)
         return detail
+    }
+
+    func applyHistoryDeletion(_ entry: PlantTimelineEntry) {
+        details[entry.plantID]?.value?.applyHistoryDeletion(entry)
+        if case .care(let event) = entry, event.kind == .watering {
+            cards.first { $0.id == entry.plantID }?.lastWatering.invalidate()
+        }
     }
 
     func applyUpdatedPlant(_ plant: Plant) {

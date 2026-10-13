@@ -17,7 +17,7 @@ struct PlantPhoto: Sendable, Equatable {
 }
 
 enum PlantPhotoError: Error, Equatable {
-    case validation, plantNotFound, notFound, conflict, photoMissing, photoCorrupt, storage
+    case validation, plantNotFound, notFound, conflict, protectedIdentity, photoMissing, photoCorrupt, readFailure, storage
 }
 
 enum PlantPhotoIdentity: Hashable, Sendable {

@@ -54,6 +54,15 @@ final class PlantDetailViewModel: ObservableObject {
         if case .loaded(let image) = photoState { return image }; return nil
     }
 
+    func applyHistoryDeletion(_ entry: PlantTimelineEntry) {
+        guard entry.plantID == id else { return }
+        switch entry {
+        case .care(let event): if event.kind == .watering { lastWatering.invalidate() }
+        case .additional(let photo): photoPager?.deleted(photo)
+        case .initial: break
+        }
+    }
+
     func careEditor() -> RegisterCareViewModel? {
         guard case .loaded(let plant) = state, let registerCare else { return nil }
         careConfirmation = nil

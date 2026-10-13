@@ -21,6 +21,42 @@ private actor CreationListLoader: LoadPlantsUseCase {
 
 @MainActor
 final class PlantListViewModelTests: XCTestCase {
+    func testHistoryDeletionReusesVisibleDetailAndInvalidatesOnlyOwnWateringConsumersAndPager() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let repository = LocalPlantRepository(root: root), fixture = try await HistoryDeletionSeed.make(repository)
+        let model = PlantListViewModel(loadPlants: LoadPlants(repository: repository), loadPhoto: LoadInitialPlantPhoto(repository: repository),
+            loadDetail: LoadPlantDetail(repository: repository), update: UpdatePlant(repository: repository), loadLastWatering: LoadLastWatering(repository: repository))
+        model.makePhotoPager = { plant in PlantPhotoPagerViewModel(plant: plant, loadMetadata: LoadPlantPhotos(repository: repository),
+            loadAdditional: LoadPlantPhoto(repository: repository), loadInitial: LoadInitialPlantPhoto(repository: repository)) }
+        await model.load(); let cards = model.cards
+        cards.forEach { $0.lastWatering.appear() }
+        let detail = model.detailViewModel(id: fixture.plant.id); await detail.load()
+        XCTAssertTrue(model.detailViewModel(id: fixture.plant.id) === detail)
+        for _ in 0..<1000 {
+            if detail.lastWatering.state == .loaded(fixture.events[0].occurredAt), cards[0].lastWatering.state == .loaded(fixture.events[0].occurredAt) { break }
+            try? await Task.sleep(for: .milliseconds(2))
+        }
+        XCTAssertEqual(detail.lastWatering.state, .loaded(fixture.events[0].occurredAt))
+        let other = cards[1].lastWatering.state
+        detail.cancelLoading(preservingPhotoSelection: true)
+        _ = try await repository.deleteCareEvent(fixture.events[0]); model.applyHistoryDeletion(.care(fixture.events[0]))
+        await detail.load()
+        for _ in 0..<1000 {
+            if detail.lastWatering.state == .loaded(nil), cards[0].lastWatering.state == .loaded(nil) { break }
+            try? await Task.sleep(for: .milliseconds(2))
+        }
+        XCTAssertEqual(detail.lastWatering.state, .loaded(nil)); XCTAssertEqual(cards[0].lastWatering.state, .loaded(nil))
+        XCTAssertEqual(cards[1].lastWatering.state, other)
+        let pager = try XCTUnwrap(detail.photoPager)
+        for _ in 0..<1000 { if pager.isComplete { break }; try? await Task.sleep(for: .milliseconds(2)) }
+        pager.select(.additional(fixture.photo.id)); detail.cancelLoading(preservingPhotoSelection: true)
+        _ = try await repository.deletePhoto(fixture.photo); model.applyHistoryDeletion(.additional(fixture.photo))
+        XCTAssertEqual(pager.selected, .initial(fixture.plant.id)); XCTAssertEqual(pager.descriptors.count, 1)
+        XCTAssertEqual(cards[0].lastWatering.state, .loaded(nil))
+        XCTAssertTrue(model.cards[0] === cards[0]); XCTAssertTrue(detail.photoPager === pager)
+        cards.forEach { $0.lastWatering.disappear() }; detail.cancelLoading()
+    }
     func testWateringInjectionCommitsOnlyEventAndPreservesCardsMetadataAndCachedImage() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }

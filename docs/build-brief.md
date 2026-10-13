@@ -10,6 +10,8 @@ Fotografiar o elegir imagen → obtener propuestas → seleccionar especie propu
 
 ## MVP obligatorio
 
+Eliminación de historial implementada por acción confirmada: cuidados y fotografías adicionales propios, nunca foto inicial/portada. Una adicional seleccionada en el carrusel sigue eliminable; Cancelar/× abandonan retry y no hay toast de éxito. Eliminar planta completa sigue siendo una capacidad posterior distinta.
+
 - Colección local y ficha por ejemplar con foto, nombre personalizado, especie confirmada, ubicación opcional, fecha de alta y ficha de cuidados propia. Estados vacíos y edición de nombre/ubicación.
 - Identificación desde cámara o galería con candidato, alternativas cuando existan, incertidumbre visible, repetir foto o introducir especie conocida; confirmación humana antes de crear la planta. Cuidados breves sobre luz, riego, humedad, temperatura, sustrato y abonado, más poda/trasplante/problemas comunes si aportan valor.
 - Registro de riego en aproximadamente 2–3 interacciones; registro breve de abonado, poda, trasplante y «otro» con fecha y nota opcional; añadir fotos y ver cronología por planta. Eliminación de eventos y de plantas con confirmación; al borrar una planta se elimina también su memoria local.
