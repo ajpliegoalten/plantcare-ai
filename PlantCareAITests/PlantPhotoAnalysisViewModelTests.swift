@@ -34,11 +34,58 @@ final class PlantPhotoAnalysisViewModelTests: XCTestCase {
         await store.configure(hold: true); var callbacks = 0
         let vm = await savingModel(store, provider: provider) { _ in callbacks += 1 }
         vm.start(); await wait { vm.state == .result }; vm.save(); vm.save()
-        XCTAssertEqual(vm.saveState, .saving); XCTAssertFalse(vm.close()); XCTAssertFalse(vm.closed)
+        XCTAssertEqual(vm.saveState, .saving); XCTAssertFalse(vm.canDiscard); XCTAssertFalse(vm.discard())
+        XCTAssertFalse(vm.close()); XCTAssertFalse(vm.closed)
         for _ in 0..<1000 { if await store.continuation != nil { break }; await Task.yield() }
         await store.release(); await wait { vm.saveState == .saved }
         let snapshots = await store.snapshots; XCTAssertEqual(snapshots.count, 1); XCTAssertEqual(callbacks, 1)
+        XCTAssertFalse(vm.canDiscard); XCTAssertFalse(vm.discard())
         XCTAssertTrue(vm.close())
+    }
+
+    func testDiscardUsefulResultClearsSessionNoKeepCallbacksOrExtraRequestAndReopensClean() async throws {
+        let store = AcceptanceSpy(), provider = AnalysisProviderSpy(), gate = PlantPhotoAnalysisPresentationGate()
+        var callbacks = 0
+        let model = await savingModel(store, provider: provider) { _ in callbacks += 1 }
+        let vm = try XCTUnwrap(gate.open { model })
+        vm.didSave = { _ in callbacks += 1 }
+        XCTAssertFalse(vm.canDiscard); XCTAssertFalse(vm.discard()); XCTAssertFalse(vm.closed)
+        vm.start(); await wait { vm.state == .result }
+        XCTAssertTrue(vm.canDiscard); XCTAssertTrue(vm.discard()); XCTAssertTrue(vm.closed)
+        XCTAssertNil(vm.result); XCTAssertNil(vm.image); XCTAssertNil(vm.plant); XCTAssertNil(vm.photoDate)
+        XCTAssertFalse(vm.showingConsent); XCTAssertFalse(vm.canDiscard); XCTAssertFalse(vm.discard())
+        vm.save(); vm.retry(); vm.start(); vm.acceptConsent()
+        let snapshots = await store.snapshots, calls = await provider.calls
+        XCTAssertTrue(snapshots.isEmpty); XCTAssertEqual(callbacks, 0); XCTAssertEqual(calls.count, 1)
+        let fresh = await savingModel(store, provider: provider)
+        let next = try XCTUnwrap(gate.open { fresh })
+        XCTAssertNil(next.result); XCTAssertEqual(next.saveState, .idle); XCTAssertFalse(next.canDiscard)
+        XCTAssertFalse(vm.discard()); next.start(); await wait { next.state == .result }
+        XCTAssertFalse(next.closed); XCTAssertTrue(next.canDiscard); XCTAssertTrue(next.discard())
+        let finalCalls = await provider.calls; XCTAssertEqual(finalCalls.count, 2)
+    }
+
+    func testDiscardAfterLocalFailureAbandonsLiteralRetryAndBothCallbacks() async throws {
+        let store = AcceptanceSpy(), provider = AnalysisProviderSpy(); await store.configure(failure: .storage)
+        var callbacks = 0
+        let vm = await savingModel(store, provider: provider) { _ in callbacks += 1 }
+        vm.didSave = { _ in callbacks += 1 }
+        vm.start(); await wait { vm.state == .result }; vm.save(); await wait { vm.saveState == .failed }
+        XCTAssertNotNil(vm.result); XCTAssertTrue(vm.canDiscard); XCTAssertTrue(vm.discard())
+        await store.configure(); vm.save(); vm.save(); XCTAssertFalse(vm.discard())
+        XCTAssertNil(vm.result); XCTAssertNil(vm.image); XCTAssertEqual(callbacks, 0)
+        let snapshots = await store.snapshots, calls = await provider.calls
+        XCTAssertEqual(snapshots.count, 1); XCTAssertEqual(calls.count, 1)
+    }
+
+    func testInsufficientEvidenceCanDiscardButCannotSave() async throws {
+        let store = AcceptanceSpy(), provider = AnalysisProviderSpy()
+        await provider.setContent(.init(outcome: .insufficientEvidence, observations: ["No permite orientar."], possibleCauses: [], checks: []))
+        let vm = await savingModel(store, provider: provider)
+        vm.start(); await wait { vm.state == .insufficientEvidence }
+        XCTAssertFalse(vm.canSave); XCTAssertTrue(vm.canDiscard); vm.save()
+        XCTAssertTrue(vm.discard()); XCTAssertNil(vm.result)
+        let snapshots = await store.snapshots; XCTAssertTrue(snapshots.isEmpty)
     }
 
     func testConflictRequiresNewIntentAndClosingStorageFailureAbandonsRetry() async throws {
@@ -67,6 +114,7 @@ final class PlantPhotoAnalysisViewModelTests: XCTestCase {
         let local = AnalysisLocalSpy(), provider = AnalysisProviderSpy(), consent = ConsentDouble()
         let vm = make(local: local, provider: provider, consent: consent)
         vm.start(); vm.start(); await wait { vm.state == .awaitingConsent }
+        XCTAssertFalse(vm.canDiscard); XCTAssertFalse(vm.discard()); XCTAssertFalse(vm.closed)
         XCTAssertNotNil(vm.image); XCTAssertNotNil(vm.plant)
         vm.cancelConsent(); let none = await provider.calls; XCTAssertTrue(none.isEmpty)
         XCTAssertEqual(vm.state, .failed)
@@ -116,6 +164,7 @@ final class PlantPhotoAnalysisViewModelTests: XCTestCase {
         let vm = try XCTUnwrap(gate.open { make(local: local, provider: provider, consent: consent) })
         XCTAssertNil(gate.open { make(local: local, provider: provider, consent: consent) })
         vm.start(); await wait { vm.state == .analyzing && vm.image != nil }
+        XCTAssertFalse(vm.canDiscard); XCTAssertFalse(vm.discard()); XCTAssertFalse(vm.closed)
         for _ in 0..<1000 { if await provider.continuation != nil { break }; await Task.yield() }
         vm.close(); await provider.release()
         await Task.yield(); XCTAssertNil(vm.result); XCTAssertNil(vm.image)

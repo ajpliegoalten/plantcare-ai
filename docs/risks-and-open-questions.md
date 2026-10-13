@@ -2,6 +2,8 @@
 
 ## Delta keep-analysis (ADR014)
 
+Delta discard-analysis vigente: «sin huella» significa cero nuevo registro/foto local, no borrado seguro ni revocación del envío/consentimiento externo. Abandono solo Presentation conserva origen y definitivos; Guardar ya despachado bloquea descarte y su commit nunca se compensa con delete. Reabrir es nueva intención/posible consulta, no cache de provisional. Menciones de acciones inactivas ADR013 abajo son históricas.
+
 Lector real/schema V4 aditivo sustituyen capacidad ausente ADR013 sin reescribir su evidencia. Unicidad/rollback/cascada serializados en un actor por almacén; sin garantía de multiproceso/downgrade/daño físico. Snapshot contextual/timeline secuencial. Save metadata no depende del JPEG; foto faltante conserva texto/error propio. Cleanup best-effort no implica borrado seguro/backups. Refresh fallido no revierte aceptación ni habilita reenvío. Calidad IA/compatibilidad remota fuera de fixtures; inferencia real exige permiso específico.
 
 ## Bloqueantes para la siguiente fase

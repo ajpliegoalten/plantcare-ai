@@ -34,9 +34,10 @@ struct PlantPhotoPagerView: View {
             if let analyze {
                 Button(action: analyze) {
                     Label("analysis.open", systemImage: "sparkles").frame(maxWidth: .infinity, minHeight: 44)
-                        .foregroundStyle(Color("Surface"))
+                        .foregroundStyle(viewModel.canAnalyze ? Color("Surface") : Color("TextSecondary"))
                 }
-                    .buttonStyle(.borderedProminent).buttonBorderShape(.capsule).tint(Color("CareTerracotta"))
+                    .buttonStyle(.borderedProminent).buttonBorderShape(.capsule)
+                    .tint(viewModel.canAnalyze ? Color("CareTerracotta") : Color("SurfaceMuted"))
                     .accessibilityIdentifier("detailAnalyzePhoto-\(plantID)")
                     .disabled(!viewModel.canAnalyze)
                 if case .failed = viewModel.analysisState {

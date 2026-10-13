@@ -1,5 +1,7 @@
 # Modelo de dominio
 
+Delta discard-analysis vigente: Descarta ya activo; abandono UI exclusivamente, foto origen/definitivos protegidos, útil/insuficiente/fallo local elegibles y commit protegido. Sucede las menciones de Descarta pendiente/futuro de los antecedentes ADR013/014 siguientes; ciclo vigente precisado abajo.
+
 ## Delta keep-analysis — ADR014
 
 Análisis guardado es aceptación explícita sobre una foto YA local, no nueva fotografía: UUID propio, plantID, identidad initial/additional, photoDate, queriedAt, revision, acceptedAt y contenido literal. Una aceptación por identidad, sin reemplazo/reanálisis; insuficiencia no guardable. Retry literal reconcilia, conflicto no sobrescribe. Contexto anterior usa fecha de foto, no aceptación. Snapshot incluye descriptor/createdAt origen para revalidación precommit.
@@ -33,7 +35,7 @@ El historial es una vista cronológica de eventos, fotos y análisis, **no** una
 
 ## Ciclo de vida del análisis
 
-Foto actual elegida → solicitud a IA con identidad/ficha y selección pertinente de historial textual reciente, sin fotos previas → resultado provisional con observaciones, posibilidades y comprobaciones prácticas → **guardar** foto y análisis juntos o **descartar** ambos. Si se cancela o falla la petición, no se guarda nada y se puede reintentar. Los análisis guardados pueden aportar contexto a otros futuros; el texto de IA nunca se transforma automáticamente en un evento de cuidado. No hacer preguntas de seguimiento dentro del análisis ni afirmar evolución visual comparativa sin comparar imágenes.
+Foto actual local elegida → solicitud a IA con identidad/ficha y selección pertinente de historial textual reciente, sin fotos previas → resultado provisional con observaciones, posibilidades y comprobaciones prácticas → **guardar análisis sobre esa foto existente** o **descartar exclusivamente el provisional**. Descarta no copia ni elimina JPEG, origen, cuidados o definitivos previos; no hay marca persistida de descarte. Disponible con resultado útil/insuficiente y tras fallo local; durante commit se rechaza, sin delete compensatorio. Cerrar cancela/invalida sesión y libera retry; reapertura requiere nueva intención sin restaurar resultado. Si se cancela o falla la petición, no se guarda nada y se puede reintentar. No se promete retirar bytes/costes ya enviados. Los análisis guardados pueden aportar contexto a otros futuros; el texto de IA nunca se transforma automáticamente en un evento de cuidado. No hacer preguntas de seguimiento dentro del análisis ni afirmar evolución visual comparativa sin comparar imágenes.
 
 ## Reglas y casos límite
 

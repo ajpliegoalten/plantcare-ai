@@ -468,10 +468,15 @@
     "title": "Descartar análisis sin dejar huella",
     "user_visible_behavior": "Al descartar un resultado no se conserva ni su foto ni el análisis en la planta.",
     "depends_on": ["analyze-current-photo"],
-    "status": "not_started",
+    "status": "accepted",
     "verification": ["Comparar cronología y almacenamiento antes y después de descartar y de cancelar solicitud; reiniciar y verificar ausencia; gate estándar."],
-    "evidence": [],
-    "notes": "El borrador de análisis no forma parte del historial."
+    "evidence": [
+      "2026-10-13 implementer openai/gpt-6.1-sol passing focal NO accepted/gate completo; spec aprobada integralmente intacta SHA256b2770e7ae77191aa9a856fe7f01ff1f84131e6e92f5e0e64812465d908c49362. View→VM.discard→close→dismiss solo Presentation; útil/insuficiente/fallo local, bloqueado saving/saved/closed. Origen/definitivos protegidos, sin escrituras/delete/callback/HTTP de descarte ni rediseño/alerta/toast/schema. Handoff docs/handoffs/discard-analysis.md.",
+      "42 IDs distintos finales Passed=32unit/integración+10UI,6nuevos+36existentes/actualizados, cero failures/skips/expectedFailures; DerivedData/evidence/discard-analysis/{unit,ui}.xcresult/selected-final-results.json/commands.json. Misma UI original exit0 esperada mediante evento kqueue wrapper, sin duplicados/reruns/retries ni fallos en ronda. Disco real modelos/UUIDs/contenido/JPEG antes/después/reopen inicial+adicional, definitivo ajeno bloqueado; UI útil/insuficiente/error local/caller/selección/longscroll/consent/tardíos/relaunch y Keep busy/retry.5PNG abiertos de46exportados, errorlocal controlparcial recortado no claimfullvisible/cierrefuncional sí; activo contraste8,473:1 y disabledbusy revisados.",
+      "Debug build-for-testing y Release build exit0/audit nuevos flags/verifier y puente ausentes; static diff/PBX/JSONunique/catalog previas exactas pasan.161inputs SHA2562de9b6a073fe7f5cff23066222834d2c7449a79b9258af3cfb88835813bc8d83 exactos tras builds/UI, spec intacta. Mismo iPhone17Pro iOS26.2/23C54 root00BBB7EC estándar normal/light consultada, Xcode26.2/17C52 macOS26.5.1/25F80; serial sin tests competidores/procesos pendientes/API real/secretos/Git entrega/matrices. Gate final único init.sh ambas fases reservado validator independiente; gates accepted anteriores históricos no baseline actual."
+    ],
+    "validator_evidence": ["2026-10-13 independent validator openai/gpt-6.1-sol ACCEPT V4: `caffeinate -dius ./init.sh` exit 0; TEST BUILD and both TEST EXECUTE phases succeeded, 363/363 Passed (273 unit + 88 parallel UI + 2 serial PhotosPicker), zero failures/skips/expected failures. Bundles `DerivedData/TestResults/20261013-184730-4678/{parallel,gallery}.xcresult`; report `docs/validations/discard-analysis.md`. 176 public inputs identical before/after (SHA256 5e55eac23e20667f1a8a62e998e5ba4087eac7434c9066567295b9765db44882); approved spec remains byte-intact. Independent review found no blocking behavior, architecture, security or documentation issues. V1–V3 failed gates preserved as historical evidence; no push/PR/merge."],
+    "notes": "El borrador no forma parte del historial. Descarta abandona exclusivamente provisional; foto origen y definitivos se conservan. Disponible útil/insuficiente/fallo local, commit Guardar protegido. Aprobación integral de spec explícita sucede sus notas históricas de borrador."
   },
   {
     "id": "delete-plant",

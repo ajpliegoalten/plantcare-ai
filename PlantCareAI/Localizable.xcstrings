@@ -1,88 +1,361 @@
 {
   "sourceLanguage" : "es",
   "strings" : {
-    "keepAnalysis.save" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Guardar análisis"}}}},
-    "keepAnalysis.saving" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Guardando análisis…"}}}},
-    "keepAnalysis.error" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"No pudimos guardar el análisis. El resultado sigue disponible; puedes reintentar el guardado local."}}}},
-    "keepAnalysis.stale" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"No pudimos confirmar el registro actual. Cierra y vuelve a abrir desde su foto; no se sobrescribirá ningún análisis."}}}},
-    "keepAnalysis.retry" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Reintentar guardado"}}}},
-    "keepAnalysis.discardFuture" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Descartar análisis estará disponible en una próxima versión. Cerrar sin guardar libera este resultado provisional."}}}},
-    "keepAnalysis.label" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Análisis guardado · orientación de IA"}}}},
-    "keepAnalysis.deleteWarning" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"También se eliminará el análisis guardado de esta fotografía."}}}},
-    "keepAnalysis.readError" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"No pudimos consultar los análisis guardados. Reintenta la lectura antes de analizar."}}}},
-    "keepAnalysis.retryRead" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Reintentar lectura"}}}},
-    "analysis.open" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Analizar foto"}}}},
-    "analysis.title" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Analizar foto"}}}},
-    "analysis.cancel" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Cancelar"}}}},
-    "analysis.close" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Cerrar análisis"}}}},
-    "analysis.photo" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Foto seleccionada para analizar"}}}},
-    "analysis.preparing" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Preparando contexto…"}}}},
-    "analysis.analyzing" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Analizando foto…"}}}},
-    "analysis.awaitingConsent" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Confirma el envío externo para continuar."}}}},
-    "analysis.retry" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Reintentar análisis"}}}},
-    "analysis.insufficient" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Evidencia insuficiente"}}}},
-    "analysis.observations" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Observaciones"}}}},
-    "analysis.causes" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Posibles causas"}}}},
-    "analysis.checks" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Comprobaciones prudentes"}}}},
-    "analysis.provisional" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Orientación de IA, no un diagnóstico. Este resultado es provisional y se libera al cerrar; no se guarda automáticamente."}}}},
-    "analysis.accept" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Aceptar análisis"}}}},
-    "analysis.discard" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Descartar análisis"}}}},
-    "analysis.futureActions" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Estas acciones estarán disponibles en una próxima versión."}}}},
-    "analysis.error.configuration" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"El análisis no está configurado o su destino ha cambiado. Cierra y revisa la configuración local antes de reintentar."}}}},
-    "analysis.error.definitive" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Esta foto ya tiene un análisis definitivo. No se enviará otra solicitud."}}}},
-    "analysis.error.notFound" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"La foto o planta ya no está disponible o ha cambiado. Cierra y vuelve a abrir desde su registro actual."}}}},
-    "analysis.error.photo" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"No pudimos leer una foto JPEG válida. La foto local no se ha eliminado. Reintenta cuando esté disponible."}}}},
-    "analysis.error.read" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"No pudimos leer el contexto o la autorización local. No lo tratamos como historial vacío. Puedes reintentar."}}}},
-    "analysis.error.context" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"La especie, ficha o ubicación exceden el presupuesto de contexto. Revisa esos datos antes de reintentar; no se han truncado ni enviado."}}}},
-    "analysis.error.timeout" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"El análisis tardó demasiado. Puedes reintentar explícitamente."}}}},
-    "analysis.error.network" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"No pudimos conectar con el servicio. Comprueba la conexión y reintenta."}}}},
-    "analysis.error.unauthorized" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"El servicio rechazó la autorización. Revisa la configuración local antes de reintentar."}}}},
-    "analysis.error.rateLimited" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"El servicio limita las solicitudes. Espera antes de reintentar."}}}},
-    "analysis.error.rejected" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"El servicio no pudo completar el análisis. Puedes reintentar; no se ha guardado ningún resultado."}}}},
-    "analysis.error.response" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"La respuesta no contiene un análisis válido completo. Puedes reintentar."}}}},
-    "analysis.error.consentCancelled" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"No se ha enviado la foto. Reintentar volverá a pedir autorización."}}}},
-    "analysis.consentOperation" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Esta solicitud analizará la foto seleccionada con el contexto pertinente de su ejemplar, no otras imágenes."}}}},
-    "analysis.consentBody" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Al aceptar autorizas a enviar al destino y modelo indicados: la foto que elijas para identificar; solo nombres confirmados y procedencia para generar cuidados; y, para analizar una foto seleccionada, esa única foto junto con especie, ficha actual, ubicación opcional, cuidados y notas anteriores al día de la foto, y textos de análisis aceptados de fotos anteriores cuando existan. No se envían imágenes anteriores, toda la colección, UUID internos ni conversaciones. Estos datos salen del dispositivo. El análisis es orientativo y provisional; no confirma un diagnóstico ni compara imágenes antiguas. La aceptación se recuerda en esta instalación para este destino, modelo y versión del aviso. Cancelar evita iniciar un nuevo envío, pero no retira bytes o costes de una solicitud ya enviada."}}}},
-    "timeline.delete.care.title" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Eliminar este cuidado?" } } } },
-    "timeline.delete.photo.title" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Eliminar esta fotografía?" } } } },
-    "timeline.delete.care.message" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Este registro se eliminará permanentemente del historial de esta planta. Esta acción no se puede deshacer." } } } },
-    "timeline.delete.photo.message" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Esta fotografía se eliminará permanentemente del historial de esta planta. Esta acción no se puede deshacer." } } } },
-    "timeline.delete.care.accessibility" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Eliminar cuidado" } } } },
-    "timeline.delete.photo.accessibility" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Eliminar fotografía" } } } },
-    "timeline.delete.care.error" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No pudimos eliminar el cuidado" } } } },
-    "timeline.delete.photo.error" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No pudimos eliminar la fotografía" } } } },
-    "timeline.delete.care.rollback" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No se ha eliminado este registro del almacenamiento local. El cuidado y sus notas siguen intactos." } } } },
-    "timeline.delete.photo.rollback" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No se ha eliminado esta fotografía del almacenamiento local. El registro y la imagen siguen intactos." } } } },
-    "timeline.delete.photo.recordRetained" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "El registro de la fotografía sigue en el historial." } } } },
-    "timeline.delete.readFailure" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No pudimos comprobar este registro en el almacenamiento local. Vuelve a cargar el historial antes de intentar eliminarlo." } } } },
-    "timeline.delete.stale" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Este registro ya no coincide con el almacenamiento local. Estamos consultando de nuevo el historial; vuelve a seleccionarlo antes de eliminar." } } } },
-    "timeline.delete.cancel" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Cancelar" } } } },
-    "timeline.delete.confirm" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Eliminar" } } } },
-    "timeline.delete.retry" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Reintentar" } } } },
-    "timeline.delete.close" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Cerrar error y cancelar eliminación" } } } },
-    "timeline.delete.busy" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Eliminando…" } } } },
-    "timeline.open" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Ver historial" } } } },
-    "timeline.subtitle" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Cuidados y fotografías" } } } },
-    "timeline.title" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Historial de cuidados" } } } },
-    "timeline.today" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Hoy" } } } },
-    "timeline.yesterday" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Ayer" } } } },
-    "timeline.noRecords" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Aún no hay cuidados ni fotografías adicionales" } } } },
-    "timeline.noCare" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin cuidados registrados" } } } },
-    "timeline.added" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Planta añadida" } } } },
-    "timeline.initial" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Incorporada a PlantCare AI con foto inicial" } } } },
-    "timeline.start" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Inicio del seguimiento" } } } },
-    "timeline.photograph" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Fotografía" } } } },
-    "timeline.error" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No pudimos cargar el historial" } } } },
-    "timeline.photoError" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No pudimos cargar esta foto" } } } },
-    "timeline.retry" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Reintentar" } } } },
-    "timeline.origin" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Has llegado al origen de este ejemplar" } } } },
-    "timeline.first" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Has llegado al primer registro de este ejemplar" } } } },
+    " " : {
+
+    },
     "%@ / %@" : {
       "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$@ / %2$@"
+          }
+        }
+      }
+    },
+    "analysis.accept" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aceptar análisis"
+          }
+        }
+      }
+    },
+    "analysis.analyzing" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analizando foto…"
+          }
+        }
+      }
+    },
+    "analysis.awaitingConsent" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirma el envío externo para continuar."
+          }
+        }
+      }
+    },
+    "analysis.cancel" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar"
+          }
+        }
+      }
+    },
+    "analysis.causes" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posibles causas"
+          }
+        }
+      }
+    },
+    "analysis.checks" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comprobaciones prudentes"
+          }
+        }
+      }
+    },
+    "analysis.close" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerrar análisis"
+          }
+        }
+      }
+    },
+    "analysis.consentBody" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Al aceptar autorizas a enviar al destino y modelo indicados: la foto que elijas para identificar; solo nombres confirmados y procedencia para generar cuidados; y, para analizar una foto seleccionada, esa única foto junto con especie, ficha actual, ubicación opcional, cuidados y notas anteriores al día de la foto, y textos de análisis aceptados de fotos anteriores cuando existan. No se envían imágenes anteriores, toda la colección, UUID internos ni conversaciones. Estos datos salen del dispositivo. El análisis es orientativo y provisional; no confirma un diagnóstico ni compara imágenes antiguas. La aceptación se recuerda en esta instalación para este destino, modelo y versión del aviso. Cancelar evita iniciar un nuevo envío, pero no retira bytes o costes de una solicitud ya enviada."
+          }
+        }
+      }
+    },
+    "analysis.consentOperation" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta solicitud analizará la foto seleccionada con el contexto pertinente de su ejemplar, no otras imágenes."
+          }
+        }
+      }
+    },
+    "analysis.discard" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descartar análisis"
+          }
+        }
+      }
+    },
+    "analysis.error.configuration" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El análisis no está configurado o su destino ha cambiado. Cierra y revisa la configuración local antes de reintentar."
+          }
+        }
+      }
+    },
+    "analysis.error.consentCancelled" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se ha enviado la foto. Reintentar volverá a pedir autorización."
+          }
+        }
+      }
+    },
+    "analysis.error.context" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La especie, ficha o ubicación exceden el presupuesto de contexto. Revisa esos datos antes de reintentar; no se han truncado ni enviado."
+          }
+        }
+      }
+    },
+    "analysis.error.definitive" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta foto ya tiene un análisis definitivo. No se enviará otra solicitud."
+          }
+        }
+      }
+    },
+    "analysis.error.network" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No pudimos conectar con el servicio. Comprueba la conexión y reintenta."
+          }
+        }
+      }
+    },
+    "analysis.error.notFound" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La foto o planta ya no está disponible o ha cambiado. Cierra y vuelve a abrir desde su registro actual."
+          }
+        }
+      }
+    },
+    "analysis.error.photo" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No pudimos leer una foto JPEG válida. La foto local no se ha eliminado. Reintenta cuando esté disponible."
+          }
+        }
+      }
+    },
+    "analysis.error.rateLimited" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El servicio limita las solicitudes. Espera antes de reintentar."
+          }
+        }
+      }
+    },
+    "analysis.error.read" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No pudimos leer el contexto o la autorización local. No lo tratamos como historial vacío. Puedes reintentar."
+          }
+        }
+      }
+    },
+    "analysis.error.rejected" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El servicio no pudo completar el análisis. Puedes reintentar; no se ha guardado ningún resultado."
+          }
+        }
+      }
+    },
+    "analysis.error.response" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La respuesta no contiene un análisis válido completo. Puedes reintentar."
+          }
+        }
+      }
+    },
+    "analysis.error.timeout" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El análisis tardó demasiado. Puedes reintentar explícitamente."
+          }
+        }
+      }
+    },
+    "analysis.error.unauthorized" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El servicio rechazó la autorización. Revisa la configuración local antes de reintentar."
+          }
+        }
+      }
+    },
+    "analysis.futureActions" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estas acciones estarán disponibles en una próxima versión."
+          }
+        }
+      }
+    },
+    "analysis.insufficient" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Evidencia insuficiente"
+          }
+        }
+      }
+    },
+    "analysis.observations" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Observaciones"
+          }
+        }
+      }
+    },
+    "analysis.open" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analizar foto"
+          }
+        }
+      }
+    },
+    "analysis.photo" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foto seleccionada para analizar"
+          }
+        }
+      }
+    },
+    "analysis.preparing" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preparando contexto…"
+          }
+        }
+      }
+    },
+    "analysis.provisional" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orientación de IA, no un diagnóstico. Este resultado es provisional y se libera al cerrar; no se guarda automáticamente."
+          }
+        }
+      }
+    },
+    "analysis.retry" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reintentar análisis"
+          }
+        }
+      }
+    },
+    "analysis.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analizar foto"
           }
         }
       }
@@ -1454,6 +1727,102 @@
     "Instrumented invocations: %@" : {
 
     },
+    "keepAnalysis.deleteWarning" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "También se eliminará el análisis guardado de esta fotografía."
+          }
+        }
+      }
+    },
+    "keepAnalysis.error" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No pudimos guardar el análisis. El resultado sigue disponible; puedes reintentar el guardado local."
+          }
+        }
+      }
+    },
+    "keepAnalysis.label" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Análisis guardado · orientación de IA"
+          }
+        }
+      }
+    },
+    "keepAnalysis.readError" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No pudimos consultar los análisis guardados. Reintenta la lectura antes de analizar."
+          }
+        }
+      }
+    },
+    "keepAnalysis.retry" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reintentar guardado"
+          }
+        }
+      }
+    },
+    "keepAnalysis.retryRead" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reintentar lectura"
+          }
+        }
+      }
+    },
+    "keepAnalysis.save" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardar análisis"
+          }
+        }
+      }
+    },
+    "keepAnalysis.saving" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardando análisis…"
+          }
+        }
+      }
+    },
+    "keepAnalysis.stale" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No pudimos confirmar el registro actual. Cierra y vuelve a abrir desde su foto; no se sobrescribirá ningún análisis."
+          }
+        }
+      }
+    },
     "lastWatering.card %@" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1841,6 +2210,367 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Reintentar lectura"
+          }
+        }
+      }
+    },
+    "Solicitudes: %@" : {
+
+    },
+    "timeline.added" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planta añadida"
+          }
+        }
+      }
+    },
+    "timeline.delete.busy" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminando…"
+          }
+        }
+      }
+    },
+    "timeline.delete.cancel" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar"
+          }
+        }
+      }
+    },
+    "timeline.delete.care.accessibility" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar cuidado"
+          }
+        }
+      }
+    },
+    "timeline.delete.care.error" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No pudimos eliminar el cuidado"
+          }
+        }
+      }
+    },
+    "timeline.delete.care.message" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este registro se eliminará permanentemente del historial de esta planta. Esta acción no se puede deshacer."
+          }
+        }
+      }
+    },
+    "timeline.delete.care.rollback" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se ha eliminado este registro del almacenamiento local. El cuidado y sus notas siguen intactos."
+          }
+        }
+      }
+    },
+    "timeline.delete.care.title" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Eliminar este cuidado?"
+          }
+        }
+      }
+    },
+    "timeline.delete.close" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerrar error y cancelar eliminación"
+          }
+        }
+      }
+    },
+    "timeline.delete.confirm" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar"
+          }
+        }
+      }
+    },
+    "timeline.delete.photo.accessibility" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar fotografía"
+          }
+        }
+      }
+    },
+    "timeline.delete.photo.error" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No pudimos eliminar la fotografía"
+          }
+        }
+      }
+    },
+    "timeline.delete.photo.message" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta fotografía se eliminará permanentemente del historial de esta planta. Esta acción no se puede deshacer."
+          }
+        }
+      }
+    },
+    "timeline.delete.photo.recordRetained" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El registro de la fotografía sigue en el historial."
+          }
+        }
+      }
+    },
+    "timeline.delete.photo.rollback" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se ha eliminado esta fotografía del almacenamiento local. El registro y la imagen siguen intactos."
+          }
+        }
+      }
+    },
+    "timeline.delete.photo.title" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Eliminar esta fotografía?"
+          }
+        }
+      }
+    },
+    "timeline.delete.readFailure" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No pudimos comprobar este registro en el almacenamiento local. Vuelve a cargar el historial antes de intentar eliminarlo."
+          }
+        }
+      }
+    },
+    "timeline.delete.retry" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reintentar"
+          }
+        }
+      }
+    },
+    "timeline.delete.stale" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este registro ya no coincide con el almacenamiento local. Estamos consultando de nuevo el historial; vuelve a seleccionarlo antes de eliminar."
+          }
+        }
+      }
+    },
+    "timeline.error" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No pudimos cargar el historial"
+          }
+        }
+      }
+    },
+    "timeline.first" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Has llegado al primer registro de este ejemplar"
+          }
+        }
+      }
+    },
+    "timeline.initial" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incorporada a PlantCare AI con foto inicial"
+          }
+        }
+      }
+    },
+    "timeline.noCare" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin cuidados registrados"
+          }
+        }
+      }
+    },
+    "timeline.noRecords" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay cuidados ni fotografías adicionales"
+          }
+        }
+      }
+    },
+    "timeline.open" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver historial"
+          }
+        }
+      }
+    },
+    "timeline.origin" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Has llegado al origen de este ejemplar"
+          }
+        }
+      }
+    },
+    "timeline.photoError" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No pudimos cargar esta foto"
+          }
+        }
+      }
+    },
+    "timeline.photograph" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fotografía"
+          }
+        }
+      }
+    },
+    "timeline.retry" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reintentar"
+          }
+        }
+      }
+    },
+    "timeline.start" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicio del seguimiento"
+          }
+        }
+      }
+    },
+    "timeline.subtitle" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuidados y fotografías"
+          }
+        }
+      }
+    },
+    "timeline.title" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Historial de cuidados"
+          }
+        }
+      }
+    },
+    "timeline.today" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoy"
+          }
+        }
+      }
+    },
+    "timeline.yesterday" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayer"
           }
         }
       }
