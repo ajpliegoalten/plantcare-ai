@@ -25,6 +25,9 @@ final class PlantPhotoAnalysisTestFixture: PlantPhotoAnalysisRepository, @unchec
 struct PlantPhotoAnalysisFixtureVerify: LoadPlantsUseCase {
     let base: any LoadPlantsUseCase
     let repository: LocalPlantRepository
+    // Opt-in expectations for discard E2E; Keep tests may legitimately add records.
+    var verifyDiscard = false
+    var preservingInitial = false
     func execute() async throws -> [Plant] {
         let plants = try await base.execute()
         guard plants.count == 2 else { throw PlantStorageError.storage }
@@ -39,6 +42,19 @@ struct PlantPhotoAnalysisFixtureVerify: LoadPlantsUseCase {
               try await repository.loadPhotos(for: b).isEmpty else { throw PlantStorageError.storage }
         let expectedJPEG = try await LocalIdentificationPhotoPreparer().prepare(StorageTestFixture.photo(2)).jpeg
         guard try await repository.loadPhoto(id: PlantTimelineFixtureLoad.id(10), for: a) == expectedJPEG else { throw PlantStorageError.photoCorrupt }
+        if verifyDiscard {
+            let own = try await repository.loadSavedAnalyses(for: a)
+            let other = try await repository.loadSavedAnalyses(for: b)
+            guard other.isEmpty else { throw PlantStorageError.storage }
+            if preservingInitial {
+                let content = PlantPhotoAnalysisContent(outcome: .analysis,
+                    observations: ["Observación de la foto seleccionada, sin diagnóstico."],
+                    possibleCauses: ["Podría influir la luz; no es una certeza."],
+                    checks: ["Comprueba el sustrato antes de decidir un cuidado. FINAL COMPROBACIÓN"])
+                guard own.count == 1, own[0].identity == .initial(a), own[0].plantID == a,
+                      own[0].photoDate == plants[0].createdAt, own[0].content == content else { throw PlantStorageError.storage }
+            } else { guard own.isEmpty else { throw PlantStorageError.storage } }
+        }
         return plants
     }
 }

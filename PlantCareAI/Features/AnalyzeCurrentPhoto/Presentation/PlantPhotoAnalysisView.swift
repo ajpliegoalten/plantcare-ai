@@ -61,8 +61,11 @@ struct PlantPhotoAnalysisView: View {
                                         .accessibilityIdentifier("analysisSaveRetry")
                                 }
                             }
-                            futureButton("analysis.discard", identifier: "analysisDiscard")
-                            Text("keepAnalysis.discardFuture").font(.footnote).accessibilityIdentifier("analysisFutureActions")
+                            Button { if viewModel.discard() { dismiss() } } label: {
+                                Text("analysis.discard").foregroundStyle(Color("TextSecondary"))
+                                    .frame(maxWidth: .infinity, minHeight: 52)
+                                    .background(Color("SurfaceMuted"), in: Capsule())
+                            }.buttonStyle(.plain).disabled(!viewModel.canDiscard).accessibilityIdentifier("analysisDiscard")
                         }
                     }
                     #if DEBUG && targetEnvironment(simulator)
@@ -95,13 +98,6 @@ struct PlantPhotoAnalysisView: View {
                     accept: viewModel.acceptConsent, cancel: viewModel.cancelConsent)
             }
             .onDisappear { viewModel.close() }
-    }
-    private func futureButton(_ title: LocalizedStringKey, identifier: String) -> some View {
-        Button {} label: {
-            Text(title).foregroundStyle(Color("TextSecondary"))
-                .frame(maxWidth: .infinity, minHeight: 52)
-                .background(Color("SurfaceMuted"), in: Capsule())
-        }.buttonStyle(.plain).disabled(true).accessibilityIdentifier(identifier)
     }
     private func section(_ title: LocalizedStringKey, _ values: [String]) -> some View {
         VStack(alignment: .leading, spacing: 12) {

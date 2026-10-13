@@ -52,7 +52,9 @@ struct PlantCareAIApp: App {
                     seed: arguments.contains("--storage-seed"), mode: arguments[position + 1])
             }
             if arguments.contains("--photo-analysis-verify") {
-                load = PlantPhotoAnalysisFixtureVerify(base: load, repository: repository)
+                load = PlantPhotoAnalysisFixtureVerify(base: load, repository: repository,
+                    verifyDiscard: arguments.contains("--discard-analysis-verify"),
+                    preservingInitial: arguments.contains("--discard-preserve-initial"))
             }
         }
         #endif

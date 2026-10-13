@@ -134,6 +134,16 @@ final class PlantPhotoAnalysisViewModel: ObservableObject, Identifiable {
 
     var canSave: Bool { !closed && state == .result && keep != nil && source != nil && saveState == .idle }
 
+    var canDiscard: Bool {
+        !closed && result != nil && (state == .result || state == .insufficientEvidence)
+            && saveState != .saving && saveState != .saved
+    }
+
+    @discardableResult func discard() -> Bool {
+        guard canDiscard else { return false }
+        return close()
+    }
+
     func save() {
         guard canSave || (!closed && saveState == .failed && !saveNeedsNewIntent),
               task == nil, let keep, let result, let source else { return }

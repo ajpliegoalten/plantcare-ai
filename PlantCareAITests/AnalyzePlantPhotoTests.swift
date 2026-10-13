@@ -27,13 +27,15 @@ actor AnalysisLocalSpy: PlantRepository, CareEventRepository, PlantPhotoReposito
 actor AnalysisProviderSpy: PlantPhotoAnalysisRepository {
     var calls: [(Data, PlantAnalysisContext)] = []
     var hold = false
+    var content = BuildPlantAnalysisContextTests.content
     var continuation: CheckedContinuation<Void, Never>?
     func analyze(jpeg: Data, context: PlantAnalysisContext) async throws -> PlantPhotoAnalysisContent {
         calls.append((jpeg, context))
         if hold { await withCheckedContinuation { continuation = $0 } }
-        return BuildPlantAnalysisContextTests.content
+        return content
     }
     func setHold() { hold = true }
+    func setContent(_ value: PlantPhotoAnalysisContent) { content = value }
     func release() { hold = false; continuation?.resume(); continuation = nil }
 }
 

@@ -20,6 +20,63 @@ final class LocalPlantPhotoAnalysisRepositoryTests: XCTestCase {
         KeepPlantPhotoAnalysisTests.snapshot(source: .init(id: .additional(photo.id), date: photo.occurredAt, createdAt: photo.createdAt))
     }
 
+    private struct DurableSnapshot: Equatable {
+        let plants: [Plant]
+        let care: [[CareEvent]]
+        let photos: [[PlantPhoto]]
+        let analyses: [[SavedPlantPhotoAnalysis]]
+        let jpeg: [Data]
+    }
+
+    private func durableSnapshot(_ repository: LocalPlantRepository) async throws -> DurableSnapshot {
+        let plants = try await repository.loadPlants()
+        var care: [[CareEvent]] = [], photos: [[PlantPhoto]] = [], analyses: [[SavedPlantPhotoAnalysis]] = [], jpeg: [Data] = []
+        for plant in plants {
+            care.append(try await repository.loadCareEvents(for: plant.id))
+            let ownPhotos = try await repository.loadPhotos(for: plant.id); photos.append(ownPhotos)
+            analyses.append(try await repository.loadSavedAnalyses(for: plant.id))
+            jpeg.append(try await repository.loadInitialPhoto(for: plant.id))
+            for photo in ownPhotos { jpeg.append(try await repository.loadPhoto(id: photo.id, for: plant.id)) }
+        }
+        return .init(plants: plants, care: care, photos: photos, analyses: analyses, jpeg: jpeg)
+    }
+
+    @MainActor
+    func testDiscardInitialAndAdditionalPreservesRealDiskTimelineDefinitivesCareAndJPEGAfterReopen() async throws {
+        try await seed(); let (photo, jpeg) = try await photo()
+        var repository: LocalPlantRepository? = LocalPlantRepository(root: root)
+        _ = try await repository!.savePhoto(photo, jpeg: jpeg)
+        let previous = KeepPlantPhotoAnalysisTests.snapshot(plant: StorageTestFixture.plant(2))
+        _ = try await repository!.saveAccepted(previous)
+        for event in legacyEvents(3) { _ = try await repository!.saveCareEvent(event) }
+        let before = try await durableSnapshot(repository!)
+        let scope = ExternalAIConsent(recipient: "discard-test", noticeVersion: 5), consent = ConsentDouble()
+        await consent.configure(value: scope)
+        let provider = AnalysisProviderSpy(); var callbacks = 0
+        for identity in [PlantPhotoIdentity.initial(photo.plantID), .additional(photo.id)] {
+            let use = AnalyzePlantPhoto(detail: .init(repository: repository!), care: repository!, photos: repository!,
+                initial: .init(repository: repository!), repository: provider, gate: .init(), acceptedReader: repository!, validateJPEG: { _ in })
+            let vm = PlantPhotoAnalysisViewModel(plantID: photo.plantID, identity: identity, analyze: use,
+                authorize: .init(repository: consent, scope: scope), destination: nil, keep: KeepPlantPhotoAnalysis(repository: repository!),
+                onSaved: { _ in callbacks += 1 }, configurationIsCurrent: { true })
+            vm.start()
+            for _ in 0..<500 { if vm.state == .result { break }; try await Task.sleep(for: .milliseconds(10)) }
+            XCTAssertEqual(vm.state, .result); XCTAssertTrue(vm.discard()); vm.save(); XCTAssertFalse(vm.discard())
+            let after = try await durableSnapshot(repository!); XCTAssertEqual(after, before)
+            let timeline = try await LoadPlantTimeline(detail: .init(repository: repository!), care: repository!, photos: repository!, analyses: repository!).snapshot(for: photo.plantID)
+            XCTAssertEqual(timeline?.entries.count, 7); XCTAssertTrue(timeline?.analyses.isEmpty == true)
+        }
+        XCTAssertEqual(callbacks, 0); let calls = await provider.calls; XCTAssertEqual(calls.count, 2)
+        repository = nil
+        let reopened = LocalPlantRepository(root: root)
+        let afterReopen = try await durableSnapshot(reopened); XCTAssertEqual(afterReopen, before)
+        let records = try await reopened.loadSavedAnalyses(for: previous.record.plantID); XCTAssertEqual(records, [previous.record])
+        let blocked = AnalyzePlantPhoto(detail: .init(repository: reopened), care: reopened, photos: reopened,
+            initial: .init(repository: reopened), repository: provider, gate: .init(), acceptedReader: reopened, validateJPEG: { _ in })
+        do { _ = try await blocked.prepare(plantID: previous.record.plantID, identity: previous.record.identity, queriedAt: Date(), timeZone: .current); XCTFail("definitive remains blocked") }
+        catch { XCTAssertEqual(error as? PlantPhotoAnalysisError, .alreadyAnalyzed) }
+    }
+
     func testDurableInitialAdditionalIdentityIsolationExactJPEGNoCareAndSingleTimelineHito() async throws {
         try await seed()
         var repository: LocalPlantRepository? = LocalPlantRepository(root: root)

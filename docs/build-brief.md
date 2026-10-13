@@ -18,6 +18,8 @@ Fotografiar o elegir imagen → obtener propuestas → seleccionar especie propu
 
 ## MVP obligatorio
 
+Delta discard-analysis: Descarta abandona el provisional de una foto ya local y vuelve al caller sin nuevo registro/JPEG ni borrar origen/definitivos. Disponible también con evidencia insuficiente o fallo local; durante commit Guardar se bloquea. Cierre durante preparación/petición invalida continuaciones, sin prometer retirada de bytes/costes externos.
+
 Eliminación de historial implementada por acción confirmada: cuidados y fotografías adicionales propios, nunca foto inicial/portada. Una adicional seleccionada en el carrusel sigue eliminable; Cancelar/× abandonan retry y no hay toast de éxito. Eliminar planta completa sigue siendo una capacidad posterior distinta.
 
 - Colección local y ficha por ejemplar con foto, nombre personalizado, especie confirmada, ubicación opcional, fecha de alta y ficha de cuidados propia. Estados vacíos y edición de nombre/ubicación.

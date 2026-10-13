@@ -1,5 +1,7 @@
 # Suite UI: cobertura y coste
 
+Delta discard-analysis: ocho AnalyzeCurrentPhotoUITests (dos nuevos y seis conservados/actualizados), Descarta activa sin ayuda futura; guards Keep busy y regresión retry local. Verificación durable real inicial/adicional, insuficiencia/fallo local/relaunch y definitivo previo preservado por opt-in Debug en docs/testing-analyze-current-photo.md; evidencia por impacto en docs/handoffs/discard-analysis.md. Sin cambios a init.sh, PhotosPicker ni timeouts/retries.
+
 Delta keep-analysis: nueva `KeepAnalysisUITests` y acciones actualizadas en AnalyzeCurrentPhotoUITests, sin retirar assertions de provisional/insuficiencia/consent/selección. Guardado inicial/adicional, relaunch, texto íntegro bajo foto, retry sin HTTP, busy/cierre/gesto y cascada/retained pager. Fixtures UUID reales y selección por impacto en docs/testing-keep-analysis.md; conteos antiguos son históricos. No cambios al harness ni PhotosPicker serial.
 
 H2 busy Care/Add: tras drag protegido se observa resolución del indicador de IO sin error, luego cierre nativo; no usar desaparición del sheet como única señal de commit. Se mantienen fixture12s/timeout10 por frontera y disabled/cancel/gesture/confirmation/verificación disco exactos. Dos fronteras tienen acumulado potencial20s, no el mismo deadline compuesto anterior. Diagnóstico natural temporal no reprodujo FAILED antiguo ni prueba causa exacta: lifecycle y límites en handoff. Producto/modifiers intactos, solo UItest reparado; gate independiente nuevo pendiente, FAILED295/296/PhotosNO conservado.
