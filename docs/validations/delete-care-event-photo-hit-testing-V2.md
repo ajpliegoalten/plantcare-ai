@@ -1,0 +1,44 @@
+# Independent validation V2 — delete-care-event photo hit-testing
+
+## Current verdict: ACCEPT
+
+H2 closed for current acceptance; no blocking findings or active repair brief. Original REVISE/FAILED295/296 and unknown historical root cause preserved. The changed synchronization is independently admissible under the functional contract and the complete final gate passes; no retrospective approval of the Failed run.
+
+Same feature/worktree/branch/base9db921d. Original REVISE `delete-care-event-photo-hit-testing.md` SHA256ce157942cf36a39a5389e7098f8a3f143cb21e7b34b8dc3d7848075736f88fb7 and FAILED295/296 bundle remain intact; prior spec/V2 accepted reports/historic failures unchanged. No original failure erased or attributed to flake. Parent alone will persist round accepted/local commit after final accept.
+
+## Independent assessment of H2 repair admissibility
+
+**Repair is admissible for final verification, not acceptance by confidence.** Only final executable input changed: PlantCareAIUITests.swift;155 other inputs including product/modifiers/fixtures/Domain/Data/Presentation unchanged. New156 manifest `repair-H2/inputs-final.json` SHA25698565abf0178ada4f2383a98814abeba462db1fe7d5f9cf6efc0cf0330a3059d matches actual files. Temporary Care fixture/VM/View instrumentation absent and those sources match previous inputs.
+
+Reviewed original failure line1764, exact new Care/Add methods, VM saving/saved/error publication and sheet onChange/interactiveDismissDisabled. Previously bar-absence wait started with real IO still running; now a protected-drag bar-exists assertion precedes a10s wait for saving indicator absence plus error-absence, followed by10s native bar-dismiss wait. Care still requires confirmation and exact disk count/payload verification; Add retains double-tap/disabled/cancel/source/gesture and exact JPEG+metadata verification. Neither success nor disappearance of spinner alone is accepted as commit. Error/failure/premature drag closure still fails. All original assertions retained, new negative assertions added, original fixture sleep12s intact, no retry/iterations/test timeout override/sleeps introduced.
+
+**Timing changes explicitly:** two windows permit up to20s after drag, not the old overall10s. This is a harness deadline change, not an identical deadline or proven old cause. It is justified by the actual functional contract: block editing/cancel/gesture until dispatched irreversible commit resolves; recognize successful commit and close natively thereafter. Approved specs/domain/design do not impose a combined10s commit+dismiss SLA. A12s deliberately delayed fixture and native animation observe distinct boundaries, not user latency acceptance; charging remaining IO to a dismissal-only window was not a specified product requirement. The change introduces an explicit bounded completion observation and preserves bounded10s close AFTER completion, rather than retrying the failed wait or weakening success/storage/lock assertions. If a10s end-to-end SLA had been required, this repair would not be acceptable; no such contract is established here.
+
+Diagnostic original1/1Passed **does not reproduce the historical fault**. Original synthetic lifecycle log corroborated: saving1791879640.444, fixtureenter9640.446, completed9652.455 (~12.009s), saved9652.475, dismissrequested9652.482, disappearedsaved9653.033; protected drag occurred before completion, native close about0.55s after request in this run. This demonstrates independent phases and normal behavior only. Earlier log-query405/Shutdown preserved; directed root boot solely to read completed diagnostic logs, not test rerun. Historical gate's actual final commit/error/native-dismiss state and exact reason remain unknown; no universal simulator/native bug-resolution claim.
+
+## Corroboration / reused review
+
+Original repaired5distinct IDs Passed (failed-repaired1 + modal-regressions4), zero failed/skipped/expected failures, individually corroborated in original xcresult trees. Natural diagnostic not added to final coverage. No validator focused reruns. Two existing PNGs independently opened: diagnostic6060A560 shows protected busy/disabled sheet after drag; finalE62AE53A shows actual dismissed sheet/detail confirmation with missing-photo retry. No manual smoke by agent; user's earlier manual success remains reported evidence, not diagnostic reproduction or independent gate.
+
+Prior same-validator photo six-renderer audit,39focused new/reused corroboration, seven photo-screen PNGs, architecture/security/scope/docs and preserved accessibility review reused on identical relevant155inputs; no new product change/secret sink/dependency. Nil-pager fallback remains static/build-only assessment, no runtime UI claim. New test sync and documentation change no architecture boundary. `docs/testing-ui` explicitly records two windows/potential20s/history.
+
+Unrelated catalog8cdcf42429d0664cf73eed1f0c92fd1d60d343a9c01fa286f429fc1654986dd8 remains untouched. Prior parsed semantic assessment reused:202existing translations exact,18 extractionState stale additions plus empty whitespace key, same root language/version. Parent can exclude it from repair commit on runtime semantic equivalence, not gate-on-HEAD-byte/compiled-byte equivalence. Do not edit/revert/stage catalog or run redundant HEAD build.
+
+## New final gate
+
+Single ORIGINAL `caffeinate -dius ./init.sh` default5workers/screenshots0, justified by changed executable UI boundary test invalidating FAILED295/296; parallel+Photos serial mandatory, no baseline/extra role gate. **Exit0 TEST BUILD SUCCEEDED and both TEST EXECUTE SUCCEEDED,298/298 distinct Passed=221unit+75parallelUI+2Photosserial**, zero failed/skipped/expected failures. Original bundles `DerivedData/TestResults/20261013-104157-12375/{parallel,gallery}.xcresult`;parallel296cases10:41:59.101–10:57:33.893+0200, gallery2cases10:57:42.375–10:59:11.451+0200 (2026-10-13). Independent summaries/original trees/log corroboration: all IDs once,296unique parallel IDs and2disjoint gallery IDs; agreed root in both bundles. H2 Carebusy, Addbusy, all11DeleteUIincluding4portrait,6TimelineUI and preserved functional/storage regressions pass. No runner crash/RequestDenied/FBProcessExit marker in log; historic failures/incidents not universally declared resolved. Original initPID12375 awaited kqueueNOTE_EXIT/completion notification, no polling/retries/iterations/focused reruns/extra gate.
+
+Before/after156 exact hashes98565abf…a3059d;catalog8cdcf…/originalREVISE/spec hashes rechecked intact. No xcodebuild/xctest/simctl/XCTRunner active at closure. Evidence directory `DerivedData/evidence/delete-care-event/validator-photo-hit-V2/` command/preflight/devices/inputs/log/exit/repair originals.
+
+Preflight fail-closed:156 hashes current exact, only UItest differs vs381423…; original REVISE/catalog hashes intact, ignored required secret config existence only/no read/hash/copy/overwrite. No xcodebuild/xctest/simctl/XCTRunner competitors; rootBooted exact init selector00BBB7EC-8DF7-400C-A08A-9D3C8818D886. Read-only queries light/large(normal), iPhone17Pro iOS26.2/23C54/Xcode26.2/17C52/macOS26.5.1/25F80. ProMax/other devices/settings intact, no API real/matrices/permission/tool config changes. CLI fallback because tools catalog lacks MCP. Static diff--check/PBX plutil pass; no remaining lifecycle diagnostic flags/prints in executable source.
+
+## Handoff
+
+Independent verdict **accept**. No accepted/status/stage/commit edits by validator. Parent persists active round accepted and authorized LOCAL repair commit only after accept, preserving original report/failures and unrelated catalog unstaged; no push/PR/merge and no gate again for docs/role changes only.
+
+Optional user smoke unchanged: portrait card photo+whitespace→correct detail; pager swipe/previous/next, Edit/Care/Add fields and controls; history second photo trash cancel/fresh confirm with initial protected and relaunch/other plant preserved. User confirmation earlier not inflated into agent scenarios. No new human smoke/physical camera/iCloud/expanded SE/text/VoiceOver/appearance matrices executed or automatically required. Residual O(n)metadata/viewportcache3/concurrency2/logicalcleanup/singlewriter limits unchanged.
+
+
+## Acceptance follow-up
+
+Parent may persist this active round accepted and authorized LOCAL repair commit, preserving original reports/spec/histories and excluding unrelated catalog from commit while leaving worktree bytes untouched. No push/PR/merge or repeated gate for documentary/state-only changes. Catalog exclusion is semantic runtime equivalence, not tested-HEAD-byte identity. User manual success remains reported, no smoke newly executed by validator. No implementation repair brief remains active; old report brief is historical superseded by this verdict, not deleted.

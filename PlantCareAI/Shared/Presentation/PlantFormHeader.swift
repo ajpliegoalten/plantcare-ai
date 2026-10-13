@@ -14,6 +14,8 @@ struct PlantFormHeader: View {
             }
             .frame(width: photoSize, height: photoSize).background(Color("Surface"))
             .clipShape(RoundedRectangle(cornerRadius: 12)).accessibilityHidden(true)
+            // Decorative bitmap only; form fields/actions stay interactive.
+            .allowsHitTesting(false)
             VStack(alignment: .leading, spacing: 4) {
                 Text(name).font(.headline).accessibilityIdentifier("plantFormName")
                 Text(subtitle).font(.subheadline).foregroundStyle(Color("TextSecondary"))

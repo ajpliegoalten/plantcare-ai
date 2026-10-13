@@ -24,9 +24,11 @@ enum StorageTestFixture {
         // Locally drawn test motif, not stock photography or production seed data.
         let format = UIGraphicsImageRendererFormat()
         format.scale = 1
-        return UIGraphicsImageRenderer(size: CGSize(width: 640, height: 480), format: format).image { context in
+        let size = ProcessInfo.processInfo.arguments.contains("--storage-portrait-photos")
+            ? CGSize(width: 640, height: 1280) : CGSize(width: 640, height: 480)
+        return UIGraphicsImageRenderer(size: size, format: format).image { context in
             (index == 1 ? UIColor(red: 0.85, green: 0.45, blue: 0.55, alpha: 1) : UIColor(red: 0.25, green: 0.65, blue: 0.7, alpha: 1)).setFill()
-            context.fill(CGRect(x: 0, y: 0, width: 640, height: 480))
+            context.fill(CGRect(origin: .zero, size: size))
             UIColor.brown.setFill()
             context.fill(CGRect(x: 240, y: 320, width: 160, height: 120))
             UIColor.darkGray.setStroke()

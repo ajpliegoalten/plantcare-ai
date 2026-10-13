@@ -1,5 +1,7 @@
 # Restricciones operativas
 
+- MUST: acotar el hit-testing de fotos `scaledToFill` al marco visible después de dimensionarlo (`contentShape`); el recorte visual por sí solo no lo limita. `allowsHitTesting(false)` solo en el subárbol decorativo, nunca en la tarjeta navegable, pager, retry o acciones del formulario. Motivo: un portrait recortado interceptaba la papelera del historial; las fotos y espacios de tarjeta deben seguir abriendo el detalle y el pager conservar swipe/controles.
+
 - MUST: proteger la foto inicial de alta/portada por identidad discriminada y filtro Data, no por selección efímera del carrusel. Una adicional seleccionada sigue eliminable; nunca dirigir un delete adicional a Photos/Plant ni intercambiar UUID de entidades. Motivo: eliminación de historial aprobada (ADR012).
 
 - MUST: invocar todo transporte externo de IA dentro de `AuthorizeExternalAIOperation`, nunca usando solo una bandera UI. Antes de conectar un proveedor real, sustituir el destinatario provisional, actualizar aviso y renovar alcance; renovar también ante cambios materiales de destinatario, datos o finalidades. Motivo: la aceptación actual no autoriza silenciosamente un proveedor aún desconocido (ADR 003).

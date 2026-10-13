@@ -1761,8 +1761,14 @@ final class CareEventsUITests: PlantCareAIUITestCase {
         let bar = app.navigationBars["Registrar cuidado"]
         bar.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.5)).press(forDuration: 0.05,
             thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.9)))
+        XCTAssertTrue(bar.exists) // Native drag cannot dismiss a saving form.
+        // Commit resolution and native dismissal are separate boundaries. Do
+        // not spend the dismissal window on the remaining 12-second writer.
+        XCTAssertTrue(app.activityIndicators["careSaving"].waitForNonExistence(timeout: 10))
+        XCTAssertFalse(app.staticTexts["careError"].exists)
         XCTAssertTrue(bar.waitForNonExistence(timeout: 10))
         XCTAssertTrue(app.descendants(matching: .any)["careConfirmation"].firstMatch.exists)
+        capture("watering-busy-committed-dismissed", app: app)
         verify(app, id: id, count: 1)
     }
 }
@@ -2196,6 +2202,10 @@ final class AddPlantPhotoUITests: PlantCareAIUITestCase {
         let bar = app.navigationBars["Añadir foto"]
         bar.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.5)).press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.9)))
         XCTAssertTrue(bar.exists); capture("additional-busy", app: app)
+        // Same two-boundary contract as care: resolve real IO first, then
+        // observe native dismissal without charging IO to its wait window.
+        XCTAssertTrue(app.descendants(matching: .any)["additionalPhotoSaving"].firstMatch.waitForNonExistence(timeout: 10))
+        XCTAssertFalse(app.staticTexts["additionalPhotoError"].exists)
         XCTAssertTrue(app.navigationBars["Añadir foto"].waitForNonExistence(timeout: 10)); verify(app, id: id, expected: "A:0;")
     }
     func testReadFailuresMetadataAndOwnImageRetryKeepDateAndCareAvailable() {
@@ -2429,6 +2439,175 @@ final class PlantTimelineUITests: PlantCareAIUITestCase {
 }
 
 final class DeleteCareEventUITests: PlantCareAIUITestCase {
+    func testPortraitCardPhotoAndWhitespaceNavigateAndPagerCropKeepsSwipesAndButtons() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--storage-test-id", isolatedID(), "--storage-seed", "--storage-portrait-photos",
+            "--timeline-fixture", "twoPhotoHitTesting", "-AppleLanguages", "(es)"]
+        app.launch()
+        let card = app.buttons["plantCard-\(plantID(1))"]
+        XCTAssertTrue(card.waitForExistence(timeout: 10))
+        expectation(for: NSPredicate(format: "value BEGINSWITH %@", "Foto cargada"), evaluatedWith: card); waitForExpectations(timeout: 5)
+        // The whole NavigationLink remains active, including its cropped photo
+        // and empty trailing space inside the metadata padding.
+        for offset in [CGVector(dx: 0.5, dy: 0.2), CGVector(dx: 0.95, dy: 0.85)] {
+            for _ in 0..<8 {
+                let point = card.coordinate(withNormalizedOffset: offset).screenPoint
+                let viewport = app.scrollViews["collectionViewport"].frame
+                if point.y > viewport.minY + 15 && point.y < min(viewport.maxY, app.frame.maxY) - 70 { break }
+                if point.y <= viewport.minY + 15 { app.swipeDown() } else { app.swipeUp() }
+            }
+            XCTAssertTrue(card.isHittable)
+            let point = card.coordinate(withNormalizedOffset: offset).screenPoint
+            XCTAssertTrue(app.scrollViews["collectionViewport"].frame.contains(point))
+            capture("portrait-card-tap-\(offset.dy)", app: app)
+            card.coordinate(withNormalizedOffset: offset).tap()
+            XCTAssertTrue(app.staticTexts["selectedPlant-\(plantID(1))"].waitForExistence(timeout: 5))
+            XCTAssertEqual(app.staticTexts["selectedPlant-\(plantID(1))"].label, "Fixture 1")
+            if offset.dy == 0.2 { back(app) }
+        }
+        let initial = app.descendants(matching: .any)["detailPhoto-\(plantID(1))"].firstMatch
+        expectation(for: NSPredicate(format: "value == %@", "Foto cargada"), evaluatedWith: initial); waitForExpectations(timeout: 5)
+        XCTAssertEqual(initial.frame.width / initial.frame.height, 4.0 / 3.0, accuracy: 0.01)
+        let next = app.buttons["plantPhotoNext-\(plantID(1))"], previous = app.buttons["plantPhotoPrevious-\(plantID(1))"]
+        XCTAssertTrue(next.isHittable); next.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        let second = app.descendants(matching: .any)["plantPhotoImage-" + key(10, photo: true)].firstMatch
+        XCTAssertTrue(second.waitForExistence(timeout: 5))
+        expectation(for: NSPredicate(format: "value BEGINSWITH %@", "Foto cargada"), evaluatedWith: second); waitForExpectations(timeout: 5)
+        XCTAssertEqual(second.frame.width / second.frame.height, 4.0 / 3.0, accuracy: 0.01)
+        XCTAssertLessThan(second.frame.maxY, next.frame.minY)
+        capture("portrait-pager-crop-and-controls", app: app)
+        // Gesture starts in the actual image, not the surrounding pager label.
+        second.swipeLeft()
+        let third = app.descendants(matching: .any)["plantPhotoImage-" + key(11, photo: true)].firstMatch
+        XCTAssertTrue(third.waitForExistence(timeout: 5)); XCTAssertFalse(next.isEnabled)
+        third.swipeRight(); XCTAssertTrue(second.waitForExistence(timeout: 5))
+        XCTAssertTrue(previous.isHittable); previous.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        XCTAssertTrue(app.staticTexts["plantPhotoDate-\(plantID(1))"].label.hasPrefix("Foto inicial"))
+        XCTAssertFalse(previous.isEnabled)
+    }
+
+    func testPortraitDecorativeFormHeadersKeepEditCareAndAdditionalPreviewControlsInteractive() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--storage-test-id", isolatedID(), "--storage-seed", "--storage-portrait-photos",
+            "--additional-photo-fixture", "normal", "-AppleLanguages", "(es)"]
+        app.launch(); let card = app.buttons["plantCard-\(plantID(1))"]
+        XCTAssertTrue(card.waitForExistence(timeout: 10)); card.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.2)).tap()
+        XCTAssertTrue(app.staticTexts["selectedPlant-\(plantID(1))"].waitForExistence(timeout: 5))
+        let edit = app.buttons["editPlant-\(plantID(1))"]; XCTAssertTrue(edit.isHittable); edit.tap()
+        let name = app.textViews["editPlantName"].exists ? app.textViews["editPlantName"] : app.textFields["editPlantName"]
+        XCTAssertTrue(name.waitForExistence(timeout: 5)); XCTAssertTrue(name.isHittable)
+        name.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap(); name.typeText(" temporal")
+        XCTAssertTrue((name.value as? String)?.contains("temporal") == true)
+        capture("portrait-edit-header-and-field", app: app)
+        app.buttons["cancelEditPlant"].tap(); XCTAssertTrue(name.waitForNonExistence(timeout: 5))
+        let care = app.buttons["detailRegisterCare-\(plantID(1))"]; reveal(care, in: app); care.tap()
+        let kind = app.buttons["careKind-repotting"]
+        XCTAssertTrue(kind.waitForExistence(timeout: 5)); XCTAssertTrue(kind.isHittable)
+        kind.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        XCTAssertTrue(kind.isSelected)
+        let note = app.textViews["careNote"]; reveal(note, in: app); note.tap(); note.typeText("Nota sin guardar")
+        XCTAssertEqual(note.value as? String, "Nota sin guardar")
+        capture("portrait-care-header-and-controls", app: app)
+        app.buttons["cancelCare"].tap(); XCTAssertTrue(note.waitForNonExistence(timeout: 5))
+        let add = app.buttons["detailAddPhoto-\(plantID(1))"]
+        for _ in 0..<8 where !add.isHittable { app.swipeDown() }; XCTAssertTrue(add.isHittable); add.tap()
+        let fixture = app.buttons["fixture-additional-B"]; reveal(fixture, in: app); fixture.tap()
+        let preview = app.images["additionalPhotoPreview"]
+        XCTAssertTrue(preview.waitForExistence(timeout: 5))
+        expectation(for: NSPredicate(format: "value == %@", "80 × 120"), evaluatedWith: preview); waitForExpectations(timeout: 5)
+        let camera = app.buttons["additionalPhotoCamera"]; reveal(camera, in: app)
+        XCTAssertTrue(camera.isHittable); XCTAssertTrue(camera.isEnabled)
+        camera.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        XCTAssertTrue(app.staticTexts["La cámara no está disponible en este dispositivo."].waitForExistence(timeout: 5))
+        let gallery = app.buttons["additionalPhotoGallery"]; XCTAssertTrue(gallery.isEnabled)
+        XCTAssertTrue(app.buttons["saveAdditionalPhoto"].isEnabled)
+        capture("portrait-additional-preview-and-source-controls", app: app)
+        app.buttons["cancelAdditionalPhoto"].tap(); XCTAssertTrue(preview.waitForNonExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["selectedPlant-\(plantID(1))"].label, "Fixture 1")
+    }
+    func testPortraitHitRegionsRemainInsideCropAndAllFiveHeadersWorkAfterScrolling() {
+        let app = XCUIApplication(); launch(app, id: isolatedID(), mode: "twoPhotoHitTesting"); open(app)
+        // Distinct geometry regression: keep both photos, scroll the older one
+        // toward the top, then test all care headers and return to the newest.
+        for number in [10, 1, 2, 3, 11] {
+            let photo = number >= 10, button = trash(key(number, photo: number >= 10), app: app)
+            XCTAssertTrue(button.waitForExistence(timeout: 5))
+            for _ in 0..<8 {
+                let y = button.frame.midY, top = app.navigationBars["Historial de cuidados"].frame.maxY
+                // At the bottom, the final care header cannot move into the
+                // upper half. Only photos require that distinct scroll position.
+                let bottom = photo ? top + 350 : app.frame.maxY - 100
+                if y > top + 70 && y < bottom { break }
+                let down = y <= top + 70
+                app.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: down ? 0.35 : 0.75))
+                    .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: down ? 0.6 : 0.5)))
+            }
+            XCTAssertTrue(button.isHittable); XCTAssertTrue(button.isEnabled)
+            XCTAssertGreaterThan(button.frame.midY, app.navigationBars["Historial de cuidados"].frame.maxY + 70)
+            XCTAssertLessThan(button.frame.midY, photo ? app.navigationBars["Historial de cuidados"].frame.maxY + 350 : app.frame.maxY - 100)
+            if photo {
+                let image = app.descendants(matching: .any)["timelinePhoto-" + key(number, photo: true)].firstMatch
+                expectation(for: NSPredicate(format: "value == %@", "Foto cargada"), evaluatedWith: image); waitForExpectations(timeout: 5)
+                XCTAssertGreaterThan(image.frame.minY, button.frame.maxY)
+                XCTAssertEqual(image.frame.width / image.frame.height, 4.0 / 3.0, accuracy: 0.01)
+                capture("portrait-crop-\(number)-scrolled", app: app)
+            }
+            button.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+            let alert = app.alerts[photo ? "¿Eliminar esta fotografía?" : "¿Eliminar este cuidado?"]
+            XCTAssertTrue(alert.waitForExistence(timeout: 5))
+            capture("portrait-header-\(number)-cancel-alert", app: app)
+            alert.buttons["Cancelar"].tap(); XCTAssertTrue(alert.waitForNonExistence(timeout: 5))
+            XCTAssertTrue(button.exists)
+        }
+        XCTAssertFalse(app.buttons["deleteTimeline-initial-" + plantID(1)].exists)
+    }
+    func testTwoPortraitAdditionalPhotosDirectTrashCentersAfterScrollAndSelectedDeletion() {
+        let app = XCUIApplication(), id = isolatedID()
+        launch(app, id: id, mode: "twoPhotoHitTesting")
+        let next = app.buttons["plantPhotoNext-\(plantID(1))"]
+        XCTAssertTrue(next.waitForExistence(timeout: 5)); next.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["plantPhotoImage-" + key(10, photo: true)].firstMatch.waitForExistence(timeout: 5))
+        open(app)
+        // No confirm/reveal/tap helper: move the second photo's actual button
+        // into unobscured content, assert its real frame, tap its center once.
+        for number in [10, 11] {
+            let button = trash(key(number, photo: true), app: app)
+            XCTAssertTrue(button.waitForExistence(timeout: 5))
+            for _ in 0..<8 {
+                let y = button.frame.midY, top = app.navigationBars["Historial de cuidados"].frame.maxY
+                if y > top + 50 && y < app.frame.maxY - 100 { break }
+                let down = y <= top + 50
+                app.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: down ? 0.35 : 0.75))
+                    .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: down ? 0.6 : 0.45)))
+            }
+            let image = app.descendants(matching: .any)["timelinePhoto-" + key(number, photo: true)].firstMatch
+            expectation(for: NSPredicate(format: "value == %@", "Foto cargada"), evaluatedWith: image)
+            waitForExpectations(timeout: 5)
+            XCTAssertTrue(button.isHittable); XCTAssertTrue(button.isEnabled)
+            XCTAssertTrue(app.frame.contains(button.frame))
+            XCTAssertGreaterThan(button.frame.midY, app.navigationBars["Historial de cuidados"].frame.maxY + 50)
+            XCTAssertLessThan(button.frame.midY, app.frame.maxY - 100)
+            print("DIRECT TRASH \(number) frame=\(button.frame) image=\(image.frame)")
+            capture("two-photo-\(number)-before-direct-tap", app: app)
+            button.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+            let alert = app.alerts["¿Eliminar esta fotografía?"]
+            XCTAssertTrue(alert.waitForExistence(timeout: 5))
+            capture("two-photo-\(number)-confirmation", app: app)
+            alert.buttons["Cancelar"].tap()
+            XCTAssertTrue(alert.waitForNonExistence(timeout: 5)); XCTAssertTrue(button.exists)
+            button.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+            XCTAssertTrue(alert.waitForExistence(timeout: 5)); alert.buttons["Eliminar"].tap()
+            XCTAssertTrue(button.waitForNonExistence(timeout: 5))
+        }
+        for number in [1, 2, 3] { XCTAssertTrue(trash(key(number), app: app).exists) }
+        XCTAssertFalse(app.buttons["deleteTimeline-initial-" + plantID(1)].exists)
+        historyBack(app)
+        XCTAssertTrue(app.staticTexts["plantPhotoDate-\(plantID(1))"].label.hasPrefix("Foto inicial"))
+        app.terminate(); launch(app, id: id, seed: false, mode: "twoPhotoHitTesting"); open(app)
+        for number in [10, 11] { XCTAssertFalse(trash(key(number, photo: true), app: app).exists) }
+        for number in [1, 2, 3] { XCTAssertTrue(trash(key(number), app: app).exists) }
+        XCTAssertFalse(app.buttons["deleteTimeline-initial-" + plantID(1)].exists)
+    }
     private var captured: Set<String> = []
     private func captureOnce(_ name: String, app: XCUIApplication) {
         if captured.insert(name).inserted { capture(name, app: app) }

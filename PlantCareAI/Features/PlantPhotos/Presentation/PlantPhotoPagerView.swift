@@ -54,6 +54,7 @@ struct PlantPhotoPagerView: View {
             case .loaded(let image):
                 Image(uiImage: image).resizable().scaledToFill()
                     .frame(width: size.width, height: size.height).clipped()
+                    .contentShape(Rectangle())
             case .idle, .loading:
                 ProgressView().accessibilityIdentifier("plantPhotoLoading-\(descriptor.id.stableKey)")
             case .failed:
@@ -66,6 +67,7 @@ struct PlantPhotoPagerView: View {
             }
         }
         .frame(width: size.width, height: size.height).clipped()
+        .contentShape(Rectangle())
         .accessibilityElement(children: .contain)
         .accessibilityLabel(isInitial ? Text("detail.photo.initial") : Text("plantPhotos.add"))
         .accessibilityValue(imageValue(state, isInitial: isInitial))

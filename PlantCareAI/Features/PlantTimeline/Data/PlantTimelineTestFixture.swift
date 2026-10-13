@@ -1,5 +1,6 @@
 #if DEBUG && targetEnvironment(simulator)
 import Foundation
+import UIKit
 
 // Opt-in UUID-scoped real-store seed. No sidecar or fabricated history on read.
 struct PlantTimelineFixtureLoad: LoadPlantsUseCase {
@@ -27,6 +28,27 @@ struct PlantTimelineFixtureLoad: LoadPlantsUseCase {
     func execute() async throws -> [Plant] {
         let plants = try await base.execute()
         if seed, let plant = plants.first {
+            if mode == "twoPhotoHitTesting" {
+                // Isolated manual-report shape: two portrait additional photos,
+                // repotting, watering, other, then the protected initial photo.
+                for (offset, kind) in [CareEvent.Kind.repotting, .watering, .other].enumerated() {
+                    _ = try await repository.saveCareEvent(CareEvent(id: Self.id(offset + 1), plantID: plant.id,
+                        kind: kind, occurredAt: Date(timeIntervalSince1970: 86400), note: "Nota propia " + kind.rawValue,
+                        createdAt: Date(timeIntervalSince1970: Double(204000 - offset)), timeZoneIdentifier: "Africa/Abidjan"))
+                }
+                let format = UIGraphicsImageRendererFormat(); format.scale = 1
+                let bytes = UIGraphicsImageRenderer(size: CGSize(width: 480, height: 960), format: format).image { context in
+                    UIColor.systemTeal.setFill(); context.fill(CGRect(x: 0, y: 0, width: 480, height: 960))
+                    UIColor.systemGreen.setFill(); context.fill(CGRect(x: 120, y: 240, width: 240, height: 480))
+                }.jpegData(compressionQuality: 0.9)!
+                let prepared = try await LocalIdentificationPhotoPreparer().prepare(bytes)
+                for index in 10...11 {
+                    _ = try await repository.savePhoto(PlantPhoto(id: Self.id(index), plantID: plant.id,
+                        occurredAt: Date(timeIntervalSince1970: 86400), createdAt: Date(timeIntervalSince1970: Double(205000 + index)),
+                        timeZoneIdentifier: "Africa/Abidjan", width: prepared.width, height: prepared.height), jpeg: prepared.jpeg)
+                }
+                return plants
+            }
             if mode != "photosOnly" && mode != "scrollPhotos" {
                 for event in Self.events(for: plant.id) { _ = try await repository.saveCareEvent(event) }
             }

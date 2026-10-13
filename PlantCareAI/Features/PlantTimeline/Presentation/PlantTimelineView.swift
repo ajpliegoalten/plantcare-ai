@@ -214,7 +214,11 @@ struct PlantTimelineView: View {
                                 } else if viewModel.state(for: identity) == .loading {
                                     ProgressView().accessibilityLabel(Text("detail.photo.loading"))
                                 } else { Image(systemName: "photo").accessibilityHidden(true) }
-                            }.frame(width: geometry.size.width, height: geometry.size.height)
+                             }.frame(width: geometry.size.width, height: geometry.size.height)
+                                 // scaledToFill can extend beyond the visible crop;
+                                 // clipping alone does not constrain hit testing.
+                                 // A portrait must not intercept its trash header.
+                                 .contentShape(Rectangle())
                         }
                     }.clipped().clipShape(RoundedRectangle(cornerRadius: 12))
                     .background {
