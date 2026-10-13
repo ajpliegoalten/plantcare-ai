@@ -32,8 +32,12 @@ struct PlantPhotoPagerView: View {
                 }
             }
             if let analyze {
-                Button(action: analyze) { Label("analysis.open", systemImage: "sparkles").frame(maxWidth: .infinity, minHeight: 44) }
-                    .buttonStyle(.bordered).buttonBorderShape(.capsule).accessibilityIdentifier("detailAnalyzePhoto-\(plantID)")
+                Button(action: analyze) {
+                    Label("analysis.open", systemImage: "sparkles").frame(maxWidth: .infinity, minHeight: 44)
+                        .foregroundStyle(Color("Surface"))
+                }
+                    .buttonStyle(.borderedProminent).buttonBorderShape(.capsule).tint(Color("CareTerracotta"))
+                    .accessibilityIdentifier("detailAnalyzePhoto-\(plantID)")
             }
             switch viewModel.metadataState {
             case .idle, .loading: ProgressView("plantPhotos.loadingMetadata")

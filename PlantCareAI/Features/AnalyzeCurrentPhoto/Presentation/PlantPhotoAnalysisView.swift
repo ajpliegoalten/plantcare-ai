@@ -27,8 +27,12 @@ struct PlantPhotoAnalysisView: View {
                             .accessibilityIdentifier("analysisPhotoDate")
                     }
                     switch viewModel.state {
-                    case .preparing: ProgressView("analysis.preparing").accessibilityIdentifier("analysisPreparing")
-                    case .analyzing: ProgressView("analysis.analyzing").accessibilityIdentifier("analysisBusy")
+                    case .preparing:
+                        ProgressView("analysis.preparing").frame(maxWidth: .infinity, alignment: .center)
+                            .accessibilityIdentifier("analysisPreparing")
+                    case .analyzing:
+                        ProgressView("analysis.analyzing").frame(maxWidth: .infinity, alignment: .center)
+                            .accessibilityIdentifier("analysisBusy")
                     case .awaitingConsent: Text("analysis.awaitingConsent")
                     case .failed:
                         Text(LocalizedStringKey(viewModel.errorKey)).accessibilityIdentifier("analysisError")

@@ -67,6 +67,8 @@ No crear pantalla independiente de actividad en el MVP. El detalle puede mostrar
 
 ### Análisis de fotografía — delta aprobado 2026-10-13
 
+Reparación visual autorizada posterior sobre7556ad7: CTA del pager «Analizar foto» cápsula prominente **CareTerracotta #904C33** con texto Surface blanco (contraste sRGB6,43:1); activo y distinto de Añadir foto verde y controles futuros neutrales deshabilitados. Preparing/Analyzing centran su ProgressView a ancho disponible; resultado/error/cabecera/fecha conservan alineación y comportamiento. No cambios de tokens, catálogo, Domain/Data ni funciones futuras.
+
 «Analizar foto» con sparkles bajo controles del pager; fotos adicionales del timeline separan esa acción de papelera, inicial también la tiene, cuidados no. No cambiar portada/orden/selección al cerrar. Modal blanco nativo Analizar foto, radio24/detent0.95/grabber, scroll/margen20/spacing16: PlantFormHeader56 con snapshot de foto **seleccionada**, nombre/especie, preview4:3/radio22 y fecha. Preparando contexto/Analizando foto no conversacional; foto visible, fallo con Reintentar explícito. Resultado completo Observaciones/Posibles causas/Comprobaciones prudentes, insuficiencia distinta de error y aviso provisional/orientativo. Aceptar análisis/Descartar análisis visibles DESHABILITADOS con «Estas acciones estarán disponibles en una próxima versión». Cancelar/×/gesto cierres técnicos que liberan provisional sin guardar/borrar, disponibles durante espera. Reabrir nunca restaura análisis. Objetivos≥44 y soporte adaptable sin matrices ampliadas rutinarias. Aviso v5 declara foto única/contexto anterior, no imágenes anteriores (ADR013).
 
 ### Historial por ejemplar: delta autorizado (2026-10-12)

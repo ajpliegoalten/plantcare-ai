@@ -2254,7 +2254,9 @@ final class AnalyzeCurrentPhotoUITests: PlantCareAIUITestCase {
         XCTAssertTrue(app.staticTexts["selectedPlant-\(plantID(1))"].waitForExistence(timeout: 5))
     }
     private func pagerOpen(_ app: XCUIApplication) {
-        let action = app.buttons["detailAnalyzePhoto-\(plantID(1))"]; reveal(action, in: app); action.tap()
+        let action = app.buttons["detailAnalyzePhoto-\(plantID(1))"]; reveal(action, in: app)
+        XCTAssertTrue(action.isEnabled); XCTAssertGreaterThanOrEqual(action.frame.height, 44)
+        capture("analysis-active-pager-cta", app: app); action.tap()
         // On first use the consent sheet immediately covers the analysis bar.
         // Assert either of the two actual modal states, not a hidden ancestor.
         expectation(for: NSPredicate { _, _ in
@@ -2337,6 +2339,17 @@ final class AnalyzeCurrentPhotoUITests: PlantCareAIUITestCase {
     func testBusyCanCloseCancelAndGestureNoLateResultReopenFresh() {
         let app = XCUIApplication(), id = isolatedID(); launch(app, id: id, mode: "busy")
         pagerOpen(app); accept(app); XCTAssertTrue(app.otherElements["analysisBusy"].waitForExistence(timeout: 5) || app.activityIndicators["analysisBusy"].exists)
+        let loadingText = app.staticTexts["Analizando foto…"]
+        XCTAssertTrue(loadingText.waitForExistence(timeout: 5))
+        // SwiftUI merges the label into the ActivityIndicator; its internal
+        // StaticText may have an empty/non-finite AX frame. Measure real controls.
+        let loading = app.activityIndicators["analysisBusy"]
+        XCTAssertTrue(loading.exists); XCTAssertEqual(loading.label, "Analizando foto…")
+        XCTAssertGreaterThan(loading.frame.width, 0); XCTAssertTrue(loading.frame.midX.isFinite)
+        XCTAssertEqual(loading.frame.midX, app.frame.midX, accuracy: 4)
+        let spinner = loading.activityIndicators.firstMatch
+        XCTAssertTrue(spinner.exists); XCTAssertGreaterThan(spinner.frame.width, 0)
+        XCTAssertEqual(spinner.frame.midX, app.frame.midX, accuracy: 4)
         capture("analysis-busy-photo-visible", app: app); close(app)
         pagerOpen(app); XCTAssertTrue(app.staticTexts["Analizando foto…"].waitForExistence(timeout: 5)); XCTAssertFalse(app.staticTexts["analysisProvisional"].exists)
         close(app, button: "analysisCancel")
