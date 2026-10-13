@@ -29,6 +29,33 @@ spacing:
 
 # Dirección visual
 
+## Icono y lanzamiento (app-launch-branding, aprobado 2026-10-13)
+
+El usuario aprueba el brote sobre fondo verde enlazado en su HTML de splash,
+incluyendo ampliar el original JPEG512×512 a AppIcon PNG1024×1024 opaco.
+Esta aprobación establece una fuente de marca para este recurso concreto;
+no autoriza copiar otros logos o sustituir las decisiones de las pantallas existentes.
+La ampliación no añade detalle. iOS aplica la máscara del icono instalado.
+
+`Resources/LaunchScreen.storyboard` reproduce la composición estática: fondo
+crema `Background`, halos botánicos discretos, icono144pt con radio32/sombra,
+PlantCare32pt bold, cápsula AI y «Inteligencia botánica en tu bolsillo para un
+cuidado consciente.». Texto nativo de sistema; la cápsula/halo son artwork local.
+No hay fuentes web, barras dibujadas, progreso, sincronización ni espera artificial.
+Su duración y transición a Mis plantas pertenecen a iOS; no hay splash SwiftUI.
+Recursos usados en Debug y Release, sin descargar imágenes durante el arranque.
+
+Delta explícito del usuario: la aplicación se limita a Portrait y fuerza Light
+mediante Info.plist en Debug y Release, independientemente de la preferencia de
+apariencia del sistema. No añadir opción de modo noche ni giro horizontal.
+El diagnóstico inicial iOS26.2 detectó que un bundle sin sello de recursos
+rechaza el snapshot del storyboard (Security-67056). Después de la prueba
+ad hoc aislada y del rechazo inicial conservado en PROGRESS, el usuario autoriza
+una excepción de firma ad hoc únicamente para app/iphonesimulator Debug/Release.
+No requiere cuenta Apple ni cambia firma de dispositivo; no es un postbuild
+manual ni un splash retenido. La preview UIKit no sustituye la captura del
+LaunchScreen del sistema. La cuenta/provisioning/certificado reales son futuros.
+
 ## Fuentes y autoridad
 
 El HTML de «Mis plantas» y su bloque «Brand & Style» de Stitch fueron compartidos en la conversación y el usuario aceptó **la pantalla HTML como referencia visual principal de esa pantalla**. No hay archivo ni captura incorporados al repositorio: este documento conserva las decisiones extraídas para futuros agentes. El texto «Brand & Style» sirve solo de inspiración donde no contradiga la pantalla, el brief o el enfoque iOS nativo. No copiar Tailwind, Material Symbols, enlaces de imágenes, logo generado ni componentes web; fotografías y logotipo del prototipo no tienen aquí una fuente de recursos aprobada. No convertir otras pantallas de Stitch en referencia sin revisarlas.
