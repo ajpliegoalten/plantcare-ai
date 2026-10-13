@@ -125,7 +125,7 @@ final class OpenAICompatibleSpeciesIdentificationRepositoryTests: XCTestCase {
         XCTAssertNotEqual(original.scope, .current)
         let changed = try IdentificationAPIConfiguration(baseURL: "https://other.invalid/v2", model: "another/vision-model", key: nil)
         XCTAssertNotEqual(changed.scope, original.scope)
-        XCTAssertEqual(original.scope.noticeVersion, 4)
+        XCTAssertEqual(original.scope.noticeVersion, 5)
         XCTAssertEqual(changed.notice.destination, changed.endpoint.absoluteString)
         XCTAssertEqual(changed.notice.model, changed.model)
         for base in ["http://inference.devexpert.io/v1", "https://inference.devexpert.io:0/v1", "https://inference.devexpert.io:65536/v1", "https://inference.devexpert.io/v1/chat/completions", "https://inference.devexpert.io/v1/chat/completions/", "https://inference.devexpert.io/v1?x=1", "https://user@inference.devexpert.io/v1", "https://inference.devexpert.io/v1/../v1", "https://inference.devexpert.io/v1%2f", "https://inference.devexpert.io//v1", "https://inference.devexpert.io/v1#x", "https://inference.devexpert.io\\other/v1", "https://inference.devexpert.io/v1 ", "https://"] {

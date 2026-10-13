@@ -32,6 +32,20 @@ final class PlantTimelineViewModel: ObservableObject {
     private var request: Task<Void, Never>?
     private var boundary: Task<Void, Never>?
     private var observers: [NSObjectProtocol] = []
+    var makeAnalysis: ((UUID, PlantPhotoIdentity) -> PlantPhotoAnalysisViewModel?)?
+    @Published var analysisEditor: PlantPhotoAnalysisViewModel?
+
+    func requestAnalysis(_ entry: PlantTimelineEntry) {
+        guard state == .loaded, deletionState == .idle, analysisEditor == nil,
+              entry.plantID == plantID, entries.contains(entry) else { return }
+        let identity: PlantPhotoIdentity
+        switch entry {
+        case .initial(let plant): identity = .initial(plant.id)
+        case .additional(let photo): identity = .additional(photo.id)
+        case .care: return
+        }
+        analysisEditor = makeAnalysis?(plantID, identity)
+    }
 
     init(plantID: UUID, load: any LoadPlantTimelineUseCase, photos: PlantTimelinePhotoViewModel,
          deleteCare: (any DeleteCareEventUseCase)? = nil, deletePhoto: (any DeletePlantPhotoUseCase)? = nil,
@@ -108,6 +122,7 @@ final class PlantTimelineViewModel: ObservableObject {
     }
 
     func disappear() {
+        analysisEditor?.close(); analysisEditor = nil
         active = false; generation += 1; request?.cancel(); request = nil
         boundary?.cancel(); boundary = nil
         observers.forEach(NotificationCenter.default.removeObserver); observers = []
@@ -116,7 +131,7 @@ final class PlantTimelineViewModel: ObservableObject {
     }
 
     func requestDeletion(_ entry: PlantTimelineEntry) {
-        guard state == .loaded, deletionState == .idle, entry.plantID == plantID,
+        guard state == .loaded, deletionState == .idle, analysisEditor == nil, entry.plantID == plantID,
               entries.contains(entry) else { return }
         switch entry {
         case .initial: return

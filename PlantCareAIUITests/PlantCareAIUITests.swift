@@ -334,7 +334,7 @@ final class IdentificationResultUITests: PlantCareAIUITestCase {
         app.launch(); assertCards(app)
         prepareConsentPhoto(app); requestConsent(app)
         let body = app.staticTexts["externalAIConsentBody"]
-        XCTAssertTrue(body.label.contains("destino indicado")); XCTAssertFalse(body.label.contains("DevExpert"))
+        XCTAssertTrue(body.label.contains("destino y modelo indicados")); XCTAssertFalse(body.label.contains("DevExpert"))
         XCTAssertFalse(body.label.contains("todavía no"))
         XCTAssertEqual(app.staticTexts["externalAIActualDestination"].label, "https://vision-one.invalid/v1/chat/completions")
         XCTAssertEqual(app.staticTexts["externalAIActualModel"].label, "vision-test-a")
@@ -1098,7 +1098,7 @@ final class CareSheetUITests: PlantCareAIUITestCase {
             if mode == "renew" {
                 XCTAssertTrue(app.navigationBars["Antes de usar IA externa"].waitForExistence(timeout: 8))
                 let body = app.staticTexts["externalAIConsentBody"]
-                XCTAssertTrue(body.label.contains("no volvemos a enviar la foto"))
+                XCTAssertTrue(body.label.contains("solo nombres confirmados y procedencia para generar cuidados"))
                 app.buttons["cancelExternalAIConsent"].tap()
                 XCTAssertTrue(app.staticTexts["careSheetError"].waitForExistence(timeout: 5))
                 assertCareCount(0, app: app)
@@ -2244,6 +2244,140 @@ final class AddPlantPhotoUITests: PlantCareAIUITestCase {
     }
 }
 
+final class AnalyzeCurrentPhotoUITests: PlantCareAIUITestCase {
+    private let additional = "additional-10000000-0000-0000-0000-000000000010"
+    private func launch(_ app: XCUIApplication, id: String, mode: String = "success", seed: Bool = true, extra: [String] = []) {
+        app.launchArguments = ["--storage-test-id", id, "--consent-test-id", id, "--photo-analysis-fixture", mode,
+            "--timeline-fixture", "mixed", "-AppleLanguages", "(es)"] + (seed ? ["--storage-seed"] : ["--storage-verify", "--photo-analysis-verify"]) + extra
+        app.launch(); let card = app.buttons["plantCard-\(plantID(1))"]
+        XCTAssertTrue(card.waitForExistence(timeout: 10)); card.tap()
+        XCTAssertTrue(app.staticTexts["selectedPlant-\(plantID(1))"].waitForExistence(timeout: 5))
+    }
+    private func pagerOpen(_ app: XCUIApplication) {
+        let action = app.buttons["detailAnalyzePhoto-\(plantID(1))"]; reveal(action, in: app)
+        XCTAssertTrue(action.isEnabled); XCTAssertGreaterThanOrEqual(action.frame.height, 44)
+        capture("analysis-active-pager-cta", app: app); action.tap()
+        // On first use the consent sheet immediately covers the analysis bar.
+        // Assert either of the two actual modal states, not a hidden ancestor.
+        expectation(for: NSPredicate { _, _ in
+            app.buttons["analysisClose"].exists || app.buttons["cancelExternalAIConsent"].exists
+        }, evaluatedWith: app)
+        waitForExpectations(timeout: 5)
+    }
+    private func accept(_ app: XCUIApplication) {
+        XCTAssertTrue(app.navigationBars["Antes de usar IA externa"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["externalAIConsentBody"].label.contains("No se envían imágenes anteriores"))
+        XCTAssertEqual(app.staticTexts["externalAIActualDestination"].label, "https://analysis.invalid/v1/chat/completions")
+        XCTAssertEqual(app.staticTexts["externalAIActualModel"].label, "analysis-fixture")
+        capture("analysis-consent-v5", app: app)
+        let button = app.buttons["acceptExternalAIConsent"]; reveal(button, in: app); button.tap()
+    }
+    private func count(_ expected: Int, _ app: XCUIApplication) {
+        XCTAssertEqual(app.staticTexts["analysisInvocationCount"].label, "Solicitudes: \(expected)")
+    }
+    private func result(_ app: XCUIApplication) {
+        let provisional = app.staticTexts["analysisProvisional"]
+        XCTAssertTrue(provisional.waitForExistence(timeout: 8)); reveal(provisional, in: app)
+        let accept = app.buttons["analysisAccept"], discard = app.buttons["analysisDiscard"]
+        reveal(accept, in: app); XCTAssertFalse(accept.isEnabled); XCTAssertEqual(accept.label, "Aceptar análisis")
+        reveal(discard, in: app); XCTAssertFalse(discard.isEnabled); XCTAssertEqual(discard.label, "Descartar análisis")
+        XCTAssertTrue(app.staticTexts["analysisFutureActions"].exists); XCTAssertGreaterThanOrEqual(discard.frame.height, 44)
+        capture("analysis-result-disabled-actions", app: app)
+    }
+    private func close(_ app: XCUIApplication, button: String = "analysisClose") {
+        app.buttons[button].tap(); XCTAssertTrue(app.navigationBars["Analizar foto"].waitForNonExistence(timeout: 5))
+    }
+    private func history(_ app: XCUIApplication) {
+        let action = app.buttons["detailHistory-\(plantID(1))"]; reveal(action, in: app); action.tap()
+        XCTAssertTrue(app.navigationBars["Historial de cuidados"].waitForExistence(timeout: 5))
+    }
+    func testInitialPagerLongResultDisabledActionsCloseReopenNewRequestNoProvisionalCache() {
+        let app = XCUIApplication(), id = isolatedID(); launch(app, id: id, mode: "long")
+        pagerOpen(app); accept(app)
+        let observation = app.staticTexts.matching(NSPredicate(format: "label ENDSWITH %@", "FINAL OBSERVACIÓN")).firstMatch
+        XCTAssertTrue(observation.waitForExistence(timeout: 8)); XCTAssertGreaterThan(observation.label.count, 800)
+        capture("analysis-long-observations", app: app); result(app); count(1, app)
+        XCTAssertEqual(app.staticTexts["analysisSelectedIdentity"].label, "initial-" + plantID(1))
+        close(app); pagerOpen(app); result(app); count(2, app)
+        XCTAssertFalse(app.navigationBars["Antes de usar IA externa"].exists); close(app, button: "analysisCancel")
+        app.terminate(); launch(app, id: id, seed: false)
+        pagerOpen(app); result(app); count(1, app); close(app)
+    }
+    func testAdditionalPagerAndBothTimelinePhotoActionsPreserveSelectionAndDisk() {
+        let app = XCUIApplication(), id = isolatedID(); launch(app, id: id)
+        let next = app.buttons["plantPhotoNext-\(plantID(1))"]; XCTAssertTrue(next.waitForExistence(timeout: 5)); next.tap()
+        let selectedDate = app.staticTexts["plantPhotoDate-\(plantID(1))"].label
+        pagerOpen(app); accept(app); result(app); count(1, app)
+        XCTAssertEqual(app.staticTexts["analysisSelectedIdentity"].label, additional); close(app)
+        XCTAssertEqual(app.staticTexts["plantPhotoDate-\(plantID(1))"].label, selectedDate)
+        history(app)
+        let action = app.buttons["analyzeTimeline-" + additional]; reveal(action, in: app); action.tap()
+        result(app); count(2, app); XCTAssertEqual(app.staticTexts["analysisSelectedIdentity"].label, additional); close(app)
+        XCTAssertTrue(app.navigationBars["Historial de cuidados"].exists)
+        let initial = app.buttons["analyzeTimeline-initial-" + plantID(1)]; reveal(initial, in: app); initial.tap()
+        result(app); count(3, app); XCTAssertEqual(app.staticTexts["analysisSelectedIdentity"].label, "initial-" + plantID(1)); close(app)
+        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "analyzeTimeline-care-")).count, 0)
+        app.navigationBars["Historial de cuidados"].buttons["BackButton"].tap()
+        let date = app.staticTexts["plantPhotoDate-\(plantID(1))"]
+        XCTAssertTrue(date.waitForExistence(timeout: 5)); XCTAssertEqual(date.label, selectedDate)
+        app.terminate(); launch(app, id: id, seed: false)
+        XCTAssertTrue(app.staticTexts["plantPhotoDate-\(plantID(1))"].label.hasPrefix("Foto inicial"))
+        history(app); XCTAssertTrue(app.buttons["analyzeTimeline-" + additional].exists)
+    }
+    func testConsentCancellationAndGestureZeroRequestsThenExplicitRetry() {
+        let app = XCUIApplication(), id = isolatedID(); launch(app, id: id)
+        pagerOpen(app); XCTAssertTrue(app.buttons["cancelExternalAIConsent"].waitForExistence(timeout: 5)); app.buttons["cancelExternalAIConsent"].tap()
+        XCTAssertTrue(app.staticTexts["analysisError"].waitForExistence(timeout: 5)); count(0, app)
+        capture("analysis-consent-cancel-error", app: app)
+        let retry = app.buttons["analysisRetry"]; reveal(retry, in: app); retry.tap()
+        let bar = app.navigationBars["Antes de usar IA externa"]; XCTAssertTrue(bar.waitForExistence(timeout: 5))
+        bar.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.5)).press(forDuration: 0.05,
+            thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.9)))
+        XCTAssertTrue(bar.waitForNonExistence(timeout: 5)); XCTAssertTrue(app.staticTexts["analysisError"].exists); count(0, app)
+        reveal(retry, in: app); retry.tap(); accept(app); result(app); count(1, app); close(app)
+    }
+    func testBusyCanCloseCancelAndGestureNoLateResultReopenFresh() {
+        let app = XCUIApplication(), id = isolatedID(); launch(app, id: id, mode: "busy")
+        pagerOpen(app); accept(app); XCTAssertTrue(app.otherElements["analysisBusy"].waitForExistence(timeout: 5) || app.activityIndicators["analysisBusy"].exists)
+        let loadingText = app.staticTexts["Analizando foto…"]
+        XCTAssertTrue(loadingText.waitForExistence(timeout: 5))
+        // SwiftUI merges the label into the ActivityIndicator; its internal
+        // StaticText may have an empty/non-finite AX frame. Measure real controls.
+        let loading = app.activityIndicators["analysisBusy"]
+        XCTAssertTrue(loading.exists); XCTAssertEqual(loading.label, "Analizando foto…")
+        XCTAssertGreaterThan(loading.frame.width, 0); XCTAssertTrue(loading.frame.midX.isFinite)
+        XCTAssertEqual(loading.frame.midX, app.frame.midX, accuracy: 4)
+        let spinner = loading.activityIndicators.firstMatch
+        XCTAssertTrue(spinner.exists); XCTAssertGreaterThan(spinner.frame.width, 0)
+        XCTAssertEqual(spinner.frame.midX, app.frame.midX, accuracy: 4)
+        capture("analysis-busy-photo-visible", app: app); close(app)
+        pagerOpen(app); XCTAssertTrue(app.staticTexts["Analizando foto…"].waitForExistence(timeout: 5)); XCTAssertFalse(app.staticTexts["analysisProvisional"].exists)
+        close(app, button: "analysisCancel")
+        pagerOpen(app); XCTAssertTrue(app.staticTexts["Analizando foto…"].waitForExistence(timeout: 5))
+        let bar = app.navigationBars["Analizar foto"]
+        bar.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.5)).press(forDuration: 0.05,
+            thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.9)))
+        XCTAssertTrue(bar.waitForNonExistence(timeout: 5)); XCTAssertFalse(app.staticTexts["analysisProvisional"].exists)
+        app.terminate(); launch(app, id: id, seed: false)
+    }
+    func testNetworkFailureExplicitRetryNoAutomaticRetryAndDiskExactRelaunch() {
+        let app = XCUIApplication(), id = isolatedID(); launch(app, id: id, mode: "failOnce")
+        pagerOpen(app); accept(app); XCTAssertTrue(app.staticTexts["analysisError"].waitForExistence(timeout: 5)); count(1, app)
+        XCTAssertTrue(app.staticTexts["analysisError"].label.contains("conectar")); XCTAssertFalse(app.staticTexts["analysisProvisional"].exists)
+        capture("analysis-network-error", app: app)
+        let retry = app.buttons["analysisRetry"]; reveal(retry, in: app); retry.tap(); result(app); count(2, app); close(app)
+        app.terminate(); launch(app, id: id, seed: false)
+    }
+    func testInsufficientEvidencePrudentResultAndMissingPhotoLocalErrorNoRequest() {
+        let app = XCUIApplication(), id = isolatedID(); launch(app, id: id, mode: "insufficient")
+        pagerOpen(app); accept(app); result(app); XCTAssertTrue(app.staticTexts["Evidencia insuficiente"].exists)
+        count(1, app); capture("analysis-insufficient", app: app); close(app)
+        let missingID = isolatedID(); app.terminate(); launch(app, id: missingID, extra: ["--storage-photo-missing"])
+        pagerOpen(app); XCTAssertTrue(app.staticTexts["analysisError"].waitForExistence(timeout: 5)); count(0, app)
+        XCTAssertFalse(app.navigationBars["Antes de usar IA externa"].exists); close(app)
+    }
+}
+
 final class PlantTimelineUITests: PlantCareAIUITestCase {
     private func timelineBack(_ app: XCUIApplication) {
         let native = app.navigationBars["Historial de cuidados"].buttons["BackButton"]
@@ -2510,7 +2644,19 @@ final class DeleteCareEventUITests: PlantCareAIUITestCase {
         capture("portrait-care-header-and-controls", app: app)
         app.buttons["cancelCare"].tap(); XCTAssertTrue(note.waitForNonExistence(timeout: 5))
         let add = app.buttons["detailAddPhoto-\(plantID(1))"]
-        for _ in 0..<8 where !add.isHittable { app.swipeDown() }; XCTAssertTrue(add.isHittable); add.tap()
+        let detailBar = app.navigationBars["Detalle de planta"]
+        // A new pager action shifts scroll positions. AX hittable alone can
+        // include a control beneath the navigation overlay: expose its tap center.
+        for _ in 0..<8 {
+            if add.isHittable && add.frame.midY > detailBar.frame.maxY + 44 && add.frame.midY < app.frame.maxY - 70 { break }
+            let down = add.frame.midY <= detailBar.frame.maxY + 44
+            app.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: down ? 0.4 : 0.7))
+                .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: down ? 0.65 : 0.4)))
+        }
+        XCTAssertTrue(add.isHittable); XCTAssertGreaterThan(add.frame.midY, detailBar.frame.maxY + 44)
+        XCTAssertLessThan(add.frame.midY, app.frame.maxY - 70)
+        capture("analysis-regression-add-visible-target", app: app); add.tap()
+        XCTAssertTrue(app.navigationBars["Añadir foto"].waitForExistence(timeout: 5))
         let fixture = app.buttons["fixture-additional-B"]; reveal(fixture, in: app); fixture.tap()
         let preview = app.images["additionalPhotoPreview"]
         XCTAssertTrue(preview.waitForExistence(timeout: 5))

@@ -1,5 +1,9 @@
 # Brief de producto: PlantCare AI
 
+## Delta aprobado: analyze-current-photo (2026-10-13, ADR013)
+
+Cualquier foto local seleccionada (inicial/adicional/retroactiva) desde pager/timeline abre mismo modal por identidad exacta. Foto única con especie/ficha/ubicación actuales y solo cuidados de días anteriores al de foto en zona gregoriana fija, máximo20/90días/notas500. Futuro contexto hasta5análisis definitivos TEXTUALES de fotos anteriores por fecha origen, nunca imágenes anteriores/provisionales; hoy no existe lector/persistencia y no se fabrica. JSON16KiB/omisiones explícitas/base excesiva falla local. Aviso v5 destino/modelo/finalidad/contexto, no hereda v4; rechazo/fallo registro ceroHTTP. Un envío por intención, cancelación/retry explícitos. Resultado prudente completo/insuficiencia válida, provisional solo modal; cierre libera sin escribir/borrar. Aceptar/Descartar visibles inactivos hasta sus features, solo definitivo futuro bloquea reanalizar. keep-analysis guardará/renderizará texto bajo foto sin duplicación/aportará lector real. Sin API real de agentes sin autorización específica.
+
 ## Problema y usuario
 
 Una persona con plantas en casa puede buscar una identificación o consejos generales, pero esos consejos no tienen memoria de los cuidados y cambios de **su** planta. PlantCare AI es un asistente iOS personal que convierte una identificación orientativa en una ficha con historial, para contextualizar observaciones posteriores. Usuario del MVP: una sola persona no experta que gestiona sus propias plantas en un iPhone; no hay cuentas, colaboración ni especialistas.

@@ -1,5 +1,11 @@
 # Modelo de dominio
 
+## Análisis fotográfico provisional (ADR013, 2026-10-13)
+
+PlantPhotoAnalysis efímero vincula plantID/identidad discriminada/queriedAt/revisión/outcome/tres arrays. No entidad SwiftData, aceptación, evento, foto nueva ni cambio de ficha. Solo modal; cerrar libera. Definitivo futuro bloquea entradas/despacho; provisional/fallo/cancel no. Mismo JPEG con identidades distintas no deduplica. keep-analysis aportará lector real/persistencia/texto bajo foto sin duplicarla; discard-analysis rechazo sin borrar foto origen.
+
+Contexto especie/ficha actuales/ubicación aportada, no reconstrucción histórica; solo cuidados/textos definitivos de fotos de días gregorianos estrictamente anteriores en zona fija por intención/retry. Inicial fecha de alta, no EXIF. Care occurredAt DESC/createdAt DESC/UUID ASC, hasta20en90días previos/notas prefix500 declarado sin mutar local. Hasta5textos completos por fecha de foto DESC/identidad ASC, no generación/aceptación como captura ni JPEG históricos. Presupuesto16KiB elimina IA antigua antes de cuidados antiguos y cuenta omisiones; base excesiva falla. Lector aún ausente explícito, no fallos convertidos en vacío. Aviso/alcance v5 renovado obligatorio.
+
 ## Conceptos y relaciones
 
 - **Planta**: ejemplar local con identificador propio, nombre personalizado, foto principal, especie confirmada (nombre común/científico cuando estén disponibles), ubicación opcional y fecha de alta. Pertenece al único usuario local del dispositivo.

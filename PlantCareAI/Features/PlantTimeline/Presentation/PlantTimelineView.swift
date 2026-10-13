@@ -68,7 +68,8 @@ struct PlantTimelineView: View {
             Text(viewModel.deletionContext + "\n\n" + String(localized: viewModel.deletionIsPhoto ? "timeline.delete.photo.message" : "timeline.delete.care.message"))
         }
         .onAppear { viewModel.appear() }
-        .onDisappear { viewModel.disappear() }
+        .sheet(item: $viewModel.analysisEditor) { PlantPhotoAnalysisView(viewModel: $0) }
+        .onDisappear { if viewModel.analysisEditor == nil { viewModel.disappear() } }
         .onChange(of: scenePhase) { _, phase in if phase == .active { viewModel.foreground() } }
     }
 
@@ -96,6 +97,7 @@ struct PlantTimelineView: View {
                         }
                     }
                     TimelinePhotoError(viewModel: viewModel.photos, identity: entry.id)
+                    analysisButton(entry)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading).padding(16)
@@ -125,6 +127,7 @@ struct PlantTimelineView: View {
         HStack {
             Text(title).font(.headline)
             Spacer(minLength: 8)
+            if entry.isPhoto { analysisButton(entry) }
             Button { viewModel.requestDeletion(entry) } label: {
                 // One-point margin avoids a transformed AX frame rounding below44pt.
                 Image(systemName: "trash").frame(minWidth: 45, minHeight: 45)
@@ -134,6 +137,15 @@ struct PlantTimelineView: View {
                 Text("timeline.delete.care.accessibility") + Text(" ") + Text(title))
             .accessibilityIdentifier("deleteTimeline-" + entry.id.stableKey)
             .disabled(viewModel.deletionState != .idle)
+        }
+    }
+
+    @ViewBuilder private func analysisButton(_ entry: PlantTimelineEntry) -> some View {
+        if viewModel.makeAnalysis != nil {
+            Button { viewModel.requestAnalysis(entry) } label: {
+                Label("analysis.open", systemImage: "sparkles").font(.subheadline).frame(minHeight: 45)
+            }.accessibilityIdentifier("analyzeTimeline-" + entry.id.stableKey)
+                .disabled(viewModel.deletionState != .idle || viewModel.analysisEditor != nil)
         }
     }
 

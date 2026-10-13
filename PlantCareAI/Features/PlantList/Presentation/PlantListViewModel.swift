@@ -23,6 +23,7 @@ final class PlantListViewModel: ObservableObject {
     var makeAddPhoto: ((Plant, @escaping @MainActor (PlantPhoto, UIImage) -> Void) -> AddPlantPhotoViewModel)?
     var makePhotoPager: ((Plant) -> PlantPhotoPagerViewModel)?
     var makeTimeline: ((UUID) -> PlantTimelineViewModel)?
+    var makeAnalysis: ((UUID, PlantPhotoIdentity) -> PlantPhotoAnalysisViewModel?)?
     private var details: [UUID: WeakDetail] = [:]
     private final class WeakDetail {
         weak var value: PlantDetailViewModel?
@@ -88,6 +89,7 @@ final class PlantListViewModel: ObservableObject {
         }
         detail.makeAddPhoto = makeAddPhoto
         detail.makePhotoPager = makePhotoPager
+        detail.makeAnalysis = makeAnalysis
         details[id] = WeakDetail(detail)
         return detail
     }
