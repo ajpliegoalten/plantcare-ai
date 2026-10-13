@@ -284,6 +284,7 @@ struct PlantDetailView: View {
                             }
                         }
                         .frame(width: geometry.size.width, height: geometry.size.height)
+                        .contentShape(Rectangle())
                     }
                 }
                 .clipped()

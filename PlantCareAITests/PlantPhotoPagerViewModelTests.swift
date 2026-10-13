@@ -3,6 +3,51 @@ import XCTest
 
 @MainActor
 final class PlantPhotoPagerViewModelTests: XCTestCase {
+    func testDeleteSuspendedSelectedFallbackInitialAndNonselectedPreservesIdentityAndCache() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let repository = LocalPlantRepository(root: root), fixture = try await HistoryDeletionSeed.make(repository)
+        let second = PlantTimelineFixtureLoad.photo(for: fixture.plant.id)
+        _ = try await repository.savePhoto(second, jpeg: fixture.jpeg)
+        let vm = PlantPhotoPagerViewModel(plant: fixture.plant, loadMetadata: LoadPlantPhotos(repository: repository),
+            loadAdditional: LoadPlantPhoto(repository: repository), loadInitial: LoadInitialPlantPhoto(repository: repository))
+        vm.appear(); await wait { vm.isComplete }; await wait { vm.initialImage != nil }
+        let initial = vm.initialImage
+        vm.select(.additional(second.id)); await wait { if case .loaded = vm.imageState { return true }; return false }
+        vm.disappear(preservingSelection: true)
+        _ = try await repository.deletePhoto(fixture.photo); vm.deleted(fixture.photo)
+        XCTAssertEqual(vm.selected, .additional(second.id)); XCTAssertEqual(vm.descriptors.count, 2)
+        XCTAssertTrue(vm.initialImage === initial)
+        vm.appear(); await wait { vm.isComplete }
+        XCTAssertEqual(vm.index, 1); XCTAssertFalse(vm.canNext); XCTAssertTrue(vm.canPrevious)
+        vm.disappear(preservingSelection: true)
+        _ = try await repository.deletePhoto(second); vm.deleted(second)
+        XCTAssertEqual(vm.selected, .initial(fixture.plant.id)); XCTAssertEqual(vm.descriptors.count, 1)
+        guard case .idle = vm.imageState(for: .additional(second.id)) else { return XCTFail("Deleted page cached") }
+        XCTAssertTrue(vm.initialImage === initial)
+        vm.appear(); await wait { vm.isComplete }
+        XCTAssertEqual(vm.index, 0); XCTAssertFalse(vm.canNext); XCTAssertFalse(vm.canPrevious); vm.disappear()
+    }
+
+    func testDeleteInvalidatesLateMetadataImageAndFailedReconcileIsNotComplete() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let initial = LocalPlantRepository(root: root), plant = StorageTestFixture.plant(1), reads = PhotoReadGate()
+        try await initial.savePlant(plant, initialPhoto: StorageTestFixture.photo(1))
+        let photo = PlantTimelineFixtureLoad.photo(for: plant.id)
+        let vm = PlantPhotoPagerViewModel(plant: plant, loadMetadata: LoadPlantPhotos(repository: reads),
+            loadAdditional: LoadPlantPhoto(repository: reads), loadInitial: LoadInitialPlantPhoto(repository: initial))
+        vm.appear(); await reads.waitMetadata(1); await reads.metadata(0, .success([photo])); await wait { vm.isComplete }
+        vm.select(.additional(photo.id)); await reads.waitImages(1)
+        vm.refresh(); await reads.waitMetadata(2); vm.disappear(preservingSelection: true)
+        vm.deleted(photo); XCTAssertEqual(vm.selected, .initial(plant.id)); XCTAssertEqual(vm.descriptors.count, 1)
+        await reads.metadata(1, .success([photo])); await reads.image(0, .success(StorageTestFixture.photo(2)))
+        await Task.yield(); XCTAssertEqual(vm.descriptors.count, 1)
+        guard case .idle = vm.imageState(for: .additional(photo.id)) else { return XCTFail("Late image resurrected") }
+        vm.appear(); await reads.waitMetadata(3); await reads.metadata(2, .failure(PlantPhotoError.storage))
+        await wait { if case .failed = vm.metadataState { return true }; return false }
+        XCTAssertFalse(vm.isComplete); XCTAssertEqual(vm.selected, .initial(plant.id)); vm.disappear()
+    }
     private func wait(_ condition: () -> Bool) async {
         for _ in 0..<1000 { if condition() { return }; try? await Task.sleep(for: .milliseconds(2)) }; XCTFail("Timed out")
     }

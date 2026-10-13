@@ -65,7 +65,8 @@ final class PlantTimelinePhotoViewModel: ObservableObject {
     // them and publish image states outside that transaction, not reentrantly.
     func scheduleViewport(frames: [PlantTimelineIdentity: CGRect], bounds: CGRect) {
         guard active else { return }
-        viewportFrames = frames; viewportBounds = bounds
+        // Late layout preferences must not retain a deleted/foreign identity.
+        viewportFrames = frames.filter { allowed.contains($0.key) }; viewportBounds = bounds
         guard viewportTask == nil else { return }
         let session = generation
         viewportTask = Task { [weak self] in
@@ -189,6 +190,17 @@ final class PlantTimelinePhotoViewModel: ObservableObject {
         queue = []; visible = []; allowed = []; cache = [:]; lru = []; states = [:]
     }
     func disappear() { active = false; reset() }
+
+    func remove(_ identity: PlantTimelineIdentity) {
+        allowed.remove(identity); visible.remove(identity); owners[identity] = nil
+        cache[identity] = nil; lru.removeAll { $0 == identity }; states[identity] = nil
+        queue.removeAll { $0 == identity }; tokens[identity] = nil
+        hiding.removeValue(forKey: identity)?.cancel()
+        viewportFrames[identity] = nil
+        // Keep cancelled work in tasks/running until it drains, preserving concurrency2.
+        if let token = running[identity] { tasks[token]?.cancel() }
+        pump()
+    }
 
     deinit { viewportTask?.cancel(); tasks.values.forEach { $0.cancel() }; hiding.values.forEach { $0.cancel() } }
 }

@@ -22,6 +22,7 @@ final class PlantPhotoPagerViewModel: ObservableObject {
     private var metadataTask: Task<Void, Never>?
     private var imageTask: Task<Void, Never>?
     private var active = false
+    private var reconciliationPending = false
 
     init(plant: Plant, loadMetadata: LoadPlantPhotos, loadAdditional: LoadPlantPhoto, loadInitial: LoadInitialPlantPhoto) {
         self.plant = plant; self.loadMetadata = loadMetadata; self.loadAdditional = loadAdditional
@@ -47,12 +48,14 @@ final class PlantPhotoPagerViewModel: ObservableObject {
     func appear() {
         refreshDisplayZone()
         active = true
-        if !isComplete { refresh() }
+        if !isComplete || reconciliationPending { refresh() }
         loadSelected()
     }
     func refreshDisplayZone() { displayZone = .current }
 
     func refresh() {
+        guard active else { reconciliationPending = true; return }
+        reconciliationPending = false
         metadataGeneration += 1; let request = metadataGeneration
         metadataTask?.cancel(); metadataState = .loading
         metadataTask = Task { [weak self, loadMetadata, plant] in
@@ -90,6 +93,23 @@ final class PlantPhotoPagerViewModel: ObservableObject {
     }
 
     func retryImage() { loadSelected(force: true) }
+
+    func deleted(_ photo: PlantPhoto) {
+        guard photo.plantID == plant.id else { return }
+        let identity = PlantPhotoIdentity.additional(photo.id)
+        metadataGeneration += 1; metadataTask?.cancel(); metadataTask = nil
+        photos.removeAll { $0.id == photo.id }
+        cache[identity] = nil; lru.removeAll { $0 == identity }
+        if selected == identity {
+            imageGeneration += 1; imageTask?.cancel(); imageTask = nil
+            selected = .initial(plant.id)
+            imageState = .idle
+        }
+        descriptors = PlantPhotoDescriptor.ordered(plant: plant, photos: photos)
+        reconciliationPending = true
+        // A covered detail must not perform eager IO. It reconciles on return.
+        if active { refresh(); loadSelected() }
+    }
 
     private func insert(_ image: UIImage, for identity: PlantPhotoIdentity) {
         cache[identity] = image; lru.removeAll { $0 == identity }; lru.append(identity)

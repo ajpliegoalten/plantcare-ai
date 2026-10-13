@@ -82,6 +82,7 @@ struct PlantCardView: View {
                             .resizable()
                             .scaledToFill()
                             .frame(width: geometry.size.width, height: geometry.size.height)
+                            .contentShape(Rectangle())
                             .accessibilityIdentifier("plantPhoto-\(viewModel.id)")
                     case .idle, .loading:
                         ProgressView().frame(width: geometry.size.width, height: geometry.size.height)

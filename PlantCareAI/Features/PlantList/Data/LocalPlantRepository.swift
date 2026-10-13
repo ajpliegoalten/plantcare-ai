@@ -4,7 +4,7 @@ import ImageIO
 import UniformTypeIdentifiers
 
 // One instance per store, composed by the app. Its actor serializes duplicate checks and publication.
-actor LocalPlantRepository: PlantRepository, CareEventRepository, PlantPhotoRepository {
+actor LocalPlantRepository: PlantRepository, CareEventRepository, PlantPhotoRepository, CareEventDeletingRepository, PlantPhotoDeletingRepository {
     private let root: URL
     private var container: ModelContainer?
     private var context: ModelContext?
@@ -14,18 +14,82 @@ actor LocalPlantRepository: PlantRepository, CareEventRepository, PlantPhotoRepo
     private let beforeCareCommit: @Sendable (CareEvent) throws -> Void
     private let photoPublication: @Sendable (PlantPhoto, Bool) throws -> Void
     private let beforePhotoCommit: @Sendable (PlantPhoto) throws -> Void
+    private let beforeDeletionCommit: @Sendable () throws -> Void
+    private let beforeDeletionCleanup: @Sendable () throws -> Void
 
-    init(root: URL, beforeCommit: @escaping @Sendable () throws -> Void = {}, now: @escaping @Sendable () -> Date = { Date() }, beforeCareCommit: @escaping @Sendable (CareEvent) throws -> Void = { _ in }, photoPublication: @escaping @Sendable (PlantPhoto, Bool) throws -> Void = { _, _ in }, beforePhotoCommit: @escaping @Sendable (PlantPhoto) throws -> Void = { _ in }) {
+    init(root: URL, beforeCommit: @escaping @Sendable () throws -> Void = {}, now: @escaping @Sendable () -> Date = { Date() }, beforeCareCommit: @escaping @Sendable (CareEvent) throws -> Void = { _ in }, photoPublication: @escaping @Sendable (PlantPhoto, Bool) throws -> Void = { _, _ in }, beforePhotoCommit: @escaping @Sendable (PlantPhoto) throws -> Void = { _ in }, beforeDeletionCommit: @escaping @Sendable () throws -> Void = {}, beforeDeletionCleanup: @escaping @Sendable () throws -> Void = {}) {
         self.root = root
         self.beforeCommit = beforeCommit
         self.now = now
         self.beforeCareCommit = beforeCareCommit
         self.photoPublication = photoPublication
         self.beforePhotoCommit = beforePhotoCommit
+        self.beforeDeletionCommit = beforeDeletionCommit
+        self.beforeDeletionCleanup = beforeDeletionCleanup
     }
 
     private var photos: URL { root.appendingPathComponent("Photos", isDirectory: true) }
     private var additionalPhotos: URL { root.appendingPathComponent("AdditionalPhotos", isDirectory: true) }
+
+    func deleteCareEvent(_ expected: CareEvent) async throws -> CareEvent {
+        let context: ModelContext
+        do { context = try store() } catch { throw CareEventError.readFailure }
+        let record: PersistedCareEvent
+        let canonical: CareEvent
+        do {
+            guard let plant = try context.fetch(FetchDescriptor<PersistedPlant>()).first(where: { $0.id == expected.plantID }) else { throw CareEventError.plantNotFound }
+            _ = try plant.domain()
+            guard let found = try context.fetch(FetchDescriptor<PersistedCareEvent>()).first(where: { $0.id == expected.id && $0.plantID == expected.plantID }) else { throw CareEventError.notFound }
+            record = found; canonical = try record.domain()
+            guard canonical == expected else { throw CareEventError.conflict }
+        } catch {
+            if let typed = error as? CareEventError, [.notFound, .plantNotFound, .conflict].contains(typed) { throw typed }
+            throw CareEventError.readFailure
+        }
+        do {
+            context.delete(record)
+            try beforeDeletionCommit(); try beforeCommit(); try context.save()
+            return canonical
+        } catch {
+            context.rollback()
+            throw (error as? CareEventError) ?? .storage
+        }
+    }
+
+    func deletePhoto(_ expected: PlantPhoto) async throws -> PlantPhoto {
+        let context: ModelContext
+        do { context = try store() } catch { throw PlantPhotoError.readFailure }
+        let canonical: PlantPhoto
+        let reference: String
+        let record: PersistedPlantPhoto
+        do {
+            guard let plant = try context.fetch(FetchDescriptor<PersistedPlant>()).first(where: { $0.id == expected.plantID }) else { throw PlantPhotoError.plantNotFound }
+            _ = try plant.domain()
+            guard let found = try context.fetch(FetchDescriptor<PersistedPlantPhoto>()).first(where: { $0.id == expected.id && $0.plantID == expected.plantID }) else { throw PlantPhotoError.notFound }
+            record = found
+            canonical = try record.domain() // Also validates the canonical additional-only reference.
+            guard canonical == expected else { throw PlantPhotoError.conflict }
+            reference = record.photoReference
+        } catch {
+            if let typed = error as? PlantPhotoError, [.notFound, .plantNotFound, .conflict].contains(typed) { throw typed }
+            throw PlantPhotoError.readFailure
+        }
+        do {
+            context.delete(record)
+            try beforeDeletionCommit(); try beforeCommit(); try context.save()
+        } catch {
+            context.rollback()
+            throw (error as? PlantPhotoError) ?? .storage
+        }
+        // Metadata is already committed. Cleanup cannot turn success into retryable failure.
+        // A remaining orphan is recovered only after global metadata validation on reopen.
+        do {
+            try beforeDeletionCleanup()
+            let file = additionalPhotos.appendingPathComponent(reference)
+            if FileManager.default.fileExists(atPath: file.path) { try FileManager.default.removeItem(at: file) }
+        } catch { /* Best effort; never reinsert metadata or claim rollback. */ }
+        return canonical
+    }
 
     private func store() throws -> ModelContext {
         if let context { return context }
