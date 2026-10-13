@@ -1,5 +1,11 @@
 # Progreso de PlantCare AI
 
+## 2026-10-14 — app-launch-branding: commit, push y PR entregados
+
+- Commit de producto/tests/docs/spec/aceptación **`52e0fb4`** (`feat(ios): add app icon and native launch screen`), rama `feature/app-launch-branding`; push normal a origin con upstream, sin force-push.
+- PR **#50** creada con cliente `gh` hacia `main`: https://github.com/ajpliegoalten/plantcare-ai/pull/50. Resumen incluye ACCEPTV3/390Passed, mitigaciónworker1/default5intacto y provisioning futuro. Sin merge ni auto-merge.
+- Estadoaccepted independiente preservado; esta anotación de entrega es solo documental y no invalida189inputs fuente/test/config del gate final. No pruebas ni validación duplicadas por publicar. Configprivada/DerivedData/xcuserdata/certificados excluidos, metadatos y stagingexternos conservados.
+
 ## 2026-10-14 — app-launch-branding: ACCEPT V3, publicación autorizada
 
 - Validator independiente emite **ACCEPT V3**, `docs/validations/app-launch-branding.md`. Único gateV3 original `TEST_WORKERS=1 XCODE_XCCONFIG_FILE=.../validator-v3/NoLocalizationExtraction.xcconfig caffeinate -dius ./init.sh`, exit0, build/ambasfasesTESTEXECUTESUCCEEDED; **390/390Passed=296unit+92UI+2Photos**,0failed/skipped/expectedFailures. Bundles `DerivedData/TestResults/20261014-000939-58441/{parallel,gallery}.xcresult`. Worker1mitigación autorizada/default5intacto/suitecompleta; no garantía de causa profunda/estabilidad5clones, V1/V2FAILEDhistóricos íntegros.
