@@ -166,6 +166,12 @@ App inyecta tras overrides Debug y callback canónico postcommit único al lista
 
 ## Recursos y comprobación
 
+### Aceptación durable (ADR014)
+
+`PlantPhotoAnalysisViewModel → KeepPlantPhotoAnalysisUseCase → PlantPhotoAnalysisStoring ← LocalPlantRepository`. Domain KeepAnalysis contiene registro/snapshot y validación Foundation; Data entidad SwiftData V4 aditiva y seam Debug Simulator local. El actor compartido también implementa `SavedPlantPhotoAnalysisReading` y adapta a `AcceptedPlantPhotoAnalysisReading`; App conecta todos los AnalyzePlantPhoto, incluso sintéticos, después de overrides. No sidecar/escritor ficticio. Save no toca JPEG; unicidad lógica/descriptor revalidado/save síncronos, idempotencia literal, rollback precommit. Recuperación valida todas las entidades antes de limpiar. Delete adicional elimina texto en el mismo commit metadata.
+
+Timeline obtiene `PlantTimelineSnapshot` fail-closed (entradas/mapa por identidad); renderer mantiene fila/orden/fechas y añade texto completo bajo foto. Callback canónico invalida pager del Detail realmente retenido mediante lista y refresca timeline sin purgar cache por guardar. Elegibilidad loaded/unknown/failed, generaciones contra respuestas tardías y relectura en reentrada/foreground; Domain revalida antes de preparar/despachar. Modal separa guardado local de fallo remoto y reconoce commit antes de dismiss. ADR014 sucede las menciones históricas de capacidad Keep ausente de ADR013.
+
 ### Análisis contextual de foto (ADR013)
 
 `PlantPhotoAnalysisView → PlantPhotoAnalysisViewModel → AnalyzePlantPhotoUseCase ← AnalyzePlantPhoto` compone lectores Domain Plant/CareEvent/PlantPhoto y carga solo bytes de identidad seleccionada. `BuildPlantAnalysisContext` puro filtra por día gregoriano estrictamente anterior en zona capturada por intención, limita presupuesto y declara omisiones. `PlantPhotoAnalysisRepository ← OpenAICompatiblePlantPhotoAnalysisRepository` transporta JSON no confiable + único JPEG dentro de `AuthorizeExternalAIOperation`; snapshot v5 común a aviso/transporte revalidado antes de HTTP/publicación. App conecta tras overrides Debug al mismo actor/consentRepository, fábricas sin IO por Detail/Timeline.

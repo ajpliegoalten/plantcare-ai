@@ -20,7 +20,7 @@ enum PlantPhotoError: Error, Equatable {
     case validation, plantNotFound, notFound, conflict, protectedIdentity, photoMissing, photoCorrupt, readFailure, storage
 }
 
-enum PlantPhotoIdentity: Hashable, Sendable {
+enum PlantPhotoIdentity: Hashable, Codable, Sendable {
     case initial(UUID), additional(UUID)
 
     var stableKey: String {

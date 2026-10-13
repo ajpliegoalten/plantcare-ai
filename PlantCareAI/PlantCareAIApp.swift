@@ -26,6 +26,10 @@ struct PlantCareAIApp: App {
            arguments.indices.contains(position + 1), let id = UUID(uuidString: arguments[position + 1]) {
             let testRoot = URL.applicationSupportDirectory.appendingPathComponent("StorageTests").appendingPathComponent(id.uuidString)
             repository = LocalPlantRepository(root: testRoot)
+            if let position = arguments.firstIndex(of: "--keep-analysis-fixture"), arguments.indices.contains(position + 1) {
+                let fixture = KeepAnalysisTestFixture(mode: arguments[position + 1])
+                repository = LocalPlantRepository(root: testRoot, beforeAnalysisCommit: { try fixture.beforeCommit() })
+            }
             if let position = arguments.firstIndex(of: "--care-fixture"), arguments.indices.contains(position + 1) {
                 let fixture = CareEventTestFixture(root: testRoot, mode: arguments[position + 1])
                 repository = LocalPlantRepository(root: testRoot, beforeCareCommit: { try fixture.beforeCareCommit($0) })
@@ -71,10 +75,10 @@ struct PlantCareAIApp: App {
         #endif
         viewModel.makePhotoPager = { plant in
             PlantPhotoPagerViewModel(plant: plant, loadMetadata: LoadPlantPhotos(repository: photoReader),
-                loadAdditional: LoadPlantPhoto(repository: photoReader), loadInitial: LoadInitialPlantPhoto(repository: repository))
+                loadAdditional: LoadPlantPhoto(repository: photoReader), loadInitial: LoadInitialPlantPhoto(repository: repository), analysisReader: repository)
         }
         var timelineReader: any LoadPlantTimelineUseCase = LoadPlantTimeline(
-            detail: LoadPlantDetail(repository: repository), care: repository, photos: photoReader)
+            detail: LoadPlantDetail(repository: repository), care: repository, photos: photoReader, analyses: repository)
         #if DEBUG && targetEnvironment(simulator)
         if arguments.contains("--timeline-read-error"),
            let position = arguments.firstIndex(of: "--storage-test-id"), arguments.indices.contains(position + 1),
@@ -89,7 +93,11 @@ struct PlantCareAIApp: App {
                     loadAdditional: LoadPlantPhoto(repository: photoReader)),
                 deleteCare: DeleteCareEvent(repository: repository), deletePhoto: DeletePlantPhoto(repository: repository),
                  onDeleted: { [weak viewModel] entry in viewModel?.applyHistoryDeletion(entry) })
-            timeline.makeAnalysis = viewModel?.makeAnalysis
+            timeline.makeAnalysis = { [weak timeline, weak viewModel] id, identity in
+                let modal = viewModel?.makeAnalysis?(id, identity)
+                modal?.didSave = { [weak timeline] record in timeline?.analysisSaved(record) }
+                return modal
+            }
             return timeline
         }
         viewModel.makeAddPhoto = { plant, onSaved in
@@ -129,7 +137,7 @@ struct PlantCareAIApp: App {
             analysisFixture = PlantPhotoAnalysisTestFixture(mode: arguments[position + 1])
         }
         #endif
-        viewModel.makeAnalysis = { id, identity in
+        viewModel.makeAnalysis = { [weak viewModel] id, identity in
             analysisPresentation.open {
                 let originalConfiguration = IdentificationAPIConfiguration.localDemo()
                 var configuration = originalConfiguration
@@ -145,11 +153,12 @@ struct PlantCareAIApp: App {
                 #endif
                 let useCase = provider.map { AnalyzePlantPhoto(detail: LoadPlantDetail(repository: repository), care: repository,
                     photos: photoReader, initial: LoadInitialPlantPhoto(repository: repository), repository: $0, gate: analysisGate,
-                    validateJPEG: { try await OpenAICompatiblePlantPhotoAnalysisRepository.validateJPEG($0) }) }
+                    acceptedReader: repository, validateJPEG: { try await OpenAICompatiblePlantPhotoAnalysisRepository.validateJPEG($0) }) }
                 let modal = PlantPhotoAnalysisViewModel(plantID: id, identity: identity, analyze: useCase,
                     authorize: AuthorizeExternalAIOperation(repository: consentRepository,
                         scope: configuration?.scope ?? ExternalAIConsent(recipient: "unconfigured-analysis", noticeVersion: 5)),
-                    destination: configuration?.notice, configurationIsCurrent: {
+                    destination: configuration?.notice, keep: KeepPlantPhotoAnalysis(repository: repository),
+                    onSaved: { [weak viewModel] record in viewModel?.analysisSaved(record) }, configurationIsCurrent: {
                         #if DEBUG && targetEnvironment(simulator)
                         if analysisFixture != nil { return true }
                         #endif

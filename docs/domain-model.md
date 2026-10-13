@@ -1,5 +1,11 @@
 # Modelo de dominio
 
+## Delta keep-analysis — ADR014
+
+Análisis guardado es aceptación explícita sobre una foto YA local, no nueva fotografía: UUID propio, plantID, identidad initial/additional, photoDate, queriedAt, revision, acceptedAt y contenido literal. Una aceptación por identidad, sin reemplazo/reanálisis; insuficiencia no guardable. Retry literal reconcilia, conflicto no sobrescribe. Contexto anterior usa fecha de foto, no aceptación. Snapshot incluye descriptor/createdAt origen para revalidación precommit.
+
+Texto debajo de la foto en su hito existente, sin cuidado/fila de análisis. Foto faltante conserva texto/placeholder; error de metadata impide historial parcial. Delete adicional elimina ambos en el mismo save, inicial protegida. Guardar no copia/recomprime JPEG ni altera ficha/portada/último riego. Cierre sin guardar efímero; Descarta pendiente. Sucede el ciclo histórico «guardar foto y análisis juntos» para origen local existente, sin reinterpretar evidencia.
+
 ## Análisis fotográfico provisional (ADR013, 2026-10-13)
 
 PlantPhotoAnalysis efímero vincula plantID/identidad discriminada/queriedAt/revisión/outcome/tres arrays. No entidad SwiftData, aceptación, evento, foto nueva ni cambio de ficha. Solo modal; cerrar libera. Definitivo futuro bloquea entradas/despacho; provisional/fallo/cancel no. Mismo JPEG con identidades distintas no deduplica. keep-analysis aportará lector real/persistencia/texto bajo foto sin duplicarla; discard-analysis rechazo sin borrar foto origen.

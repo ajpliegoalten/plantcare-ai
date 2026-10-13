@@ -45,9 +45,24 @@ struct PlantPhotoAnalysisView: View {
                             section("analysis.causes", result.content.possibleCauses)
                             section("analysis.checks", result.content.checks)
                             Text("analysis.provisional").font(.footnote).accessibilityIdentifier("analysisProvisional")
-                            futureButton("analysis.accept", identifier: "analysisAccept")
+                            Button { viewModel.save() } label: {
+                                Text("keepAnalysis.save").foregroundStyle(viewModel.canSave ? Color("Surface") : Color("TextSecondary"))
+                                    .frame(maxWidth: .infinity, minHeight: 52)
+                            }.buttonStyle(.borderedProminent).buttonBorderShape(.capsule)
+                                .disabled(!viewModel.canSave).accessibilityIdentifier("analysisAccept")
+                            if viewModel.saveState == .saving {
+                                ProgressView("keepAnalysis.saving").accessibilityIdentifier("analysisSaving")
+                            }
+                            if viewModel.saveState == .failed {
+                                Text(viewModel.saveNeedsNewIntent ? "keepAnalysis.stale" : "keepAnalysis.error")
+                                    .accessibilityIdentifier("analysisSaveError")
+                                if !viewModel.saveNeedsNewIntent {
+                                    Button("keepAnalysis.retry") { viewModel.save() }.frame(minHeight: 44)
+                                        .accessibilityIdentifier("analysisSaveRetry")
+                                }
+                            }
                             futureButton("analysis.discard", identifier: "analysisDiscard")
-                            Text("analysis.futureActions").font(.footnote).accessibilityIdentifier("analysisFutureActions")
+                            Text("keepAnalysis.discardFuture").font(.footnote).accessibilityIdentifier("analysisFutureActions")
                         }
                     }
                     #if DEBUG && targetEnvironment(simulator)
@@ -61,16 +76,20 @@ struct PlantPhotoAnalysisView: View {
                 .navigationTitle("analysis.title").navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("analysis.cancel") { viewModel.close(); dismiss() }.frame(minHeight: 44).accessibilityIdentifier("analysisCancel")
+                        Button("analysis.cancel") { if viewModel.close() { dismiss() } }.frame(minHeight: 44)
+                            .disabled(viewModel.saveState == .saving).accessibilityIdentifier("analysisCancel")
                     }
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button { viewModel.close(); dismiss() } label: { Image(systemName: "xmark").frame(minWidth: 44, minHeight: 44) }
+                        Button { if viewModel.close() { dismiss() } } label: { Image(systemName: "xmark").frame(minWidth: 44, minHeight: 44) }
+                            .disabled(viewModel.saveState == .saving)
                             .accessibilityLabel("analysis.close").accessibilityIdentifier("analysisClose")
                     }
                 }
         }.tint(Color("PrimaryAction")).presentationDetents([.fraction(0.95)]).presentationDragIndicator(.visible)
             .presentationCornerRadius(24).accessibilityIdentifier("analysisForm")
             .task { viewModel.start() }
+            .interactiveDismissDisabled(viewModel.saveState == .saving)
+            .onChange(of: viewModel.saveState) { _, state in if state == .saved { viewModel.close(); dismiss() } }
             .sheet(isPresented: $viewModel.showingConsent, onDismiss: { viewModel.cancelConsent() }) {
                 ExternalAIConsentView(usesRealRecipient: true, destination: viewModel.destination, analyzingPhoto: true,
                     accept: viewModel.acceptConsent, cancel: viewModel.cancelConsent)

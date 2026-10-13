@@ -80,6 +80,11 @@ actor PlantTimelineReadTestFixture: LoadPlantTimelineUseCase {
     let base: any LoadPlantTimelineUseCase
     private var failed = false
     init(base: any LoadPlantTimelineUseCase) { self.base = base }
+    func snapshot(for plantID: UUID) async throws -> PlantTimelineSnapshot? {
+        let value = try await base.snapshot(for: plantID)
+        if !failed { failed = true; throw PlantStorageError.storage }
+        return value
+    }
     func execute(for plantID: UUID) async throws -> [PlantTimelineEntry]? {
         let entries = try await base.execute(for: plantID)
         if !failed { failed = true; throw PlantStorageError.storage }

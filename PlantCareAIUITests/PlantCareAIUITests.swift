@@ -2244,6 +2244,127 @@ final class AddPlantPhotoUITests: PlantCareAIUITestCase {
     }
 }
 
+final class KeepAnalysisUITests: PlantCareAIUITestCase {
+    private let additional = "additional-10000000-0000-0000-0000-000000000010"
+    private func launch(_ app: XCUIApplication, id: String, seed: Bool = true, mode: String = "success", save: String? = nil) {
+        app.launchArguments = ["--storage-test-id", id, "--consent-test-id", id, "--photo-analysis-fixture", mode,
+            "--timeline-fixture", "mixed", "-AppleLanguages", "(es)"] + (seed ? ["--storage-seed"] : ["--storage-verify", "--photo-analysis-verify"])
+            + (save.map { ["--keep-analysis-fixture", $0] } ?? [])
+        app.launch(); let card = app.buttons["plantCard-\(plantID(1))"]
+        XCTAssertTrue(card.waitForExistence(timeout: 10)); card.tap()
+        XCTAssertTrue(app.staticTexts["selectedPlant-\(plantID(1))"].waitForExistence(timeout: 5))
+    }
+    private func history(_ app: XCUIApplication) {
+        let action = app.buttons["detailHistory-\(plantID(1))"]; reveal(action, in: app); action.tap()
+        XCTAssertTrue(app.navigationBars["Historial de cuidados"].waitForExistence(timeout: 5))
+    }
+    private func open(_ action: XCUIElement, app: XCUIApplication) {
+        reveal(action, in: app); XCTAssertTrue(action.isEnabled); action.tap()
+        let consent = app.buttons["acceptExternalAIConsent"]
+        if consent.waitForExistence(timeout: 2) { reveal(consent, in: app); consent.tap() }
+        XCTAssertTrue(app.staticTexts["analysisProvisional"].waitForExistence(timeout: 8))
+    }
+    private func save(_ app: XCUIApplication) {
+        let button = app.buttons["analysisAccept"]; reveal(button, in: app)
+        XCTAssertTrue(button.isEnabled); XCTAssertEqual(button.label, "Guardar análisis")
+        capture("keep-analysis-result", app: app); button.tap()
+    }
+    private func saved(_ identity: String, app: XCUIApplication) -> XCUIElement {
+        app.descendants(matching: .any)["savedAnalysis-" + identity].firstMatch
+    }
+    func testInitialDurableUnderPhotoRelaunchNoDuplicateHitoNoCareAndOtherPhotoEligible() {
+        let app = XCUIApplication(), id = isolatedID(); launch(app, id: id, mode: "long")
+        open(app.buttons["detailAnalyzePhoto-\(plantID(1))"], app: app); save(app)
+        XCTAssertTrue(app.navigationBars["Analizar foto"].waitForNonExistence(timeout: 10))
+        XCTAssertFalse(app.buttons["detailAnalyzePhoto-\(plantID(1))"].isEnabled)
+        history(app); let text = saved("initial-" + plantID(1), app: app); reveal(text, in: app)
+        XCTAssertTrue(text.exists); capture("keep-analysis-under-initial", app: app)
+        let final = app.staticTexts.matching(NSPredicate(format: "label ENDSWITH %@", "FINAL COMPROBACIÓN")).firstMatch
+        reveal(final, in: app); XCTAssertTrue(final.exists)
+        XCTAssertEqual(app.descendants(matching: .any).matching(identifier: "timelineEntry-initial-" + plantID(1)).count, 1)
+        app.terminate(); launch(app, id: id, seed: false)
+        XCTAssertFalse(app.buttons["detailAnalyzePhoto-\(plantID(1))"].isEnabled)
+        history(app); reveal(saved("initial-" + plantID(1), app: app), in: app)
+        XCTAssertTrue(saved("initial-" + plantID(1), app: app).exists)
+        let other = app.buttons["analyzeTimeline-" + additional]
+        for _ in 0..<8 where !other.isHittable { app.swipeDown() }
+        XCTAssertTrue(other.isHittable); XCTAssertTrue(other.isEnabled)
+    }
+    func testAdditionalSavedDeleteWarningCancelAndAtomicDeleteRetainedPagerThenRelaunch() {
+        let app = XCUIApplication(), id = isolatedID(); launch(app, id: id)
+        let next = app.buttons["plantPhotoNext-\(plantID(1))"]; XCTAssertTrue(next.waitForExistence(timeout: 5)); next.tap()
+        history(app); open(app.buttons["analyzeTimeline-" + additional], app: app); save(app)
+        XCTAssertTrue(app.navigationBars["Analizar foto"].waitForNonExistence(timeout: 10))
+        let row = saved(additional, app: app); reveal(row, in: app); XCTAssertTrue(row.exists)
+        capture("keep-analysis-under-additional", app: app)
+        let trash = app.buttons["deleteTimeline-" + additional]; reveal(trash, in: app); trash.tap()
+        XCTAssertTrue(app.alerts.firstMatch.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.alerts.firstMatch.staticTexts.allElementsBoundByIndex.contains { $0.label.contains("También se eliminará el análisis") })
+        app.alerts.buttons["Cancelar"].tap(); XCTAssertTrue(row.exists)
+        trash.tap(); app.alerts.buttons["Eliminar"].tap()
+        XCTAssertTrue(row.waitForNonExistence(timeout: 10))
+        app.navigationBars["Historial de cuidados"].buttons["BackButton"].tap()
+        XCTAssertTrue(app.staticTexts["plantPhotoDate-\(plantID(1))"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["plantPhotoDate-\(plantID(1))"].label.hasPrefix("Foto inicial"))
+        XCTAssertTrue(app.buttons["detailAnalyzePhoto-\(plantID(1))"].isEnabled)
+        // The existing verify fixture expects the original additional: do not use it after a real delete.
+        app.terminate(); app.launchArguments.removeAll { $0 == "--storage-verify" || $0 == "--photo-analysis-verify" || $0 == "--storage-seed" }; app.launch()
+        XCTAssertTrue(app.buttons["plantCard-\(plantID(1))"].waitForExistence(timeout: 10)); app.buttons["plantCard-\(plantID(1))"].tap()
+        history(app); XCTAssertFalse(saved(additional, app: app).exists)
+        XCTAssertFalse(app.buttons["deleteTimeline-" + additional].exists)
+    }
+    func testLocalFailureRetryNoRemoteRequestAndCloseAbandonsUncommittedResult() {
+        let app = XCUIApplication(), id = isolatedID(); launch(app, id: id, save: "failOnce")
+        open(app.buttons["detailAnalyzePhoto-\(plantID(1))"], app: app); save(app)
+        let error = app.staticTexts["analysisSaveError"]; XCTAssertTrue(error.waitForExistence(timeout: 5)); reveal(error, in: app)
+        XCTAssertTrue(error.label.contains("No pudimos guardar el análisis")); capture("keep-analysis-save-error", app: app)
+        XCTAssertEqual(app.staticTexts["analysisInvocationCount"].label, "Solicitudes: 1")
+        let retry = app.buttons["analysisSaveRetry"]; reveal(retry, in: app); retry.tap()
+        XCTAssertTrue(app.navigationBars["Analizar foto"].waitForNonExistence(timeout: 10))
+        history(app); reveal(saved("initial-" + plantID(1), app: app), in: app)
+        XCTAssertTrue(saved("initial-" + plantID(1), app: app).exists)
+        let action = app.buttons["analyzeTimeline-" + additional]
+        for _ in 0..<8 where !action.isHittable { app.swipeDown() }
+        XCTAssertTrue(action.isHittable); open(action, app: app)
+        app.buttons["analysisCancel"].tap(); XCTAssertTrue(app.navigationBars["Analizar foto"].waitForNonExistence(timeout: 5))
+        reveal(action, in: app); XCTAssertTrue(action.isEnabled); XCTAssertFalse(saved(additional, app: app).exists)
+        app.terminate(); launch(app, id: id, seed: false); history(app)
+        reveal(saved("initial-" + plantID(1), app: app), in: app); XCTAssertTrue(saved("initial-" + plantID(1), app: app).exists)
+        XCTAssertFalse(saved(additional, app: app).exists)
+    }
+    func testBusyBlocksDoubleSaveCancelCloseAndGestureUntilDurableCommit() {
+        let app = XCUIApplication(), id = isolatedID(); launch(app, id: id, save: "busy")
+        open(app.buttons["detailAnalyzePhoto-\(plantID(1))"], app: app); save(app)
+        let busy = app.activityIndicators["analysisSaving"]
+        XCTAssertTrue(busy.waitForExistence(timeout: 5)); XCTAssertFalse(app.buttons["analysisAccept"].isEnabled)
+        XCTAssertFalse(app.buttons["analysisCancel"].isEnabled); XCTAssertFalse(app.buttons["analysisClose"].isEnabled)
+        let bar = app.navigationBars["Analizar foto"]
+        bar.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.5)).press(forDuration: 0.05,
+            thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.9)))
+        XCTAssertTrue(bar.exists); capture("keep-analysis-busy", app: app)
+        XCTAssertTrue(busy.waitForNonExistence(timeout: 10)); XCTAssertFalse(app.staticTexts["analysisSaveError"].exists)
+        XCTAssertTrue(bar.waitForNonExistence(timeout: 10))
+        app.terminate(); launch(app, id: id, seed: false)
+        XCTAssertFalse(app.buttons["detailAnalyzePhoto-\(plantID(1))"].isEnabled)
+    }
+    func testSavedTextSurvivesMissingInitialJPEGAndRemainsReadableUnderPlaceholder() {
+        let app = XCUIApplication(), id = isolatedID(); launch(app, id: id)
+        open(app.buttons["detailAnalyzePhoto-\(plantID(1))"], app: app); save(app)
+        XCTAssertTrue(app.navigationBars["Analizar foto"].waitForNonExistence(timeout: 10))
+        app.terminate(); launch(app, id: id, seed: false)
+        app.terminate(); app.launchArguments.removeAll { $0 == "--storage-verify" || $0 == "--photo-analysis-verify" }
+        app.launchArguments.append("--storage-photo-missing"); app.launch()
+        XCTAssertTrue(app.buttons["plantCard-\(plantID(1))"].waitForExistence(timeout: 10)); app.buttons["plantCard-\(plantID(1))"].tap()
+        history(app); let text = saved("initial-" + plantID(1), app: app); reveal(text, in: app)
+        XCTAssertTrue(text.exists)
+        let retry = app.buttons["retryTimelinePhoto-initial-" + plantID(1)]
+        XCTAssertTrue(retry.waitForExistence(timeout: 5)); capture("keep-analysis-missing-jpeg-text", app: app)
+        let check = app.staticTexts.matching(NSPredicate(format: "label ENDSWITH %@", "FINAL COMPROBACIÓN")).firstMatch
+        reveal(check, in: app); XCTAssertTrue(check.exists)
+        XCTAssertFalse(app.buttons["analyzeTimeline-initial-" + plantID(1)].isEnabled)
+    }
+}
+
 final class AnalyzeCurrentPhotoUITests: PlantCareAIUITestCase {
     private let additional = "additional-10000000-0000-0000-0000-000000000010"
     private func launch(_ app: XCUIApplication, id: String, mode: String = "success", seed: Bool = true, extra: [String] = []) {
@@ -2279,7 +2400,9 @@ final class AnalyzeCurrentPhotoUITests: PlantCareAIUITestCase {
         let provisional = app.staticTexts["analysisProvisional"]
         XCTAssertTrue(provisional.waitForExistence(timeout: 8)); reveal(provisional, in: app)
         let accept = app.buttons["analysisAccept"], discard = app.buttons["analysisDiscard"]
-        reveal(accept, in: app); XCTAssertFalse(accept.isEnabled); XCTAssertEqual(accept.label, "Aceptar análisis")
+        reveal(accept, in: app)
+        XCTAssertEqual(accept.isEnabled, !app.staticTexts["Evidencia insuficiente"].exists)
+        XCTAssertEqual(accept.label, "Guardar análisis")
         reveal(discard, in: app); XCTAssertFalse(discard.isEnabled); XCTAssertEqual(discard.label, "Descartar análisis")
         XCTAssertTrue(app.staticTexts["analysisFutureActions"].exists); XCTAssertGreaterThanOrEqual(discard.frame.height, 44)
         capture("analysis-result-disabled-actions", app: app)

@@ -29,7 +29,7 @@ final class PlantDetailViewModel: ObservableObject {
     var makeAnalysis: ((UUID, PlantPhotoIdentity) -> PlantPhotoAnalysisViewModel?)?
 
     func analysisEditor() -> PlantPhotoAnalysisViewModel? {
-        guard case .loaded = state else { return nil }
+        guard case .loaded = state, photoPager?.canAnalyze == true else { return nil }
         return makeAnalysis?(id, photoPager?.selected ?? .initial(id))
     }
 
@@ -64,9 +64,14 @@ final class PlantDetailViewModel: ObservableObject {
         guard entry.plantID == id else { return }
         switch entry {
         case .care(let event): if event.kind == .watering { lastWatering.invalidate() }
-        case .additional(let photo): photoPager?.deleted(photo)
+        case .additional(let photo): photoPager?.deleted(photo); photoPager?.refreshAnalyses()
         case .initial: break
         }
+    }
+
+    func analysisSaved(_ record: SavedPlantPhotoAnalysis) {
+        guard record.plantID == id else { return }
+        photoPager?.refreshAnalyses()
     }
 
     func careEditor() -> RegisterCareViewModel? {

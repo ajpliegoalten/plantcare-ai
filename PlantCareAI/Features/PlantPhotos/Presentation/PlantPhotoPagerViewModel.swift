@@ -23,10 +23,39 @@ final class PlantPhotoPagerViewModel: ObservableObject {
     private var imageTask: Task<Void, Never>?
     private var active = false
     private var reconciliationPending = false
+    enum AnalysisState { case unknown, loaded(Set<PlantPhotoIdentity>), failed }
+    @Published private(set) var analysisState: AnalysisState = .unknown
+    private let analysisReader: (any SavedPlantPhotoAnalysisReading)?
+    private var analysisTask: Task<Void, Never>?
+    private var analysisGeneration = 0
 
-    init(plant: Plant, loadMetadata: LoadPlantPhotos, loadAdditional: LoadPlantPhoto, loadInitial: LoadInitialPlantPhoto) {
+    var canAnalyze: Bool {
+        guard case .loaded(let identities) = analysisState else { return false }
+        return !identities.contains(selected)
+    }
+
+    func refreshAnalyses() {
+        analysisGeneration += 1; let token = analysisGeneration
+        analysisTask?.cancel(); analysisState = .unknown
+        guard let analysisReader else { return }
+        analysisTask = Task { [weak self, plant] in
+            do {
+                let records = try await analysisReader.loadSavedAnalyses(for: plant.id)
+                try Task.checkCancellation()
+                guard let self, token == self.analysisGeneration else { return }
+                self.analysisState = .loaded(Set(records.map(\.identity)))
+            } catch {
+                guard let self, token == self.analysisGeneration else { return }
+                self.analysisState = .failed
+            }
+        }
+    }
+
+    init(plant: Plant, loadMetadata: LoadPlantPhotos, loadAdditional: LoadPlantPhoto, loadInitial: LoadInitialPlantPhoto,
+         analysisReader: (any SavedPlantPhotoAnalysisReading)? = nil) {
         self.plant = plant; self.loadMetadata = loadMetadata; self.loadAdditional = loadAdditional
         self.loadInitial = loadInitial
+        self.analysisReader = analysisReader
         selected = .initial(plant.id)
         descriptors = PlantPhotoDescriptor.ordered(plant: plant, photos: [])
     }
@@ -46,6 +75,7 @@ final class PlantPhotoPagerViewModel: ObservableObject {
     }
 
     func appear() {
+        refreshAnalyses()
         refreshDisplayZone()
         active = true
         if !isComplete || reconciliationPending { refresh() }
@@ -146,6 +176,7 @@ final class PlantPhotoPagerViewModel: ObservableObject {
     }
 
     func disappear(preservingSelection: Bool = false) {
+        analysisGeneration += 1; analysisTask?.cancel(); analysisTask = nil; analysisState = .unknown
         active = false; metadataGeneration += 1; imageGeneration += 1
         metadataTask?.cancel(); imageTask?.cancel(); metadataTask = nil; imageTask = nil
         if !preservingSelection { selected = .initial(plant.id) }

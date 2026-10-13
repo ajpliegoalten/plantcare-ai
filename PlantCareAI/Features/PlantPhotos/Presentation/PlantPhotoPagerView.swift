@@ -38,6 +38,11 @@ struct PlantPhotoPagerView: View {
                 }
                     .buttonStyle(.borderedProminent).buttonBorderShape(.capsule).tint(Color("CareTerracotta"))
                     .accessibilityIdentifier("detailAnalyzePhoto-\(plantID)")
+                    .disabled(!viewModel.canAnalyze)
+                if case .failed = viewModel.analysisState {
+                    Text("keepAnalysis.readError")
+                    Button("keepAnalysis.retryRead") { viewModel.refreshAnalyses() }.frame(minHeight: 44)
+                }
             }
             switch viewModel.metadataState {
             case .idle, .loading: ProgressView("plantPhotos.loadingMetadata")

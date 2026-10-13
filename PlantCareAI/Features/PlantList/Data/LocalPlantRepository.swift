@@ -4,7 +4,7 @@ import ImageIO
 import UniformTypeIdentifiers
 
 // One instance per store, composed by the app. Its actor serializes duplicate checks and publication.
-actor LocalPlantRepository: PlantRepository, CareEventRepository, PlantPhotoRepository, CareEventDeletingRepository, PlantPhotoDeletingRepository {
+actor LocalPlantRepository: PlantRepository, CareEventRepository, PlantPhotoRepository, CareEventDeletingRepository, PlantPhotoDeletingRepository, PlantPhotoAnalysisStoring, AcceptedPlantPhotoAnalysisReading {
     private let root: URL
     private var container: ModelContainer?
     private var context: ModelContext?
@@ -16,8 +16,9 @@ actor LocalPlantRepository: PlantRepository, CareEventRepository, PlantPhotoRepo
     private let beforePhotoCommit: @Sendable (PlantPhoto) throws -> Void
     private let beforeDeletionCommit: @Sendable () throws -> Void
     private let beforeDeletionCleanup: @Sendable () throws -> Void
+    private let beforeAnalysisCommit: @Sendable () throws -> Void
 
-    init(root: URL, beforeCommit: @escaping @Sendable () throws -> Void = {}, now: @escaping @Sendable () -> Date = { Date() }, beforeCareCommit: @escaping @Sendable (CareEvent) throws -> Void = { _ in }, photoPublication: @escaping @Sendable (PlantPhoto, Bool) throws -> Void = { _, _ in }, beforePhotoCommit: @escaping @Sendable (PlantPhoto) throws -> Void = { _ in }, beforeDeletionCommit: @escaping @Sendable () throws -> Void = {}, beforeDeletionCleanup: @escaping @Sendable () throws -> Void = {}) {
+    init(root: URL, beforeCommit: @escaping @Sendable () throws -> Void = {}, now: @escaping @Sendable () -> Date = { Date() }, beforeCareCommit: @escaping @Sendable (CareEvent) throws -> Void = { _ in }, photoPublication: @escaping @Sendable (PlantPhoto, Bool) throws -> Void = { _, _ in }, beforePhotoCommit: @escaping @Sendable (PlantPhoto) throws -> Void = { _ in }, beforeDeletionCommit: @escaping @Sendable () throws -> Void = {}, beforeDeletionCleanup: @escaping @Sendable () throws -> Void = {}, beforeAnalysisCommit: @escaping @Sendable () throws -> Void = {}) {
         self.root = root
         self.beforeCommit = beforeCommit
         self.now = now
@@ -26,10 +27,78 @@ actor LocalPlantRepository: PlantRepository, CareEventRepository, PlantPhotoRepo
         self.beforePhotoCommit = beforePhotoCommit
         self.beforeDeletionCommit = beforeDeletionCommit
         self.beforeDeletionCleanup = beforeDeletionCleanup
+        self.beforeAnalysisCommit = beforeAnalysisCommit
     }
 
     private var photos: URL { root.appendingPathComponent("Photos", isDirectory: true) }
     private var additionalPhotos: URL { root.appendingPathComponent("AdditionalPhotos", isDirectory: true) }
+
+    private func analysisSource(_ value: SavedPlantPhotoAnalysis, in context: ModelContext) throws -> PlantPhotoDescriptor {
+        guard let record = try context.fetch(FetchDescriptor<PersistedPlant>()).first(where: { $0.id == value.plantID }) else {
+            throw KeepPlantPhotoAnalysisError.notFound
+        }
+        let plant = try record.domain()
+        switch value.identity {
+        case .initial(let id):
+            guard id == plant.id else { throw KeepPlantPhotoAnalysisError.notFound }
+            return .init(id: value.identity, date: plant.createdAt, createdAt: plant.createdAt)
+        case .additional(let id):
+            guard let photo = try context.fetch(FetchDescriptor<PersistedPlantPhoto>()).first(where: { $0.id == id && $0.plantID == plant.id }) else {
+                throw KeepPlantPhotoAnalysisError.notFound
+            }
+            let domain = try photo.domain()
+            return .init(id: value.identity, date: domain.occurredAt, createdAt: domain.createdAt)
+        }
+    }
+
+    private func validatedAnalyses(_ context: ModelContext) throws -> [PlantPhotoAnalysisAcceptance] {
+        var keys = Set<String>(), ids = Set<UUID>()
+        return try context.fetch(FetchDescriptor<PersistedPlantPhotoAnalysis>()).map {
+            let snapshot = try $0.snapshot()
+            guard ids.insert(snapshot.record.id).inserted,
+                  keys.insert(snapshot.record.plantID.uuidString + snapshot.record.identity.stableKey).inserted,
+                  try analysisSource(snapshot.record, in: context) == snapshot.source else { throw KeepPlantPhotoAnalysisError.readFailure }
+            return snapshot
+        }
+    }
+
+    func loadSavedAnalyses(for plantID: UUID) async throws -> [SavedPlantPhotoAnalysis] {
+        do { return try validatedAnalyses(store()).map(\.record).filter { $0.plantID == plantID } }
+        catch { throw KeepPlantPhotoAnalysisError.readFailure }
+    }
+
+    func loadAccepted(for plantID: UUID) async throws -> [AcceptedPlantPhotoAnalysis] {
+        try await loadSavedAnalyses(for: plantID).map {
+            AcceptedPlantPhotoAnalysis(plantID: $0.plantID, identity: $0.identity, photoDate: $0.photoDate, content: $0.content)
+        }
+    }
+
+    func saveAccepted(_ snapshot: PlantPhotoAnalysisAcceptance) async throws -> SavedPlantPhotoAnalysis {
+        try KeepPlantPhotoAnalysis.validate(snapshot)
+        let context: ModelContext
+        do { context = try store() } catch { throw KeepPlantPhotoAnalysisError.readFailure }
+        do {
+            let existing = try validatedAnalyses(context)
+            if let confirmed = existing.first(where: { $0.record.id == snapshot.record.id }) {
+                guard confirmed == snapshot else { throw KeepPlantPhotoAnalysisError.conflict }
+                return confirmed.record
+            }
+            guard !existing.contains(where: { $0.record.plantID == snapshot.record.plantID && $0.record.identity == snapshot.record.identity }) else {
+                throw KeepPlantPhotoAnalysisError.conflict
+            }
+            guard try analysisSource(snapshot.record, in: context) == snapshot.source else { throw KeepPlantPhotoAnalysisError.conflict }
+        } catch {
+            throw (error as? KeepPlantPhotoAnalysisError) ?? .readFailure
+        }
+        do {
+            context.insert(try PersistedPlantPhotoAnalysis(snapshot))
+            try beforeAnalysisCommit(); try beforeCommit(); try context.save()
+            return snapshot.record
+        } catch {
+            context.rollback()
+            throw KeepPlantPhotoAnalysisError.storage
+        }
+    }
 
     func deleteCareEvent(_ expected: CareEvent) async throws -> CareEvent {
         let context: ModelContext
@@ -75,6 +144,10 @@ actor LocalPlantRepository: PlantRepository, CareEventRepository, PlantPhotoRepo
             throw PlantPhotoError.readFailure
         }
         do {
+            for analysis in try context.fetch(FetchDescriptor<PersistedPlantPhotoAnalysis>()) {
+                let saved = try analysis.snapshot().record
+                if saved.plantID == expected.plantID && saved.identity == .additional(expected.id) { context.delete(analysis) }
+            }
             context.delete(record)
             try beforeDeletionCommit(); try beforeCommit(); try context.save()
         } catch {
@@ -97,7 +170,7 @@ actor LocalPlantRepository: PlantRepository, CareEventRepository, PlantPhotoRepo
             try FileManager.default.createDirectory(at: photos, withIntermediateDirectories: true)
             try FileManager.default.createDirectory(at: additionalPhotos, withIntermediateDirectories: true)
             let configuration = ModelConfiguration(url: root.appendingPathComponent("Plants.store"))
-            let container = try ModelContainer(for: PersistedPlant.self, PersistedCareEvent.self, PersistedPlantPhoto.self, configurations: configuration)
+            let container = try ModelContainer(for: PersistedPlant.self, PersistedCareEvent.self, PersistedPlantPhoto.self, PersistedPlantPhotoAnalysis.self, configurations: configuration)
             let context = ModelContext(container)
             context.autosaveEnabled = false
             // Fetch must succeed before cleanup: unreadable metadata must never erase referenced photos.
@@ -116,7 +189,9 @@ actor LocalPlantRepository: PlantRepository, CareEventRepository, PlantPhotoRepo
                 guard plantIDs.contains(photo.plantID) else { throw PlantPhotoError.storage }
                 return record.photoReference
             })
-            // Both entity sets are valid before either directory is touched.
+            // Validate V4 links and logical uniqueness before touching either JPEG directory.
+            _ = try validatedAnalyses(context)
+            // All entity sets are valid before either directory is touched.
             for file in try FileManager.default.contentsOfDirectory(at: additionalPhotos, includingPropertiesForKeys: nil) {
                 if file.pathExtension == "pending" || (file.pathExtension == "jpg" && !additionalReferences.contains(file.lastPathComponent)) {
                     try FileManager.default.removeItem(at: file)

@@ -1,6 +1,16 @@
 {
   "sourceLanguage" : "es",
   "strings" : {
+    "keepAnalysis.save" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Guardar análisis"}}}},
+    "keepAnalysis.saving" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Guardando análisis…"}}}},
+    "keepAnalysis.error" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"No pudimos guardar el análisis. El resultado sigue disponible; puedes reintentar el guardado local."}}}},
+    "keepAnalysis.stale" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"No pudimos confirmar el registro actual. Cierra y vuelve a abrir desde su foto; no se sobrescribirá ningún análisis."}}}},
+    "keepAnalysis.retry" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Reintentar guardado"}}}},
+    "keepAnalysis.discardFuture" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Descartar análisis estará disponible en una próxima versión. Cerrar sin guardar libera este resultado provisional."}}}},
+    "keepAnalysis.label" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Análisis guardado · orientación de IA"}}}},
+    "keepAnalysis.deleteWarning" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"También se eliminará el análisis guardado de esta fotografía."}}}},
+    "keepAnalysis.readError" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"No pudimos consultar los análisis guardados. Reintenta la lectura antes de analizar."}}}},
+    "keepAnalysis.retryRead" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Reintentar lectura"}}}},
     "analysis.open" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Analizar foto"}}}},
     "analysis.title" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Analizar foto"}}}},
     "analysis.cancel" : {"localizations":{"es":{"stringUnit":{"state":"translated","value":"Cancelar"}}}},

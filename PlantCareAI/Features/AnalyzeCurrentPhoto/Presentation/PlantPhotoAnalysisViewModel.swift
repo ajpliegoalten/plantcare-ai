@@ -18,6 +18,14 @@ final class PlantPhotoAnalysisViewModel: ObservableObject, Identifiable {
     @Published private(set) var result: PlantPhotoAnalysis?
     @Published private(set) var errorKey = "analysis.error.read"
     @Published var showingConsent = false
+    enum SaveState: Equatable { case idle, saving, failed, saved }
+    @Published private(set) var saveState: SaveState = .idle
+    @Published private(set) var saveNeedsNewIntent = false
+    private let keep: (any KeepPlantPhotoAnalysisUseCase)?
+    private let onSaved: @MainActor (SavedPlantPhotoAnalysis) -> Void
+    private var source: PlantPhotoDescriptor?
+    private var acceptance: PlantPhotoAnalysisAcceptance?
+    var didSave: (@MainActor (SavedPlantPhotoAnalysis) -> Void)?
     private let analyze: (any AnalyzePlantPhotoUseCase)?
     private let authorize: AuthorizeExternalAIOperation
     private let configurationIsCurrent: () -> Bool
@@ -32,10 +40,14 @@ final class PlantPhotoAnalysisViewModel: ObservableObject, Identifiable {
 
     init(plantID: UUID, identity: PlantPhotoIdentity, analyze: (any AnalyzePlantPhotoUseCase)?,
          authorize: AuthorizeExternalAIOperation, destination: ExternalAIDestinationNotice?,
-         queriedAt: Date = Date(), timeZone: TimeZone = .current, configurationIsCurrent: @escaping () -> Bool) {
+         queriedAt: Date = Date(), timeZone: TimeZone = .current,
+         keep: (any KeepPlantPhotoAnalysisUseCase)? = nil,
+         onSaved: @escaping @MainActor (SavedPlantPhotoAnalysis) -> Void = { _ in },
+         configurationIsCurrent: @escaping () -> Bool) {
         self.plantID = plantID; self.identity = identity; self.analyze = analyze; self.authorize = authorize
         self.destination = destination; self.queriedAt = queriedAt; self.timeZone = timeZone
         self.configurationIsCurrent = configurationIsCurrent
+        self.keep = keep; self.onSaved = onSaved
     }
     deinit { task?.cancel() }
 
@@ -55,6 +67,7 @@ final class PlantPhotoAnalysisViewModel: ObservableObject, Identifiable {
                 let image = try await Self.thumbnail(value.jpeg)
                 guard self.isCurrent(token) else { return }
                 self.prepared = value; self.plant = value.plant; self.photoDate = value.photo.date; self.image = image
+                self.source = value.photo
                 self.task = nil
                 self.send(confirmed: false)
             } catch { self.fail(error, token: token) }
@@ -119,10 +132,36 @@ final class PlantPhotoAnalysisViewModel: ObservableObject, Identifiable {
         }
     }
 
-    func close() {
-        guard !closed else { return }
+    var canSave: Bool { !closed && state == .result && keep != nil && source != nil && saveState == .idle }
+
+    func save() {
+        guard canSave || (!closed && saveState == .failed && !saveNeedsNewIntent),
+              task == nil, let keep, let result, let source else { return }
+        if acceptance == nil {
+            acceptance = .init(record: .init(id: UUID(), plantID: plantID, identity: identity, photoDate: source.date,
+                queriedAt: result.queriedAt, revision: result.revision, acceptedAt: Date(), content: result.content), source: source)
+        }
+        guard let acceptance else { return }
+        saveState = .saving
+        // Once dispatched, recognize the durable result even if cancellation arrives later.
+        task = Task { [self] in
+            do {
+                let record = try await keep.execute(acceptance)
+                task = nil; onSaved(record); didSave?(record); saveState = .saved
+            } catch {
+                task = nil; saveState = .failed
+                saveNeedsNewIntent = (error as? KeepPlantPhotoAnalysisError) != .storage
+            }
+        }
+    }
+
+    @discardableResult func close() -> Bool {
+        guard saveState != .saving else { return false }
+        guard !closed else { return true }
         closed = true; generation += 1; task?.cancel(); task = nil
         prepared = nil; result = nil; image = nil; plant = nil; photoDate = nil; showingConsent = false
+        source = nil; acceptance = nil
+        return true
     }
 
     nonisolated private static func thumbnail(_ data: Data) async throws -> UIImage {

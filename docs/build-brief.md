@@ -1,5 +1,9 @@
 # Brief de producto: PlantCare AI
 
+## Delta aprobado: keep-analysis (2026-10-13, ADR014)
+
+Guardar análisis conserva explícitamente el resultado útil junto a la foto local seleccionada, sin duplicarla ni registrar cuidados. Un definitivo por identidad; insuficiencia no guardable y definitivo impide reanálisis. Commit local cierra modal, retry conserva intención sin IA. Texto íntegro orientativo debajo de foto en el mismo hito, disponible al relanzar/sin red/configuración. Delete adicional elimina su análisis en la misma transacción metadata y lo advierte; inicial protegida. Descarta pendiente: cierre sin guardar libera provisional. Contexto futuro usa textos propios anteriores por fecha de foto, nunca JPEG previos/fecha de aceptación. Sucede menciones históricas de guardar una foto nueva con análisis para este flujo sobre fotos ya locales.
+
 ## Delta aprobado: analyze-current-photo (2026-10-13, ADR013)
 
 Cualquier foto local seleccionada (inicial/adicional/retroactiva) desde pager/timeline abre mismo modal por identidad exacta. Foto única con especie/ficha/ubicación actuales y solo cuidados de días anteriores al de foto en zona gregoriana fija, máximo20/90días/notas500. Futuro contexto hasta5análisis definitivos TEXTUALES de fotos anteriores por fecha origen, nunca imágenes anteriores/provisionales; hoy no existe lector/persistencia y no se fabrica. JSON16KiB/omisiones explícitas/base excesiva falla local. Aviso v5 destino/modelo/finalidad/contexto, no hereda v4; rechazo/fallo registro ceroHTTP. Un envío por intención, cancelación/retry explícitos. Resultado prudente completo/insuficiencia válida, provisional solo modal; cierre libera sin escribir/borrar. Aceptar/Descartar visibles inactivos hasta sus features, solo definitivo futuro bloquea reanalizar. keep-analysis guardará/renderizará texto bajo foto sin duplicación/aportará lector real. Sin API real de agentes sin autorización específica.

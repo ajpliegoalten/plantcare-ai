@@ -65,7 +65,8 @@ struct PlantTimelineView: View {
             Button("timeline.delete.cancel", role: .cancel) { viewModel.abandonDeletion() }
             Button("timeline.delete.confirm", role: .destructive) { viewModel.confirmDeletion() }
         } message: {
-            Text(viewModel.deletionContext + "\n\n" + String(localized: viewModel.deletionIsPhoto ? "timeline.delete.photo.message" : "timeline.delete.care.message"))
+            Text(viewModel.deletionContext + "\n\n" + String(localized: viewModel.deletionIsPhoto ? "timeline.delete.photo.message" : "timeline.delete.care.message") +
+                 ((viewModel.deletionTarget.flatMap { viewModel.savedAnalysis(for: $0) } != nil) ? "\n" + String(localized: "keepAnalysis.deleteWarning") : ""))
         }
         .onAppear { viewModel.appear() }
         .sheet(item: $viewModel.analysisEditor) { PlantPhotoAnalysisView(viewModel: $0) }
@@ -86,6 +87,7 @@ struct PlantTimelineView: View {
                 case .additional:
                     deletionHeader(entry, title: "timeline.photograph")
                     TimelinePhoto(viewModel: viewModel.photos, identity: entry.id, initial: false)
+                    savedAnalysis(entry)
                 case .initial:
                     HStack(alignment: .top, spacing: 12) {
                         TimelinePhoto(viewModel: viewModel.photos, identity: entry.id, initial: true)
@@ -97,6 +99,7 @@ struct PlantTimelineView: View {
                         }
                     }
                     TimelinePhotoError(viewModel: viewModel.photos, identity: entry.id)
+                    savedAnalysis(entry)
                     analysisButton(entry)
                 }
             }
@@ -145,7 +148,27 @@ struct PlantTimelineView: View {
             Button { viewModel.requestAnalysis(entry) } label: {
                 Label("analysis.open", systemImage: "sparkles").font(.subheadline).frame(minHeight: 45)
             }.accessibilityIdentifier("analyzeTimeline-" + entry.id.stableKey)
-                .disabled(viewModel.deletionState != .idle || viewModel.analysisEditor != nil)
+                .disabled(viewModel.deletionState != .idle || viewModel.analysisEditor != nil || viewModel.savedAnalysis(for: entry) != nil)
+        }
+    }
+
+    @ViewBuilder private func savedAnalysis(_ entry: PlantTimelineEntry) -> some View {
+        if let record = viewModel.savedAnalysis(for: entry) {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("keepAnalysis.label").font(.subheadline).foregroundStyle(Color("TextSecondary"))
+                savedSection("analysis.observations", record.content.observations)
+                savedSection("analysis.causes", record.content.possibleCauses)
+                savedSection("analysis.checks", record.content.checks)
+            }.accessibilityIdentifier("savedAnalysis-" + record.identity.stableKey)
+        }
+    }
+
+    private func savedSection(_ title: LocalizedStringKey, _ values: [String]) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title).font(.headline).accessibilityAddTraits(.isHeader)
+            ForEach(Array(values.enumerated()), id: \.offset) { _, value in
+                Text(verbatim: value).fixedSize(horizontal: false, vertical: true)
+            }
         }
     }
 
