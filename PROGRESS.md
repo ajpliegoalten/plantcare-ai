@@ -1,5 +1,19 @@
 # Progreso de PlantCare AI
 
+## 2026-10-14 — recover-ai-failure: ACCEPT documental, publicación autorizada
+
+- Validator independiente `openai/gpt-6.1-sol` emite **accept**, `docs/validations/recover-ai-failure.md`: C1–C6 respaldados por comportamiento/tests y aceptaciones previas, cobertura offline combinada aprobada por usuario. Sin laguna de producto demostrada, implementación ni pruebas adicionales.
+- Orquestador persiste `accepted` directamente desde `not_started` por cierre documental, sin inventar autoverificación `passing`. Este registro sucede espera de autorización anterior. Spec, informe y entrada de feature enlazados; sin cambios ejecutables.
+- Revisión independiente realmente realizada: lectura de fuentes/tests/helpers/informes, continuidad Git de rutas ejecutables desde52e0fb4,26selectores presentes, JSON/IDs/diff/whitespace. Gates y cifras anteriores son historia: sin corroboración nueva de bundles/manifests/hashes/entorno ni build/test/init/simulador. Gate nuevo no aplicable a documentación según AGENTS.
+- Usuario autoriza commit/push y creación o reutilización de PR de `feature/recover-ai-failure` hacia `main`, repositorio `ajpliegoalten/plantcare-ai`, base `6c259a4`; publicación pendiente de resultado Git/GitHub. Sin merge/auto-merge, otra feature ni escritura de secretos.
+
+## 2026-10-14 — recover-ai-failure: cobertura existente aprobada por el usuario
+
+- Planner `openai/gpt-6.1-sol`, feature-flow un solo paso, produjo `docs/specs/recover-ai-failure.md` en worktree aislado `plantcare-ai-worktrees/recover-ai-failure`, rama `feature/recover-ai-failure`, base main `6c259a4`. Dependencias identify-candidates/generate-care-sheet/analyze-current-photo `accepted`.
+- Usuario aprueba dar la feature por cubierta por comportamiento existente y cobertura offline combinada; no implementar código ni añadir pruebas. Spec traza criterios a fuentes/tests/aceptaciones durables sin atribuirlos a nuevas ejecuciones.
+- Solo documentación y nota de feature actualizadas. Estado `not_started` conservado: aprobación funcional del usuario no sustituye aceptación independiente. Siguiente: revisión independiente documental de pertinencia de evidencia, pendiente de autorización; no se inicia otro rol.
+- Comprobaciones documentales: `git diff --check` y parse JSON tras estos cambios; sin tests/build/init/simuladores/API ni validación ejecutable, commit/push/PR/merge. Sin nuevos recursos visuales ni inspección visual atribuida.
+
 ## 2026-10-14 — app-launch-branding: commit, push y PR entregados
 
 - Commit de producto/tests/docs/spec/aceptación **`52e0fb4`** (`feat(ios): add app icon and native launch screen`), rama `feature/app-launch-branding`; push normal a origin con upstream, sin force-push.

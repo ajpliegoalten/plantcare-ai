@@ -516,10 +516,12 @@
     "title": "Reintentar tras fallo de red o IA",
     "user_visible_behavior": "Un fallo de identificación, cuidados o análisis presenta error recuperable y permite reintentar sin perder datos locales guardados.",
     "depends_on": ["identify-candidates", "generate-care-sheet", "analyze-current-photo"],
-    "status": "not_started",
+    "status": "accepted",
     "verification": ["Simular red/API caída en las tres operaciones; comprobar reintento, sin alta incompleta y colección e historial consultables sin red; gate estándar."],
     "evidence": [],
-    "notes": "Distinguir error de red/API y persistencia local sin registrar contenido sensible."
+    "spec": "docs/specs/recover-ai-failure.md",
+    "validator_evidence": ["2026-10-14 validator independiente openai/gpt-6.1-sol ACCEPT documental, docs/validations/recover-ai-failure.md: C1–C6 cubiertos por comportamiento/tests/aceptaciones existentes, cobertura offline combinada aprobada por usuario; cero cambios ejecutables, sin implementación adicional. Lectura de fuentes/helpers/informes, continuidad Git de rutas ejecutables desde52e0fb4, 26selectores presentes, JSON/IDs/diff/whitespace correctos. Sin nuevo build/test/gate ni corroboración de xcresult/manifests/hashes/entorno históricos; gate nuevo no aplicable a cierre solo documental según AGENTS. Orquestador persiste accepted sin transición ficticia passing. Publicación commit/push/PR hacia main autorizada, sin merge."],
+    "notes": "Distinguir error de red/API y persistencia local sin registrar contenido sensible. Cubierta por comportamiento existente y cobertura offline combinada aprobados por usuario; cierre documental aceptado independientemente el2026-10-14, sin código ni pruebas adicionales. No certifica red del sistema/modo avión ni servicio actual; evidencias ejecutables anteriores conservadas como historia, no nueva ejecución."
   },
   {
     "id": "one-turn-question",
