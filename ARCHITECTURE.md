@@ -1,5 +1,22 @@
 # Arquitectura iOS: Clean Architecture + MVVM
 
+## Marca de lanzamiento (app-launch-branding)
+
+El LaunchScreen es un recurso UIKit estático del sistema en
+`PlantCareAI/Resources/LaunchScreen.storyboard`, previo a la composición SwiftUI.
+AppIcon y artwork viven en Assets.xcassets; Debug/Release seleccionan el mismo
+storyboard/icono desde el proyecto. Sin ViewModel, Domain, Data ni IO adicionales:
+no es un flujo de negocio ni una pantalla dentro de ContentView. El script macOS
+`scripts/generate-launch-assets.swift` prepara artwork offline, fuera del target
+y de las fases de build; no forma parte de las dependencias de ejecución.
+
+App target Debug/Release permite firma ad hoc exclusivamente para
+`iphonesimulator`, desde settings condicionales SDK; genera el sello de recursos
+necesario para que SplashBoard cargue el LaunchScreen. No modifica la composición
+ni introduce script de firma. Dispositivo conserva configuración sin firma hasta
+provisión futura explícita de cuenta/equipo/certificado/profile; no usar identidad
+ad hoc para un iPhone físico. Política vigente en CONSTRAINTS.md.
+
 ## Eliminación de ejemplar (ADR015)
 
 `Features/DeletePlant/Domain` define DeletePlantUseCase/PlantDeletingRepository y errores tipados.

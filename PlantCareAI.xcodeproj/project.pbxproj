@@ -1,448 +1,1560 @@
 // !$*UTF8*$!
 {
 	archiveVersion = 1;
-	classes = {};
-	objectVersion = 77;
-	objects = {
-        DP1500000000000000000040 = {isa = PBXGroup; name = DeletePlant; children = (DP1500000000000000000041, DP1500000000000000000042, DP1500000000000000000043); sourceTree = "<group>"; };
-        DP1500000000000000000043 = {isa = PBXGroup; name = Tests; children = (DP1500000000000000000021); sourceTree = "<group>"; };
-        DP1500000000000000000041 = {isa = PBXGroup; name = Domain; children = (DP1500000000000000000001, DP1500000000000000000002); sourceTree = "<group>"; };
-        DP1500000000000000000042 = {isa = PBXGroup; name = Data; children = (DP1500000000000000000003); sourceTree = "<group>"; };
-        DP1500000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantCareAI/Features/DeletePlant/Domain/PlantDeletingRepository.swift; sourceTree = SOURCE_ROOT; };
-        DP1500000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantCareAI/Features/DeletePlant/Domain/DeletePlantUseCase.swift; sourceTree = SOURCE_ROOT; };
-        DP1500000000000000000003 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantCareAI/Features/DeletePlant/Data/DeletePlantTestFixture.swift; sourceTree = SOURCE_ROOT; };
-        DP1500000000000000000021 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantCareAITests/DeletePlantTests.swift; sourceTree = SOURCE_ROOT; };
-        DP1500000000000000000011 = {isa = PBXBuildFile; fileRef = DP1500000000000000000001; };
-        DP1500000000000000000012 = {isa = PBXBuildFile; fileRef = DP1500000000000000000002; };
-        DP1500000000000000000013 = {isa = PBXBuildFile; fileRef = DP1500000000000000000003; };
-        DP1500000000000000000031 = {isa = PBXBuildFile; fileRef = DP1500000000000000000021; };
-		AB1400000000000000000040 = {isa = PBXGroup; children = (273F7F1E3275EC1CC8E82D7F, 0036DA3F4E043DD60096306F); path = KeepAnalysis; sourceTree = "<group>"; };
-        AB1400000000000000000021 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeepPlantPhotoAnalysisTests.swift; sourceTree = "<group>"; };
-        AB1400000000000000000022 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPlantPhotoAnalysisRepositoryTests.swift; sourceTree = "<group>"; };
-        AB1400000000000000000031 = {isa = PBXBuildFile; fileRef = AB1400000000000000000021; };
-        AB1400000000000000000032 = {isa = PBXBuildFile; fileRef = AB1400000000000000000022; };
-        AB1400000000000000000005 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeepAnalysisTestFixture.swift; sourceTree = "<group>"; };
-        AB1400000000000000000015 = {isa = PBXBuildFile; fileRef = AB1400000000000000000005; };
-        AB1400000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPlantPhotoAnalysis.swift; sourceTree = "<group>"; };
-        AB1400000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhotoAnalysisStoring.swift; sourceTree = "<group>"; };
-        AB1400000000000000000003 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeepPlantPhotoAnalysisUseCase.swift; sourceTree = "<group>"; };
-        AB1400000000000000000004 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedPlantPhotoAnalysis.swift; sourceTree = "<group>"; };
-        AB1400000000000000000011 = {isa = PBXBuildFile; fileRef = AB1400000000000000000001; };
-        AB1400000000000000000012 = {isa = PBXBuildFile; fileRef = AB1400000000000000000002; };
-        AB1400000000000000000013 = {isa = PBXBuildFile; fileRef = AB1400000000000000000003; };
-        AB1400000000000000000014 = {isa = PBXBuildFile; fileRef = AB1400000000000000000004; };
-        AF1300000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhotoAnalysis.swift; sourceTree = "<group>"; };
-        AF1300000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildPlantAnalysisContext.swift; sourceTree = "<group>"; };
-        AF1300000000000000000003 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhotoAnalysisRepository.swift; sourceTree = "<group>"; };
-        AF1300000000000000000004 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyzePlantPhotoUseCase.swift; sourceTree = "<group>"; };
-        AF1300000000000000000005 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAICompatiblePlantPhotoAnalysisRepository.swift; sourceTree = "<group>"; };
-        AF1300000000000000000006 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhotoAnalysisTestFixture.swift; sourceTree = "<group>"; };
-        AF1300000000000000000007 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhotoAnalysisViewModel.swift; sourceTree = "<group>"; };
-        AF1300000000000000000008 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhotoAnalysisView.swift; sourceTree = "<group>"; };
-        AF1300000000000000000011 = {isa = PBXBuildFile; fileRef = AF1300000000000000000001; };
-        AF1300000000000000000012 = {isa = PBXBuildFile; fileRef = AF1300000000000000000002; };
-        AF1300000000000000000013 = {isa = PBXBuildFile; fileRef = AF1300000000000000000003; };
-        AF1300000000000000000014 = {isa = PBXBuildFile; fileRef = AF1300000000000000000004; };
-        AF1300000000000000000015 = {isa = PBXBuildFile; fileRef = AF1300000000000000000005; };
-        AF1300000000000000000016 = {isa = PBXBuildFile; fileRef = AF1300000000000000000006; };
-        AF1300000000000000000017 = {isa = PBXBuildFile; fileRef = AF1300000000000000000007; };
-        AF1300000000000000000018 = {isa = PBXBuildFile; fileRef = AF1300000000000000000008; };
-        AF1300000000000000000021 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildPlantAnalysisContextTests.swift; sourceTree = "<group>"; };
-        AF1300000000000000000022 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyzePlantPhotoTests.swift; sourceTree = "<group>"; };
-        AF1300000000000000000023 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhotoAnalysisViewModelTests.swift; sourceTree = "<group>"; };
-        AF1300000000000000000024 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAICompatiblePlantPhotoAnalysisRepositoryTests.swift; sourceTree = "<group>"; };
-        AF1300000000000000000031 = {isa = PBXBuildFile; fileRef = AF1300000000000000000021; };
-        AF1300000000000000000032 = {isa = PBXBuildFile; fileRef = AF1300000000000000000022; };
-        AF1300000000000000000033 = {isa = PBXBuildFile; fileRef = AF1300000000000000000023; };
-        AF1300000000000000000034 = {isa = PBXBuildFile; fileRef = AF1300000000000000000024; };
-		AF1300000000000000000040 = {isa = PBXGroup; children = (5756C52E38162E54D8A5C543, 499CF8C6A8C280ED2834844A, EE69E1BB66A6F58B8F96D6D6); path = AnalyzeCurrentPhoto; sourceTree = "<group>"; };
-        DE1200000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteCareEventUseCase.swift; sourceTree = "<group>"; };
-        DE1200000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletePlantPhotoUseCase.swift; sourceTree = "<group>"; };
-        DE1200000000000000000021 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteCareEventTests.swift; sourceTree = "<group>"; };
-        DE1200000000000000000022 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletePlantPhotoTests.swift; sourceTree = "<group>"; };
-        DE1200000000000000000011 = {isa = PBXBuildFile; fileRef = DE1200000000000000000001; };
-        DE1200000000000000000012 = {isa = PBXBuildFile; fileRef = DE1200000000000000000002; };
-        DE1200000000000000000031 = {isa = PBXBuildFile; fileRef = DE1200000000000000000021; };
-        DE1200000000000000000032 = {isa = PBXBuildFile; fileRef = DE1200000000000000000022; };
-		DE1200000000000000000040 = {isa = PBXGroup; children = (); sourceTree = "<group>"; };
-        DD1000000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantTimelineEntry.swift; sourceTree = "<group>"; };
-        DD1000000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadPlantTimelineUseCase.swift; sourceTree = "<group>"; };
-        DD1000000000000000000003 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantTimelineRoute.swift; sourceTree = "<group>"; };
-        DD1000000000000000000004 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantTimelineDateFormatter.swift; sourceTree = "<group>"; };
-        DD1000000000000000000005 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantTimelineViewModel.swift; sourceTree = "<group>"; };
-        DD1000000000000000000006 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantTimelinePhotoViewModel.swift; sourceTree = "<group>"; };
-        DD1000000000000000000007 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantTimelineView.swift; sourceTree = "<group>"; };
-        DD1000000000000000000008 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantTimelineTestFixture.swift; sourceTree = "<group>"; };
-        DD1000000000000000000021 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadPlantTimelineTests.swift; sourceTree = "<group>"; };
-        DD1000000000000000000022 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantTimelineDateFormatterTests.swift; sourceTree = "<group>"; };
-        DD1000000000000000000023 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantTimelineViewModelTests.swift; sourceTree = "<group>"; };
-        DD1000000000000000000024 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantTimelinePhotoViewModelTests.swift; sourceTree = "<group>"; };
-        DD1000000000000000000011 = {isa = PBXBuildFile; fileRef = DD1000000000000000000001; };
-        DD1000000000000000000012 = {isa = PBXBuildFile; fileRef = DD1000000000000000000002; };
-        DD1000000000000000000013 = {isa = PBXBuildFile; fileRef = DD1000000000000000000003; };
-        DD1000000000000000000014 = {isa = PBXBuildFile; fileRef = DD1000000000000000000004; };
-        DD1000000000000000000015 = {isa = PBXBuildFile; fileRef = DD1000000000000000000005; };
-        DD1000000000000000000016 = {isa = PBXBuildFile; fileRef = DD1000000000000000000006; };
-        DD1000000000000000000017 = {isa = PBXBuildFile; fileRef = DD1000000000000000000007; };
-        DD1000000000000000000018 = {isa = PBXBuildFile; fileRef = DD1000000000000000000008; };
-        DD1000000000000000000031 = {isa = PBXBuildFile; fileRef = DD1000000000000000000021; };
-        DD1000000000000000000032 = {isa = PBXBuildFile; fileRef = DD1000000000000000000022; };
-        DD1000000000000000000033 = {isa = PBXBuildFile; fileRef = DD1000000000000000000023; };
-        DD1000000000000000000034 = {isa = PBXBuildFile; fileRef = DD1000000000000000000024; };
-		DD1000000000000000000040 = {isa = PBXGroup; children = (BC617CC2A8A9992F3FBF4078, 5DB6F0A74291D8303F736BC9, 85DE4469B5500F1E716D8AB6); path = PlantTimeline; sourceTree = "<group>"; };
-        DA0000000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoSelectionComponents.swift; sourceTree = "<group>"; };
-        DA0000000000000000000002 = {isa = PBXBuildFile; fileRef = DA0000000000000000000001; };
-		DB0000000000000000000040 = {isa = PBXGroup; children = (2538BCC4A5FACF1D635B12DF, 9EEE346CDD1D3C8619E48C6A, 329FF227BFDF651CC98A453F); path = PlantPhotos; sourceTree = "<group>"; };
-        DB000000000000000000000B = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhotoTestFixture.swift; sourceTree = "<group>"; };
-        DB000000000000000000001B = {isa = PBXBuildFile; fileRef = DB000000000000000000000B; };
-        DB0000000000000000000022 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddPlantPhotoTests.swift; sourceTree = "<group>"; };
-        DB0000000000000000000023 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddPlantPhotoViewModelTests.swift; sourceTree = "<group>"; };
-        DB0000000000000000000024 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhotoPagerViewModelTests.swift; sourceTree = "<group>"; };
-        DB0000000000000000000032 = {isa = PBXBuildFile; fileRef = DB0000000000000000000022; };
-        DB0000000000000000000033 = {isa = PBXBuildFile; fileRef = DB0000000000000000000023; };
-        DB0000000000000000000034 = {isa = PBXBuildFile; fileRef = DB0000000000000000000024; };
-        DB0000000000000000000021 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPlantPhotoRepositoryTests.swift; sourceTree = "<group>"; };
-        DB0000000000000000000031 = {isa = PBXBuildFile; fileRef = DB0000000000000000000021; };
-        DB0000000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhoto.swift; sourceTree = "<group>"; };
-        DB0000000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhotoRepository.swift; sourceTree = "<group>"; };
-        DB0000000000000000000003 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddPlantPhotoUseCase.swift; sourceTree = "<group>"; };
-        DB0000000000000000000004 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadPlantPhotosUseCase.swift; sourceTree = "<group>"; };
-        DB0000000000000000000005 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadPlantPhotoUseCase.swift; sourceTree = "<group>"; };
-        DB0000000000000000000006 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedPlantPhoto.swift; sourceTree = "<group>"; };
-        DB0000000000000000000007 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddPlantPhotoViewModel.swift; sourceTree = "<group>"; };
-        DB0000000000000000000008 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddPlantPhotoView.swift; sourceTree = "<group>"; };
-        DB0000000000000000000009 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhotoPagerViewModel.swift; sourceTree = "<group>"; };
-        DB000000000000000000000A = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhotoPagerView.swift; sourceTree = "<group>"; };
-        DB0000000000000000000011 = {isa = PBXBuildFile; fileRef = DB0000000000000000000001; };
-        DB0000000000000000000012 = {isa = PBXBuildFile; fileRef = DB0000000000000000000002; };
-        DB0000000000000000000013 = {isa = PBXBuildFile; fileRef = DB0000000000000000000003; };
-        DB0000000000000000000014 = {isa = PBXBuildFile; fileRef = DB0000000000000000000004; };
-        DB0000000000000000000015 = {isa = PBXBuildFile; fileRef = DB0000000000000000000005; };
-        DB0000000000000000000016 = {isa = PBXBuildFile; fileRef = DB0000000000000000000006; };
-        DB0000000000000000000017 = {isa = PBXBuildFile; fileRef = DB0000000000000000000007; };
-        DB0000000000000000000018 = {isa = PBXBuildFile; fileRef = DB0000000000000000000008; };
-        DB0000000000000000000019 = {isa = PBXBuildFile; fileRef = DB0000000000000000000009; };
-        DB000000000000000000001A = {isa = PBXBuildFile; fileRef = DB000000000000000000000A; };
-		DC0000000000000000000040 = {isa = PBXGroup; children = (EA2F4649685C2F152401E0F1, 8285E32CAF6C6C5C2BD71C64); path = LastWateringHint; sourceTree = "<group>"; };
-        DC0000000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadLastWateringUseCase.swift; sourceTree = "<group>"; };
-        DC0000000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastWateringHintViewModel.swift; sourceTree = "<group>"; };
-        DC0000000000000000000003 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastWateringHintView.swift; sourceTree = "<group>"; };
-        DC0000000000000000000004 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastWateringDateFormatter.swift; sourceTree = "<group>"; };
-        DC0000000000000000000011 = {isa = PBXBuildFile; fileRef = DC0000000000000000000001; };
-        DC0000000000000000000012 = {isa = PBXBuildFile; fileRef = DC0000000000000000000002; };
-        DC0000000000000000000013 = {isa = PBXBuildFile; fileRef = DC0000000000000000000003; };
-        DC0000000000000000000014 = {isa = PBXBuildFile; fileRef = DC0000000000000000000004; };
-        DC0000000000000000000021 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadLastWateringTests.swift; sourceTree = "<group>"; };
-        DC0000000000000000000022 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastWateringHintViewModelTests.swift; sourceTree = "<group>"; };
-        DC0000000000000000000023 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastWateringDateFormatterTests.swift; sourceTree = "<group>"; };
-        DC0000000000000000000031 = {isa = PBXBuildFile; fileRef = DC0000000000000000000021; };
-        DC0000000000000000000032 = {isa = PBXBuildFile; fileRef = DC0000000000000000000022; };
-        DC0000000000000000000033 = {isa = PBXBuildFile; fileRef = DC0000000000000000000023; };
-		CB0000000000000000000040 = {isa = PBXGroup; children = (1ABBEA8A0A04AD5FBCB63DEB, 45AF605B3806E74FAEB4E8ED, 0DB5865FC26426AC084C0ECC); path = CareEvents; sourceTree = "<group>"; };
-		CB0000000000000000000041 = {isa = PBXGroup; children = (3A7FCF77BF51EAD9165F8635); path = Shared; sourceTree = "<group>"; };
-        CB0000000000000000000008 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CareEventTestFixture.swift; sourceTree = "<group>"; };
-        CB0000000000000000000018 = {isa = PBXBuildFile; fileRef = CB0000000000000000000008; };
-        CB0000000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CareEvent.swift; sourceTree = "<group>"; };
-        CB0000000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CareEventRepository.swift; sourceTree = "<group>"; };
-        CB0000000000000000000003 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterCareEventUseCase.swift; sourceTree = "<group>"; };
-        CB0000000000000000000004 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedCareEvent.swift; sourceTree = "<group>"; };
-        CB0000000000000000000005 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterCareViewModel.swift; sourceTree = "<group>"; };
-        CB0000000000000000000006 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterCareView.swift; sourceTree = "<group>"; };
-        CB0000000000000000000007 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantFormHeader.swift; sourceTree = "<group>"; };
-        CB0000000000000000000011 = {isa = PBXBuildFile; fileRef = CB0000000000000000000001; };
-        CB0000000000000000000012 = {isa = PBXBuildFile; fileRef = CB0000000000000000000002; };
-        CB0000000000000000000013 = {isa = PBXBuildFile; fileRef = CB0000000000000000000003; };
-        CB0000000000000000000014 = {isa = PBXBuildFile; fileRef = CB0000000000000000000004; };
-        CB0000000000000000000015 = {isa = PBXBuildFile; fileRef = CB0000000000000000000005; };
-        CB0000000000000000000016 = {isa = PBXBuildFile; fileRef = CB0000000000000000000006; };
-        CB0000000000000000000017 = {isa = PBXBuildFile; fileRef = CB0000000000000000000007; };
-        CB0000000000000000000021 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterCareEventTests.swift; sourceTree = "<group>"; };
-        CB0000000000000000000022 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalCareEventRepositoryTests.swift; sourceTree = "<group>"; };
-        CB0000000000000000000023 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterCareViewModelTests.swift; sourceTree = "<group>"; };
-        CB0000000000000000000031 = {isa = PBXBuildFile; fileRef = CB0000000000000000000021; };
-        CB0000000000000000000032 = {isa = PBXBuildFile; fileRef = CB0000000000000000000022; };
-        CB0000000000000000000033 = {isa = PBXBuildFile; fileRef = CB0000000000000000000023; };
-		CA0000000000000000000040 = {isa = PBXGroup; children = (8323F696CC699BCECD683B39, FCAC2D2AEB6C5290A20095A9, 9922CD639A7CFE976915BFA7); path = SavePlant; sourceTree = "<group>"; };
-        CA0000000000000000000004 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantCreationTestFixture.swift; sourceTree = "<group>"; };
-        CA0000000000000000000014 = {isa = PBXBuildFile; fileRef = CA0000000000000000000004; };
-        CA0000000000000000000021 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveConfirmedPlantTests.swift; sourceTree = "<group>"; };
-        CA0000000000000000000022 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreparedPlantPhotoValidationTests.swift; sourceTree = "<group>"; };
-        CA0000000000000000000023 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavePlantViewModelTests.swift; sourceTree = "<group>"; };
-        CA0000000000000000000031 = {isa = PBXBuildFile; fileRef = CA0000000000000000000021; };
-        CA0000000000000000000032 = {isa = PBXBuildFile; fileRef = CA0000000000000000000022; };
-        CA0000000000000000000033 = {isa = PBXBuildFile; fileRef = CA0000000000000000000023; };
-        CA0000000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreparedPlantPhotoValidating.swift; sourceTree = "<group>"; };
-        CA0000000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveConfirmedPlantUseCase.swift; sourceTree = "<group>"; };
-        CA0000000000000000000003 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPreparedPlantPhotoValidator.swift; sourceTree = "<group>"; };
-        CA0000000000000000000011 = {isa = PBXBuildFile; fileRef = CA0000000000000000000001; };
-        CA0000000000000000000012 = {isa = PBXBuildFile; fileRef = CA0000000000000000000002; };
-        CA0000000000000000000013 = {isa = PBXBuildFile; fileRef = CA0000000000000000000003; };
-        CE0000000000000000000021 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateCareSheetTests.swift; sourceTree = "<group>"; };
-        CE0000000000000000000022 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateCareSheetViewModelTests.swift; sourceTree = "<group>"; };
-        CE0000000000000000000023 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAICompatibleCareSheetGenerationRepositoryTests.swift; sourceTree = "<group>"; };
-        CE0000000000000000000031 = {isa = PBXBuildFile; fileRef = CE0000000000000000000021; };
-        CE0000000000000000000032 = {isa = PBXBuildFile; fileRef = CE0000000000000000000022; };
-        CE0000000000000000000033 = {isa = PBXBuildFile; fileRef = CE0000000000000000000023; };
-        CE0000000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CareSheetGenerationRepository.swift; sourceTree = "<group>"; };
-        CE0000000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateCareSheetUseCase.swift; sourceTree = "<group>"; };
-        CE0000000000000000000003 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAICompatibleCareSheetGenerationRepository.swift; sourceTree = "<group>"; };
-        CE0000000000000000000004 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CareSheetGenerationTestFixture.swift; sourceTree = "<group>"; };
-        CE0000000000000000000011 = {isa = PBXBuildFile; fileRef = CE0000000000000000000001; };
-        CE0000000000000000000012 = {isa = PBXBuildFile; fileRef = CE0000000000000000000002; };
-        CE0000000000000000000013 = {isa = PBXBuildFile; fileRef = CE0000000000000000000003; };
-        CE0000000000000000000014 = {isa = PBXBuildFile; fileRef = CE0000000000000000000004; };
-		CE0000000000000000000040 = {isa = PBXGroup; children = (2D1121A556C8E9552F974FBD, B7E6F0FA2646FE2AB9A888BC); path = GenerateCareSheet; sourceTree = "<group>"; };
-        FE0000000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmManualSpeciesUseCase.swift; sourceTree = "<group>"; };
-        FE0000000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualSpeciesView.swift; sourceTree = "<group>"; };
-        FE0000000000000000000003 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmManualSpeciesTests.swift; sourceTree = "<group>"; };
-        FE0000000000000000000004 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualSpeciesViewModelTests.swift; sourceTree = "<group>"; };
-        FE0000000000000000000011 = {isa = PBXBuildFile; fileRef = FE0000000000000000000001; };
-        FE0000000000000000000012 = {isa = PBXBuildFile; fileRef = FE0000000000000000000002; };
-        FE0000000000000000000013 = {isa = PBXBuildFile; fileRef = FE0000000000000000000003; };
-        FE0000000000000000000014 = {isa = PBXBuildFile; fileRef = FE0000000000000000000004; };
-        FD0000000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmedDraftIdentity.swift; sourceTree = "<group>"; };
-        FD0000000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmSpeciesUseCase.swift; sourceTree = "<group>"; };
-        FD0000000000000000000003 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantCreationStatusView.swift; sourceTree = "<group>"; };
-        FD0000000000000000000011 = {isa = PBXBuildFile; fileRef = FD0000000000000000000001; };
-        FD0000000000000000000012 = {isa = PBXBuildFile; fileRef = FD0000000000000000000002; };
-        FD0000000000000000000013 = {isa = PBXBuildFile; fileRef = FD0000000000000000000003; };
-        FD0000000000000000000021 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmSpeciesTests.swift; sourceTree = "<group>"; };
-        FD0000000000000000000022 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmSpeciesViewModelTests.swift; sourceTree = "<group>"; };
-        FD0000000000000000000031 = {isa = PBXBuildFile; fileRef = FD0000000000000000000021; };
-        FD0000000000000000000032 = {isa = PBXBuildFile; fileRef = FD0000000000000000000022; };
-		FD0000000000000000000040 = {isa = PBXGroup; children = (8CD9997FAF4B9AAE120230CB); path = ConfirmSpecies; sourceTree = "<group>"; };
-        FC0000000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentificationResult.swift; sourceTree = "<group>"; };
-        FC0000000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeciesIdentificationRepository.swift; sourceTree = "<group>"; };
-        FC0000000000000000000003 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyCandidatesUseCase.swift; sourceTree = "<group>"; };
-        FC0000000000000000000004 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentificationAPIConfiguration.swift; sourceTree = "<group>"; };
-        FC0000000000000000000005 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAICompatibleSpeciesIdentificationRepository.swift; sourceTree = "<group>"; };
-        FC0000000000000000000006 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentificationResultView.swift; sourceTree = "<group>"; };
-        FC0000000000000000000007 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentificationCandidatesTestFixture.swift; sourceTree = "<group>"; };
-        FC0000000000000000000011 = {isa = PBXBuildFile; fileRef = FC0000000000000000000001; };
-        FC0000000000000000000012 = {isa = PBXBuildFile; fileRef = FC0000000000000000000002; };
-        FC0000000000000000000013 = {isa = PBXBuildFile; fileRef = FC0000000000000000000003; };
-        FC0000000000000000000014 = {isa = PBXBuildFile; fileRef = FC0000000000000000000004; };
-        FC0000000000000000000015 = {isa = PBXBuildFile; fileRef = FC0000000000000000000005; };
-        FC0000000000000000000016 = {isa = PBXBuildFile; fileRef = FC0000000000000000000006; };
-        FC0000000000000000000017 = {isa = PBXBuildFile; fileRef = FC0000000000000000000007; };
-        FC0000000000000000000021 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyCandidatesTests.swift; sourceTree = "<group>"; };
-        FC0000000000000000000022 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAICompatibleSpeciesIdentificationRepositoryTests.swift; sourceTree = "<group>"; };
-        FC0000000000000000000031 = {isa = PBXBuildFile; fileRef = FC0000000000000000000021; };
-        FC0000000000000000000032 = {isa = PBXBuildFile; fileRef = FC0000000000000000000022; };
-		FC0000000000000000000040 = {isa = PBXGroup; children = (BF14DAED02B6EB1332E6D8B5, 52686D008757DFA4CC4C723D, 0924555587FF90629C77F3B6); path = IdentifyCandidates; sourceTree = "<group>"; };
-        FC0000000000000000000050 = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = IdentificationSecrets.xcconfig; sourceTree = "<group>"; };
-        FB0000000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalAIConsent.swift; sourceTree = "<group>"; };
-        FB0000000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalAIConsentRepository.swift; sourceTree = "<group>"; };
-        FB0000000000000000000003 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorizeExternalAIOperationUseCase.swift; sourceTree = "<group>"; };
-        FB0000000000000000000004 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsExternalAIConsentRepository.swift; sourceTree = "<group>"; };
-        FB0000000000000000000005 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalAIConsentView.swift; sourceTree = "<group>"; };
-        FB0000000000000000000006 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalAIConsentTestFixture.swift; sourceTree = "<group>"; };
-        FB0000000000000000000011 = {isa = PBXBuildFile; fileRef = FB0000000000000000000001; };
-        FB0000000000000000000012 = {isa = PBXBuildFile; fileRef = FB0000000000000000000002; };
-        FB0000000000000000000013 = {isa = PBXBuildFile; fileRef = FB0000000000000000000003; };
-        FB0000000000000000000014 = {isa = PBXBuildFile; fileRef = FB0000000000000000000004; };
-        FB0000000000000000000015 = {isa = PBXBuildFile; fileRef = FB0000000000000000000005; };
-        FB0000000000000000000016 = {isa = PBXBuildFile; fileRef = FB0000000000000000000006; };
-        FB0000000000000000000021 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalAIConsentTests.swift; sourceTree = "<group>"; };
-        FB0000000000000000000022 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsExternalAIConsentRepositoryTests.swift; sourceTree = "<group>"; };
-        FB0000000000000000000023 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentificationConsentViewModelTests.swift; sourceTree = "<group>"; };
-        FB0000000000000000000031 = {isa = PBXBuildFile; fileRef = FB0000000000000000000021; };
-        FB0000000000000000000032 = {isa = PBXBuildFile; fileRef = FB0000000000000000000022; };
-        FB0000000000000000000033 = {isa = PBXBuildFile; fileRef = FB0000000000000000000023; };
-		FB0000000000000000000040 = {isa = PBXGroup; children = (3F6E50583545305A9C1B45E4, 69BC1200FD486AE265FECC51, EADC6ED9DF147117403A9C5F); path = ExternalAIConsent; sourceTree = "<group>"; };
-        FA0000000000000000000009 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentificationPhotoTestFixture.swift; sourceTree = "<group>"; };
-        FA0000000000000000000019 = {isa = PBXBuildFile; fileRef = FA0000000000000000000009; };
-        FA0000000000000000000021 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentificationPhotoPreparationTests.swift; sourceTree = "<group>"; };
-        FA0000000000000000000022 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentificationPhotoViewModelTests.swift; sourceTree = "<group>"; };
-        FA0000000000000000000023 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraAccessTests.swift; sourceTree = "<group>"; };
-        FA0000000000000000000031 = {isa = PBXBuildFile; fileRef = FA0000000000000000000021; };
-        FA0000000000000000000032 = {isa = PBXBuildFile; fileRef = FA0000000000000000000022; };
-        FA0000000000000000000033 = {isa = PBXBuildFile; fileRef = FA0000000000000000000023; };
-        FA0000000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentificationPhoto.swift; sourceTree = "<group>"; };
-        FA0000000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrepareIdentificationPhotoUseCase.swift; sourceTree = "<group>"; };
-        FA0000000000000000000003 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraAccess.swift; sourceTree = "<group>"; };
-        FA0000000000000000000004 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalIdentificationPhotoPreparer.swift; sourceTree = "<group>"; };
-        FA0000000000000000000005 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemCameraAccess.swift; sourceTree = "<group>"; };
-        FA0000000000000000000006 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentificationPhotoView.swift; sourceTree = "<group>"; };
-        FA0000000000000000000007 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentificationPhotoViewModel.swift; sourceTree = "<group>"; };
-        FA0000000000000000000008 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPickerView.swift; sourceTree = "<group>"; };
-        FA0000000000000000000011 = {isa = PBXBuildFile; fileRef = FA0000000000000000000001; };
-        FA0000000000000000000012 = {isa = PBXBuildFile; fileRef = FA0000000000000000000002; };
-        FA0000000000000000000013 = {isa = PBXBuildFile; fileRef = FA0000000000000000000003; };
-        FA0000000000000000000014 = {isa = PBXBuildFile; fileRef = FA0000000000000000000004; };
-        FA0000000000000000000015 = {isa = PBXBuildFile; fileRef = FA0000000000000000000005; };
-        FA0000000000000000000016 = {isa = PBXBuildFile; fileRef = FA0000000000000000000006; };
-        FA0000000000000000000017 = {isa = PBXBuildFile; fileRef = FA0000000000000000000007; };
-        FA0000000000000000000018 = {isa = PBXBuildFile; fileRef = FA0000000000000000000008; };
-		FA0000000000000000000040 = {isa = PBXGroup; children = (9F0B2F49D0193D578A81A65F, DD00B6103C156A260BF961FE, EC1CDCE048B6CB21E26E4E35); path = IdentificationPhoto; sourceTree = "<group>"; };
-        FF0000000000000000000021 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdatePlantTests.swift; sourceTree = "<group>"; };
-        FF0000000000000000000022 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditPlantViewModelTests.swift; sourceTree = "<group>"; };
-        FF0000000000000000000031 = {isa = PBXBuildFile; fileRef = FF0000000000000000000021; };
-        FF0000000000000000000032 = {isa = PBXBuildFile; fileRef = FF0000000000000000000022; };
-        FF0000000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdatePlantUseCase.swift; sourceTree = "<group>"; };
-        FF0000000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditPlantView.swift; sourceTree = "<group>"; };
-        FF0000000000000000000003 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditPlantViewModel.swift; sourceTree = "<group>"; };
-        FF0000000000000000000011 = {isa = PBXBuildFile; fileRef = FF0000000000000000000001; };
-        FF0000000000000000000012 = {isa = PBXBuildFile; fileRef = FF0000000000000000000002; };
-        FF0000000000000000000013 = {isa = PBXBuildFile; fileRef = FF0000000000000000000003; };
-		FF0000000000000000000040 = {isa = PBXGroup; children = (FF0000000000000000000041, FF0000000000000000000042); path = EditPlant; sourceTree = "<group>"; };
-		FF0000000000000000000041 = {isa = PBXGroup; children = (FF0000000000000000000001); path = Domain; sourceTree = "<group>"; };
-		FF0000000000000000000042 = {isa = PBXGroup; children = (FF0000000000000000000002, FF0000000000000000000003); path = Presentation; sourceTree = "<group>"; };
-		EE0000000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadPlantDetailUseCase.swift; sourceTree = "<group>"; };
-		EE0000000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantDetailView.swift; sourceTree = "<group>"; };
-		EE0000000000000000000003 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantDetailViewModel.swift; sourceTree = "<group>"; };
-		EE0000000000000000000011 = {isa = PBXBuildFile; fileRef = EE0000000000000000000001; };
-		EE0000000000000000000012 = {isa = PBXBuildFile; fileRef = EE0000000000000000000002; };
-		EE0000000000000000000013 = {isa = PBXBuildFile; fileRef = EE0000000000000000000003; };
-		EE0000000000000000000021 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadPlantDetailTests.swift; sourceTree = "<group>"; };
-		EE0000000000000000000022 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantDetailViewModelTests.swift; sourceTree = "<group>"; };
-		EE0000000000000000000031 = {isa = PBXBuildFile; fileRef = EE0000000000000000000021; };
-		EE0000000000000000000032 = {isa = PBXBuildFile; fileRef = EE0000000000000000000022; };
-		EE0000000000000000000040 = {isa = PBXGroup; children = (EE0000000000000000000041, EE0000000000000000000042); path = PlantDetail; sourceTree = "<group>"; };
-		EE0000000000000000000041 = {isa = PBXGroup; children = (EE0000000000000000000001); path = Domain; sourceTree = "<group>"; };
-		EE0000000000000000000042 = {isa = PBXGroup; children = (EE0000000000000000000002, EE0000000000000000000003); path = Presentation; sourceTree = "<group>"; };
-		DD0000000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantCardView.swift; sourceTree = "<group>"; };
-		DD0000000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantCardViewModel.swift; sourceTree = "<group>"; };
-		DD0000000000000000000011 = {isa = PBXBuildFile; fileRef = DD0000000000000000000001; };
-		DD0000000000000000000012 = {isa = PBXBuildFile; fileRef = DD0000000000000000000002; };
-		DD0000000000000000000021 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantCardViewModelTests.swift; sourceTree = "<group>"; };
-		DD0000000000000000000022 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantListViewModelTests.swift; sourceTree = "<group>"; };
-		DD0000000000000000000031 = {isa = PBXBuildFile; fileRef = DD0000000000000000000021; };
-		DD0000000000000000000032 = {isa = PBXBuildFile; fileRef = DD0000000000000000000022; };
-		CC0000000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPlantRepositoryTests.swift; sourceTree = "<group>"; };
-		CC0000000000000000000002 = {isa = PBXBuildFile; fileRef = CC0000000000000000000001; };
-		CC0000000000000000000003 = {isa = PBXGroup; children = (FE0000000000000000000003, FE0000000000000000000004, FD0000000000000000000021, FD0000000000000000000022, FC0000000000000000000021, FC0000000000000000000022, FB0000000000000000000021, FB0000000000000000000022, FB0000000000000000000023, FA0000000000000000000021, FA0000000000000000000022, FA0000000000000000000023, FF0000000000000000000021, FF0000000000000000000022, EE0000000000000000000021, EE0000000000000000000022, DD0000000000000000000021, DD0000000000000000000022, CC0000000000000000000001, AB1400000000000000000021, AB1400000000000000000022, AF1300000000000000000021, AF1300000000000000000022, AF1300000000000000000023, AF1300000000000000000024, DE1200000000000000000021, DE1200000000000000000022, DD1000000000000000000021, DD1000000000000000000022, DD1000000000000000000023, DD1000000000000000000024, DB0000000000000000000021, DB0000000000000000000022, DB0000000000000000000023, DB0000000000000000000024, DC0000000000000000000021, DC0000000000000000000022, DC0000000000000000000023, CB0000000000000000000021, CB0000000000000000000022, CB0000000000000000000023, CA0000000000000000000021, CA0000000000000000000022, CA0000000000000000000023, CE0000000000000000000021, CE0000000000000000000022, CE0000000000000000000023); path = PlantCareAITests; sourceTree = "<group>"; };
-		CC0000000000000000000004 = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = PlantCareAITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		CC0000000000000000000005 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (
-            DP1500000000000000000031,
-            AB1400000000000000000031, AB1400000000000000000032,
-            AF1300000000000000000031, AF1300000000000000000032, AF1300000000000000000033, AF1300000000000000000034,
-            DD1000000000000000000031, DD1000000000000000000032, DD1000000000000000000033, DD1000000000000000000034,
-            DE1200000000000000000031, DE1200000000000000000032,
-            DB0000000000000000000032, DB0000000000000000000033, DB0000000000000000000034,
-            DB0000000000000000000031,
-            DC0000000000000000000031, DC0000000000000000000032, DC0000000000000000000033,
-            CB0000000000000000000031, CB0000000000000000000032, CB0000000000000000000033,
-            CA0000000000000000000031, CA0000000000000000000032, CA0000000000000000000033, CE0000000000000000000031, CE0000000000000000000032, CE0000000000000000000033, FE0000000000000000000013, FE0000000000000000000014, FD0000000000000000000031, FD0000000000000000000032, FC0000000000000000000031, FC0000000000000000000032, FB0000000000000000000031, FB0000000000000000000032, FB0000000000000000000033, FA0000000000000000000031, FA0000000000000000000032, FA0000000000000000000033, FF0000000000000000000031, FF0000000000000000000032, EE0000000000000000000031, EE0000000000000000000032, DD0000000000000000000031, DD0000000000000000000032, CC0000000000000000000002); runOnlyForDeploymentPostprocessing = 0; };
-		CC0000000000000000000006 = {isa = PBXNativeTarget; buildConfigurationList = CC0000000000000000000007; buildPhases = (CC0000000000000000000005); buildRules = (); dependencies = (AA0000000000000000000021); name = PlantCareAITests; productName = PlantCareAITests; productReference = CC0000000000000000000004; productType = "com.apple.product-type.bundle.unit-test"; };
-		CC0000000000000000000007 = {isa = XCConfigurationList; buildConfigurations = (CC0000000000000000000008, CC0000000000000000000009); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
-		CC0000000000000000000008 = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; PRODUCT_BUNDLE_IDENTIFIER = org.plantcareai.prototype.tests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = 1; TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PlantCareAI.app/PlantCareAI"; BUNDLE_LOADER = "$(TEST_HOST)"; }; name = Debug; };
-		CC0000000000000000000009 = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; PRODUCT_BUNDLE_IDENTIFIER = org.plantcareai.prototype.tests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = 1; TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PlantCareAI.app/PlantCareAI"; BUNDLE_LOADER = "$(TEST_HOST)"; }; name = Release; };
-		AB0000000000000000000090 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CareSheet.swift; sourceTree = "<group>"; };
-		AB0000000000000000000091 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavePlantUseCase.swift; sourceTree = "<group>"; };
-		AB0000000000000000000092 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadInitialPlantPhotoUseCase.swift; sourceTree = "<group>"; };
-		AB0000000000000000000093 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedPlant.swift; sourceTree = "<group>"; };
-		AB0000000000000000000094 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageTestFixture.swift; sourceTree = "<group>"; };
-		AC0000000000000000000090 = {isa = PBXBuildFile; fileRef = AB0000000000000000000090; };
-		AC0000000000000000000091 = {isa = PBXBuildFile; fileRef = AB0000000000000000000091; };
-		AC0000000000000000000092 = {isa = PBXBuildFile; fileRef = AB0000000000000000000092; };
-		AC0000000000000000000093 = {isa = PBXBuildFile; fileRef = AB0000000000000000000093; };
-		AC0000000000000000000094 = {isa = PBXBuildFile; fileRef = AB0000000000000000000094; };
-		AA0000000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantCareAIApp.swift; sourceTree = "<group>"; };
-		AA0000000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		AA0000000000000000000003 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantCareAIUITests.swift; sourceTree = "<group>"; };
-		AA0000000000000000000004 = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PlantCareAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		AA0000000000000000000005 = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PlantCareAIUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		AA0000000000000000000050 = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		AA0000000000000000000051 = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
-		AA0000000000000000000060 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantListView.swift; sourceTree = "<group>"; };
-		AA0000000000000000000061 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyPlantView.swift; sourceTree = "<group>"; };
-		AA0000000000000000000062 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantListViewModel.swift; sourceTree = "<group>"; };
-		AA0000000000000000000063 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Plant.swift; sourceTree = "<group>"; };
-		AA0000000000000000000064 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantRepository.swift; sourceTree = "<group>"; };
-		AA0000000000000000000065 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadPlantsUseCase.swift; sourceTree = "<group>"; };
-		AA0000000000000000000066 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPlantRepository.swift; sourceTree = "<group>"; };
-		AA0000000000000000000006 = {isa = PBXBuildFile; fileRef = AA0000000000000000000001; };
-		AA0000000000000000000007 = {isa = PBXBuildFile; fileRef = AA0000000000000000000002; };
-		AA0000000000000000000008 = {isa = PBXBuildFile; fileRef = AA0000000000000000000003; };
-		AA0000000000000000000052 = {isa = PBXBuildFile; fileRef = AA0000000000000000000050; };
-		AA0000000000000000000053 = {isa = PBXBuildFile; fileRef = AA0000000000000000000051; };
-		AA0000000000000000000070 = {isa = PBXBuildFile; fileRef = AA0000000000000000000060; };
-		AA0000000000000000000071 = {isa = PBXBuildFile; fileRef = AA0000000000000000000061; };
-		AA0000000000000000000072 = {isa = PBXBuildFile; fileRef = AA0000000000000000000062; };
-		AA0000000000000000000073 = {isa = PBXBuildFile; fileRef = AA0000000000000000000063; };
-		AA0000000000000000000074 = {isa = PBXBuildFile; fileRef = AA0000000000000000000064; };
-		AA0000000000000000000075 = {isa = PBXBuildFile; fileRef = AA0000000000000000000065; };
-		AA0000000000000000000076 = {isa = PBXBuildFile; fileRef = AA0000000000000000000066; };
-		AA0000000000000000000009 = {isa = PBXGroup; children = (DP1500000000000000000040, AA0000000000000000000011, A11000000000000000000001, CC0000000000000000000003, AA0000000000000000000012, AA0000000000000000000013); sourceTree = "<group>"; };
-		AA0000000000000000000011 = {isa = PBXGroup; children = (AA0000000000000000000080, CB0000000000000000000041, AA0000000000000000000001, AA0000000000000000000002, AA0000000000000000000050, AA0000000000000000000051); path = PlantCareAI; sourceTree = "<group>"; };
-		AA0000000000000000000080 = {isa = PBXGroup; children = (34578A4E497C19B4D593EF49, AB1400000000000000000040, AF1300000000000000000040, CB0000000000000000000040, DB0000000000000000000040, DD1000000000000000000040, DC0000000000000000000040, CA0000000000000000000040, CE0000000000000000000040, FD0000000000000000000040, FC0000000000000000000040, FB0000000000000000000040, FA0000000000000000000040, FF0000000000000000000040, EE0000000000000000000040, AA0000000000000000000081); path = Features; sourceTree = "<group>"; };
-		AA0000000000000000000081 = {isa = PBXGroup; children = (AA0000000000000000000082, AA0000000000000000000083, AA0000000000000000000084); path = PlantList; sourceTree = "<group>"; };
-		AA0000000000000000000082 = {isa = PBXGroup; children = (DD0000000000000000000001, DD0000000000000000000002, AA0000000000000000000060, AA0000000000000000000061, AA0000000000000000000062); path = Presentation; sourceTree = "<group>"; };
-		AA0000000000000000000083 = {isa = PBXGroup; children = (AB0000000000000000000090, AB0000000000000000000091, AB0000000000000000000092, AA0000000000000000000063, AA0000000000000000000064, AA0000000000000000000065); path = Domain; sourceTree = "<group>"; };
-		AA0000000000000000000084 = {isa = PBXGroup; children = (AB0000000000000000000093, AB0000000000000000000094, AA0000000000000000000066); path = Data; sourceTree = "<group>"; };
-		AA0000000000000000000012 = {isa = PBXGroup; children = (AA0000000000000000000003); path = PlantCareAIUITests; sourceTree = "<group>"; };
-		AA0000000000000000000013 = {isa = PBXGroup; children = (CC0000000000000000000004, AA0000000000000000000004, AA0000000000000000000005); name = Products; sourceTree = "<group>"; };
-		AA0000000000000000000014 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (
-            DP1500000000000000000011, DP1500000000000000000012, DP1500000000000000000013,
-            AB1400000000000000000015,
-            AB1400000000000000000011, AB1400000000000000000012, AB1400000000000000000013, AB1400000000000000000014,
-            AF1300000000000000000011, AF1300000000000000000012, AF1300000000000000000013, AF1300000000000000000014, AF1300000000000000000015, AF1300000000000000000016, AF1300000000000000000017, AF1300000000000000000018,
-            DD1000000000000000000011, DD1000000000000000000012, DD1000000000000000000013, DD1000000000000000000014, DD1000000000000000000015, DD1000000000000000000016, DD1000000000000000000017, DD1000000000000000000018,
-            DE1200000000000000000011, DE1200000000000000000012,
-            DA0000000000000000000002,
-            DB000000000000000000001B,
-            DB0000000000000000000011, DB0000000000000000000012, DB0000000000000000000013, DB0000000000000000000014, DB0000000000000000000015, DB0000000000000000000016, DB0000000000000000000017, DB0000000000000000000018, DB0000000000000000000019, DB000000000000000000001A,
-            DC0000000000000000000011, DC0000000000000000000012, DC0000000000000000000013, DC0000000000000000000014,
-            CB0000000000000000000018,
-            CB0000000000000000000011, CB0000000000000000000012, CB0000000000000000000013, CB0000000000000000000014, CB0000000000000000000015, CB0000000000000000000016, CB0000000000000000000017,
-            CA0000000000000000000014,
-            CA0000000000000000000011, CA0000000000000000000012, CA0000000000000000000013, CE0000000000000000000011, CE0000000000000000000012, CE0000000000000000000013, CE0000000000000000000014, FE0000000000000000000011, FE0000000000000000000012, FD0000000000000000000011, FD0000000000000000000012, FD0000000000000000000013, FC0000000000000000000011, FC0000000000000000000012, FC0000000000000000000013, FC0000000000000000000014, FC0000000000000000000015, FC0000000000000000000016, FC0000000000000000000017, FB0000000000000000000011, FB0000000000000000000012, FB0000000000000000000013, FB0000000000000000000014, FB0000000000000000000015, FB0000000000000000000016, FA0000000000000000000019, FA0000000000000000000011, FA0000000000000000000012, FA0000000000000000000013, FA0000000000000000000014, FA0000000000000000000015, FA0000000000000000000016, FA0000000000000000000017, FA0000000000000000000018, FF0000000000000000000011, FF0000000000000000000012, FF0000000000000000000013, EE0000000000000000000011, EE0000000000000000000012, EE0000000000000000000013, DD0000000000000000000011, DD0000000000000000000012, AC0000000000000000000090, AC0000000000000000000091, AC0000000000000000000092, AC0000000000000000000093, AC0000000000000000000094, AA0000000000000000000006, AA0000000000000000000007, AA0000000000000000000070, AA0000000000000000000071, AA0000000000000000000072, AA0000000000000000000073, AA0000000000000000000074, AA0000000000000000000075, AA0000000000000000000076); runOnlyForDeploymentPostprocessing = 0; };
-		AA0000000000000000000015 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (AA0000000000000000000008); runOnlyForDeploymentPostprocessing = 0; };
-		AA0000000000000000000016 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
-		AA0000000000000000000017 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
-		AA0000000000000000000018 = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (AA0000000000000000000052, AA0000000000000000000053); runOnlyForDeploymentPostprocessing = 0; };
-		AA0000000000000000000019 = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
-		AA0000000000000000000010 = {isa = PBXNativeTarget; buildConfigurationList = AA0000000000000000000031; buildPhases = (AA0000000000000000000014, AA0000000000000000000016, AA0000000000000000000018); buildRules = (); dependencies = (); name = PlantCareAI; productName = PlantCareAI; productReference = AA0000000000000000000004; productType = "com.apple.product-type.application"; };
-		AA0000000000000000000020 = {isa = PBXNativeTarget; buildConfigurationList = AA0000000000000000000032; buildPhases = (AA0000000000000000000015, AA0000000000000000000017, AA0000000000000000000019); buildRules = (); dependencies = (AA0000000000000000000021); name = PlantCareAIUITests; productName = PlantCareAIUITests; productReference = AA0000000000000000000005; productType = "com.apple.product-type.bundle.ui-testing"; };
-		AA0000000000000000000021 = {isa = PBXTargetDependency; target = AA0000000000000000000010; targetProxy = AA0000000000000000000022; };
-		AA0000000000000000000022 = {isa = PBXContainerItemProxy; containerPortal = AA0000000000000000000040; proxyType = 1; remoteGlobalIDString = AA0000000000000000000010; remoteInfo = PlantCareAI; };
-		AA0000000000000000000040 = {isa = PBXProject; attributes = {BuildIndependentTargetsInParallel = 1; LastUpgradeCheck = 2620; TargetAttributes = {AA0000000000000000000010 = {CreatedOnToolsVersion = 26.2;}; AA0000000000000000000020 = {CreatedOnToolsVersion = 26.2; TestTargetID = AA0000000000000000000010;}; }; }; buildConfigurationList = AA0000000000000000000030; compatibilityVersion = "Xcode 16.0"; developmentRegion = es; hasScannedForEncodings = 0; knownRegions = (es, Base); mainGroup = AA0000000000000000000009; productRefGroup = AA0000000000000000000013; projectDirPath = ""; projectRoot = ""; targets = (CC0000000000000000000006, AA0000000000000000000010, AA0000000000000000000020); };
-		AA0000000000000000000030 = {isa = XCConfigurationList; buildConfigurations = (AA0000000000000000000041, AA0000000000000000000042); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
-		AA0000000000000000000031 = {isa = XCConfigurationList; buildConfigurations = (AA0000000000000000000043, AA0000000000000000000044); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
-		AA0000000000000000000032 = {isa = XCConfigurationList; buildConfigurations = (AA0000000000000000000045, AA0000000000000000000046); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
-		AA0000000000000000000041 = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; ENABLE_TESTABILITY = YES; SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SWIFT_VERSION = 5.0; SDKROOT = iphoneos; }; name = Debug; };
-		AA0000000000000000000042 = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SWIFT_VERSION = 5.0; SDKROOT = iphoneos; }; name = Release; };
-		AA0000000000000000000043 = {isa = XCBuildConfiguration; baseConfigurationReference = FC0000000000000000000050; buildSettings = {INFOPLIST_FILE = Config/IdentificationDebugInfo.plist; INFOPLIST_KEY_PlantCareAIAPIScheme = "$(API_SCHEME)"; INFOPLIST_KEY_PlantCareAIAPIHostPath = "$(API_HOST_PATH)"; INFOPLIST_KEY_PlantCareAIModel = "$(API_MODEL)"; INFOPLIST_KEY_PlantCareAIAPIKey = "$(API_KEY)"; INFOPLIST_KEY_PlantCareAITimeoutSeconds = "$(API_TIMEOUT_SECONDS)"; CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_NSCameraUsageDescription = "Usamos la cámara para que puedas tomar una foto de tu planta antes de identificarla."; INFOPLIST_KEY_CFBundleDisplayName = "PlantCare AI"; INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle"; INFOPLIST_KEY_UILaunchScreen_Generation = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; PRODUCT_BUNDLE_IDENTIFIER = org.plantcareai.prototype; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = 1; }; name = Debug; };
-		AA0000000000000000000044 = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_NSCameraUsageDescription = "Usamos la cámara para que puedas tomar una foto de tu planta antes de identificarla."; INFOPLIST_KEY_CFBundleDisplayName = "PlantCare AI"; INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle"; INFOPLIST_KEY_UILaunchScreen_Generation = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; PRODUCT_BUNDLE_IDENTIFIER = org.plantcareai.prototype; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = 1; }; name = Release; };
-		AA0000000000000000000045 = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; PRODUCT_BUNDLE_IDENTIFIER = org.plantcareai.prototype.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = 1; TEST_TARGET_NAME = PlantCareAI; }; name = Debug; };
-		AA0000000000000000000046 = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; PRODUCT_BUNDLE_IDENTIFIER = org.plantcareai.prototype.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = 1; TEST_TARGET_NAME = PlantCareAI; }; name = Release; };
-		A11000000000000000000001 = {isa = PBXGroup; children = (FC0000000000000000000050); path = Config; sourceTree = "<group>"; };
-		34578A4E497C19B4D593EF49 = {isa = PBXGroup; children = (6E0473B6DCDB32F6A84E2477, 2E64F6487F8C3F5F2E678904); path = ManualSpecies; sourceTree = "<group>"; };
-		3A7FCF77BF51EAD9165F8635 = {isa = PBXGroup; children = (CB0000000000000000000007, DA0000000000000000000001); path = Presentation; sourceTree = "<group>"; };
-		499CF8C6A8C280ED2834844A = {isa = PBXGroup; children = (AF1300000000000000000005, AF1300000000000000000006); path = Data; sourceTree = "<group>"; };
-		5756C52E38162E54D8A5C543 = {isa = PBXGroup; children = (AF1300000000000000000001, AF1300000000000000000002, AF1300000000000000000003, AF1300000000000000000004); path = Domain; sourceTree = "<group>"; };
-		EE69E1BB66A6F58B8F96D6D6 = {isa = PBXGroup; children = (AF1300000000000000000007, AF1300000000000000000008); path = Presentation; sourceTree = "<group>"; };
-		45AF605B3806E74FAEB4E8ED = {isa = PBXGroup; children = (CB0000000000000000000004, CB0000000000000000000008); path = Data; sourceTree = "<group>"; };
-		1ABBEA8A0A04AD5FBCB63DEB = {isa = PBXGroup; children = (DE1200000000000000000001, CB0000000000000000000001, CB0000000000000000000002, CB0000000000000000000003); path = Domain; sourceTree = "<group>"; };
-		0DB5865FC26426AC084C0ECC = {isa = PBXGroup; children = (CB0000000000000000000005, CB0000000000000000000006); path = Presentation; sourceTree = "<group>"; };
-		8CD9997FAF4B9AAE120230CB = {isa = PBXGroup; children = (FD0000000000000000000001, FD0000000000000000000002); path = Domain; sourceTree = "<group>"; };
-		69BC1200FD486AE265FECC51 = {isa = PBXGroup; children = (FB0000000000000000000004, FB0000000000000000000006); path = Data; sourceTree = "<group>"; };
-		3F6E50583545305A9C1B45E4 = {isa = PBXGroup; children = (FB0000000000000000000001, FB0000000000000000000002, FB0000000000000000000003); path = Domain; sourceTree = "<group>"; };
-		EADC6ED9DF147117403A9C5F = {isa = PBXGroup; children = (FB0000000000000000000005); path = Presentation; sourceTree = "<group>"; };
-		B7E6F0FA2646FE2AB9A888BC = {isa = PBXGroup; children = (CE0000000000000000000003, CE0000000000000000000004); path = Data; sourceTree = "<group>"; };
-		2D1121A556C8E9552F974FBD = {isa = PBXGroup; children = (CE0000000000000000000001, CE0000000000000000000002); path = Domain; sourceTree = "<group>"; };
-		9F0B2F49D0193D578A81A65F = {isa = PBXGroup; children = (FA0000000000000000000009, FA0000000000000000000004, FA0000000000000000000005); path = Data; sourceTree = "<group>"; };
-		DD00B6103C156A260BF961FE = {isa = PBXGroup; children = (FA0000000000000000000001, FA0000000000000000000002, FA0000000000000000000003); path = Domain; sourceTree = "<group>"; };
-		EC1CDCE048B6CB21E26E4E35 = {isa = PBXGroup; children = (FA0000000000000000000006, FA0000000000000000000007, FA0000000000000000000008); path = Presentation; sourceTree = "<group>"; };
-		52686D008757DFA4CC4C723D = {isa = PBXGroup; children = (FC0000000000000000000004, FC0000000000000000000005, FC0000000000000000000007); path = Data; sourceTree = "<group>"; };
-		BF14DAED02B6EB1332E6D8B5 = {isa = PBXGroup; children = (FC0000000000000000000001, FC0000000000000000000002, FC0000000000000000000003); path = Domain; sourceTree = "<group>"; };
-		0924555587FF90629C77F3B6 = {isa = PBXGroup; children = (FC0000000000000000000006); path = Presentation; sourceTree = "<group>"; };
-		0036DA3F4E043DD60096306F = {isa = PBXGroup; children = (AB1400000000000000000004, AB1400000000000000000005); path = Data; sourceTree = "<group>"; };
-		273F7F1E3275EC1CC8E82D7F = {isa = PBXGroup; children = (AB1400000000000000000001, AB1400000000000000000002, AB1400000000000000000003); path = Domain; sourceTree = "<group>"; };
-		EA2F4649685C2F152401E0F1 = {isa = PBXGroup; children = (DC0000000000000000000001); path = Domain; sourceTree = "<group>"; };
-		8285E32CAF6C6C5C2BD71C64 = {isa = PBXGroup; children = (DC0000000000000000000002, DC0000000000000000000003, DC0000000000000000000004); path = Presentation; sourceTree = "<group>"; };
-		6E0473B6DCDB32F6A84E2477 = {isa = PBXGroup; children = (FE0000000000000000000001); path = Domain; sourceTree = "<group>"; };
-		2E64F6487F8C3F5F2E678904 = {isa = PBXGroup; children = (FE0000000000000000000002); path = Presentation; sourceTree = "<group>"; };
-		9EEE346CDD1D3C8619E48C6A = {isa = PBXGroup; children = (DB0000000000000000000006, DB000000000000000000000B); path = Data; sourceTree = "<group>"; };
-		2538BCC4A5FACF1D635B12DF = {isa = PBXGroup; children = (DE1200000000000000000002, DB0000000000000000000001, DB0000000000000000000002, DB0000000000000000000003, DB0000000000000000000004, DB0000000000000000000005); path = Domain; sourceTree = "<group>"; };
-		329FF227BFDF651CC98A453F = {isa = PBXGroup; children = (DB0000000000000000000007, DB0000000000000000000008, DB0000000000000000000009, DB000000000000000000000A); path = Presentation; sourceTree = "<group>"; };
-		85DE4469B5500F1E716D8AB6 = {isa = PBXGroup; children = (DD1000000000000000000008); path = Data; sourceTree = "<group>"; };
-		BC617CC2A8A9992F3FBF4078 = {isa = PBXGroup; children = (DD1000000000000000000001, DD1000000000000000000002); path = Domain; sourceTree = "<group>"; };
-		5DB6F0A74291D8303F736BC9 = {isa = PBXGroup; children = (DD1000000000000000000003, DD1000000000000000000004, DD1000000000000000000005, DD1000000000000000000006, DD1000000000000000000007); path = Presentation; sourceTree = "<group>"; };
-		FCAC2D2AEB6C5290A20095A9 = {isa = PBXGroup; children = (CA0000000000000000000003, CA0000000000000000000004); path = Data; sourceTree = "<group>"; };
-		8323F696CC699BCECD683B39 = {isa = PBXGroup; children = (CA0000000000000000000001, CA0000000000000000000002); path = Domain; sourceTree = "<group>"; };
-		9922CD639A7CFE976915BFA7 = {isa = PBXGroup; children = (FD0000000000000000000003); path = Presentation; sourceTree = "<group>"; };
+	classes = {
 	};
-	rootObject = AA0000000000000000000040;
+	objectVersion = 71;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		AA0000000000000000000006 /* PlantCareAIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000001 /* PlantCareAIApp.swift */; };
+		AA0000000000000000000007 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000002 /* ContentView.swift */; };
+		AA0000000000000000000008 /* PlantCareAIUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000003 /* PlantCareAIUITests.swift */; };
+		AA0000000000000000000052 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000050 /* Assets.xcassets */; };
+		AA0000000000000000000053 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000051 /* Localizable.xcstrings */; };
+		AA0000000000000000000070 /* PlantListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000060 /* PlantListView.swift */; };
+		AA0000000000000000000071 /* EmptyPlantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000061 /* EmptyPlantView.swift */; };
+		AA0000000000000000000072 /* PlantListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000062 /* PlantListViewModel.swift */; };
+		AA0000000000000000000073 /* Plant.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000063 /* Plant.swift */; };
+		AA0000000000000000000074 /* PlantRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000064 /* PlantRepository.swift */; };
+		AA0000000000000000000075 /* LoadPlantsUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000065 /* LoadPlantsUseCase.swift */; };
+		AA0000000000000000000076 /* LocalPlantRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000066 /* LocalPlantRepository.swift */; };
+		AB1400000000000000000011 /* SavedPlantPhotoAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1400000000000000000001 /* SavedPlantPhotoAnalysis.swift */; };
+		AB1400000000000000000012 /* PlantPhotoAnalysisStoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1400000000000000000002 /* PlantPhotoAnalysisStoring.swift */; };
+		AB1400000000000000000013 /* KeepPlantPhotoAnalysisUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1400000000000000000003 /* KeepPlantPhotoAnalysisUseCase.swift */; };
+		AB1400000000000000000014 /* PersistedPlantPhotoAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1400000000000000000004 /* PersistedPlantPhotoAnalysis.swift */; };
+		AB1400000000000000000015 /* KeepAnalysisTestFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1400000000000000000005 /* KeepAnalysisTestFixture.swift */; };
+		AB1400000000000000000031 /* KeepPlantPhotoAnalysisTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1400000000000000000021 /* KeepPlantPhotoAnalysisTests.swift */; };
+		AB1400000000000000000032 /* LocalPlantPhotoAnalysisRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1400000000000000000022 /* LocalPlantPhotoAnalysisRepositoryTests.swift */; };
+		AB1600000000000000000002 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AB1600000000000000000001 /* LaunchScreen.storyboard */; };
+		AB1600000000000000000005 /* LaunchBrandingResourcesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1600000000000000000004 /* LaunchBrandingResourcesTests.swift */; };
+		AC0000000000000000000090 /* CareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000090 /* CareSheet.swift */; };
+		AC0000000000000000000091 /* SavePlantUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000091 /* SavePlantUseCase.swift */; };
+		AC0000000000000000000092 /* LoadInitialPlantPhotoUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000092 /* LoadInitialPlantPhotoUseCase.swift */; };
+		AC0000000000000000000093 /* PersistedPlant.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000093 /* PersistedPlant.swift */; };
+		AC0000000000000000000094 /* StorageTestFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000094 /* StorageTestFixture.swift */; };
+		AF1300000000000000000011 /* PlantPhotoAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF1300000000000000000001 /* PlantPhotoAnalysis.swift */; };
+		AF1300000000000000000012 /* BuildPlantAnalysisContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF1300000000000000000002 /* BuildPlantAnalysisContext.swift */; };
+		AF1300000000000000000013 /* PlantPhotoAnalysisRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF1300000000000000000003 /* PlantPhotoAnalysisRepository.swift */; };
+		AF1300000000000000000014 /* AnalyzePlantPhotoUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF1300000000000000000004 /* AnalyzePlantPhotoUseCase.swift */; };
+		AF1300000000000000000015 /* OpenAICompatiblePlantPhotoAnalysisRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF1300000000000000000005 /* OpenAICompatiblePlantPhotoAnalysisRepository.swift */; };
+		AF1300000000000000000016 /* PlantPhotoAnalysisTestFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF1300000000000000000006 /* PlantPhotoAnalysisTestFixture.swift */; };
+		AF1300000000000000000017 /* PlantPhotoAnalysisViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF1300000000000000000007 /* PlantPhotoAnalysisViewModel.swift */; };
+		AF1300000000000000000018 /* PlantPhotoAnalysisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF1300000000000000000008 /* PlantPhotoAnalysisView.swift */; };
+		AF1300000000000000000031 /* BuildPlantAnalysisContextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF1300000000000000000021 /* BuildPlantAnalysisContextTests.swift */; };
+		AF1300000000000000000032 /* AnalyzePlantPhotoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF1300000000000000000022 /* AnalyzePlantPhotoTests.swift */; };
+		AF1300000000000000000033 /* PlantPhotoAnalysisViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF1300000000000000000023 /* PlantPhotoAnalysisViewModelTests.swift */; };
+		AF1300000000000000000034 /* OpenAICompatiblePlantPhotoAnalysisRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF1300000000000000000024 /* OpenAICompatiblePlantPhotoAnalysisRepositoryTests.swift */; };
+		CA0000000000000000000011 /* PreparedPlantPhotoValidating.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA0000000000000000000001 /* PreparedPlantPhotoValidating.swift */; };
+		CA0000000000000000000012 /* SaveConfirmedPlantUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA0000000000000000000002 /* SaveConfirmedPlantUseCase.swift */; };
+		CA0000000000000000000013 /* LocalPreparedPlantPhotoValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA0000000000000000000003 /* LocalPreparedPlantPhotoValidator.swift */; };
+		CA0000000000000000000014 /* PlantCreationTestFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA0000000000000000000004 /* PlantCreationTestFixture.swift */; };
+		CA0000000000000000000031 /* SaveConfirmedPlantTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA0000000000000000000021 /* SaveConfirmedPlantTests.swift */; };
+		CA0000000000000000000032 /* PreparedPlantPhotoValidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA0000000000000000000022 /* PreparedPlantPhotoValidationTests.swift */; };
+		CA0000000000000000000033 /* SavePlantViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA0000000000000000000023 /* SavePlantViewModelTests.swift */; };
+		CB0000000000000000000011 /* CareEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0000000000000000000001 /* CareEvent.swift */; };
+		CB0000000000000000000012 /* CareEventRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0000000000000000000002 /* CareEventRepository.swift */; };
+		CB0000000000000000000013 /* RegisterCareEventUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0000000000000000000003 /* RegisterCareEventUseCase.swift */; };
+		CB0000000000000000000014 /* PersistedCareEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0000000000000000000004 /* PersistedCareEvent.swift */; };
+		CB0000000000000000000015 /* RegisterCareViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0000000000000000000005 /* RegisterCareViewModel.swift */; };
+		CB0000000000000000000016 /* RegisterCareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0000000000000000000006 /* RegisterCareView.swift */; };
+		CB0000000000000000000017 /* PlantFormHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0000000000000000000007 /* PlantFormHeader.swift */; };
+		CB0000000000000000000018 /* CareEventTestFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0000000000000000000008 /* CareEventTestFixture.swift */; };
+		CB0000000000000000000031 /* RegisterCareEventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0000000000000000000021 /* RegisterCareEventTests.swift */; };
+		CB0000000000000000000032 /* LocalCareEventRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0000000000000000000022 /* LocalCareEventRepositoryTests.swift */; };
+		CB0000000000000000000033 /* RegisterCareViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0000000000000000000023 /* RegisterCareViewModelTests.swift */; };
+		CC0000000000000000000002 /* LocalPlantRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000000000000000000001 /* LocalPlantRepositoryTests.swift */; };
+		CE0000000000000000000011 /* CareSheetGenerationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0000000000000000000001 /* CareSheetGenerationRepository.swift */; };
+		CE0000000000000000000012 /* GenerateCareSheetUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0000000000000000000002 /* GenerateCareSheetUseCase.swift */; };
+		CE0000000000000000000013 /* OpenAICompatibleCareSheetGenerationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0000000000000000000003 /* OpenAICompatibleCareSheetGenerationRepository.swift */; };
+		CE0000000000000000000014 /* CareSheetGenerationTestFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0000000000000000000004 /* CareSheetGenerationTestFixture.swift */; };
+		CE0000000000000000000031 /* GenerateCareSheetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0000000000000000000021 /* GenerateCareSheetTests.swift */; };
+		CE0000000000000000000032 /* GenerateCareSheetViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0000000000000000000022 /* GenerateCareSheetViewModelTests.swift */; };
+		CE0000000000000000000033 /* OpenAICompatibleCareSheetGenerationRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0000000000000000000023 /* OpenAICompatibleCareSheetGenerationRepositoryTests.swift */; };
+		DA0000000000000000000002 /* PhotoSelectionComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0000000000000000000001 /* PhotoSelectionComponents.swift */; };
+		DB0000000000000000000011 /* PlantPhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000001 /* PlantPhoto.swift */; };
+		DB0000000000000000000012 /* PlantPhotoRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000002 /* PlantPhotoRepository.swift */; };
+		DB0000000000000000000013 /* AddPlantPhotoUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000003 /* AddPlantPhotoUseCase.swift */; };
+		DB0000000000000000000014 /* LoadPlantPhotosUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000004 /* LoadPlantPhotosUseCase.swift */; };
+		DB0000000000000000000015 /* LoadPlantPhotoUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000005 /* LoadPlantPhotoUseCase.swift */; };
+		DB0000000000000000000016 /* PersistedPlantPhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000006 /* PersistedPlantPhoto.swift */; };
+		DB0000000000000000000017 /* AddPlantPhotoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000007 /* AddPlantPhotoViewModel.swift */; };
+		DB0000000000000000000018 /* AddPlantPhotoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000008 /* AddPlantPhotoView.swift */; };
+		DB0000000000000000000019 /* PlantPhotoPagerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000009 /* PlantPhotoPagerViewModel.swift */; };
+		DB000000000000000000001A /* PlantPhotoPagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000000A /* PlantPhotoPagerView.swift */; };
+		DB000000000000000000001B /* PlantPhotoTestFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB000000000000000000000B /* PlantPhotoTestFixture.swift */; };
+		DB0000000000000000000031 /* LocalPlantPhotoRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000021 /* LocalPlantPhotoRepositoryTests.swift */; };
+		DB0000000000000000000032 /* AddPlantPhotoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000022 /* AddPlantPhotoTests.swift */; };
+		DB0000000000000000000033 /* AddPlantPhotoViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000023 /* AddPlantPhotoViewModelTests.swift */; };
+		DB0000000000000000000034 /* PlantPhotoPagerViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000024 /* PlantPhotoPagerViewModelTests.swift */; };
+		DC0000000000000000000011 /* LoadLastWateringUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0000000000000000000001 /* LoadLastWateringUseCase.swift */; };
+		DC0000000000000000000012 /* LastWateringHintViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0000000000000000000002 /* LastWateringHintViewModel.swift */; };
+		DC0000000000000000000013 /* LastWateringHintView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0000000000000000000003 /* LastWateringHintView.swift */; };
+		DC0000000000000000000014 /* LastWateringDateFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0000000000000000000004 /* LastWateringDateFormatter.swift */; };
+		DC0000000000000000000031 /* LoadLastWateringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0000000000000000000021 /* LoadLastWateringTests.swift */; };
+		DC0000000000000000000032 /* LastWateringHintViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0000000000000000000022 /* LastWateringHintViewModelTests.swift */; };
+		DC0000000000000000000033 /* LastWateringDateFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0000000000000000000023 /* LastWateringDateFormatterTests.swift */; };
+		DD0000000000000000000011 /* PlantCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0000000000000000000001 /* PlantCardView.swift */; };
+		DD0000000000000000000012 /* PlantCardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0000000000000000000002 /* PlantCardViewModel.swift */; };
+		DD0000000000000000000031 /* PlantCardViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0000000000000000000021 /* PlantCardViewModelTests.swift */; };
+		DD0000000000000000000032 /* PlantListViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0000000000000000000022 /* PlantListViewModelTests.swift */; };
+		DD1000000000000000000011 /* PlantTimelineEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1000000000000000000001 /* PlantTimelineEntry.swift */; };
+		DD1000000000000000000012 /* LoadPlantTimelineUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1000000000000000000002 /* LoadPlantTimelineUseCase.swift */; };
+		DD1000000000000000000013 /* PlantTimelineRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1000000000000000000003 /* PlantTimelineRoute.swift */; };
+		DD1000000000000000000014 /* PlantTimelineDateFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1000000000000000000004 /* PlantTimelineDateFormatter.swift */; };
+		DD1000000000000000000015 /* PlantTimelineViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1000000000000000000005 /* PlantTimelineViewModel.swift */; };
+		DD1000000000000000000016 /* PlantTimelinePhotoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1000000000000000000006 /* PlantTimelinePhotoViewModel.swift */; };
+		DD1000000000000000000017 /* PlantTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1000000000000000000007 /* PlantTimelineView.swift */; };
+		DD1000000000000000000018 /* PlantTimelineTestFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1000000000000000000008 /* PlantTimelineTestFixture.swift */; };
+		DD1000000000000000000031 /* LoadPlantTimelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1000000000000000000021 /* LoadPlantTimelineTests.swift */; };
+		DD1000000000000000000032 /* PlantTimelineDateFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1000000000000000000022 /* PlantTimelineDateFormatterTests.swift */; };
+		DD1000000000000000000033 /* PlantTimelineViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1000000000000000000023 /* PlantTimelineViewModelTests.swift */; };
+		DD1000000000000000000034 /* PlantTimelinePhotoViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1000000000000000000024 /* PlantTimelinePhotoViewModelTests.swift */; };
+		DE1200000000000000000011 /* DeleteCareEventUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE1200000000000000000001 /* DeleteCareEventUseCase.swift */; };
+		DE1200000000000000000012 /* DeletePlantPhotoUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE1200000000000000000002 /* DeletePlantPhotoUseCase.swift */; };
+		DE1200000000000000000031 /* DeleteCareEventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE1200000000000000000021 /* DeleteCareEventTests.swift */; };
+		DE1200000000000000000032 /* DeletePlantPhotoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE1200000000000000000022 /* DeletePlantPhotoTests.swift */; };
+		DP1500000000000000000011 /* PlantDeletingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = DP1500000000000000000001 /* PlantDeletingRepository.swift */; };
+		DP1500000000000000000012 /* DeletePlantUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DP1500000000000000000002 /* DeletePlantUseCase.swift */; };
+		DP1500000000000000000013 /* DeletePlantTestFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = DP1500000000000000000003 /* DeletePlantTestFixture.swift */; };
+		DP1500000000000000000031 /* DeletePlantTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DP1500000000000000000021 /* DeletePlantTests.swift */; };
+		EE0000000000000000000011 /* LoadPlantDetailUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000000001 /* LoadPlantDetailUseCase.swift */; };
+		EE0000000000000000000012 /* PlantDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000000002 /* PlantDetailView.swift */; };
+		EE0000000000000000000013 /* PlantDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000000003 /* PlantDetailViewModel.swift */; };
+		EE0000000000000000000031 /* LoadPlantDetailTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000000021 /* LoadPlantDetailTests.swift */; };
+		EE0000000000000000000032 /* PlantDetailViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000000022 /* PlantDetailViewModelTests.swift */; };
+		FA0000000000000000000011 /* IdentificationPhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000001 /* IdentificationPhoto.swift */; };
+		FA0000000000000000000012 /* PrepareIdentificationPhotoUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000002 /* PrepareIdentificationPhotoUseCase.swift */; };
+		FA0000000000000000000013 /* CameraAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000003 /* CameraAccess.swift */; };
+		FA0000000000000000000014 /* LocalIdentificationPhotoPreparer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000004 /* LocalIdentificationPhotoPreparer.swift */; };
+		FA0000000000000000000015 /* SystemCameraAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000005 /* SystemCameraAccess.swift */; };
+		FA0000000000000000000016 /* IdentificationPhotoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000006 /* IdentificationPhotoView.swift */; };
+		FA0000000000000000000017 /* IdentificationPhotoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000007 /* IdentificationPhotoViewModel.swift */; };
+		FA0000000000000000000018 /* CameraPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000008 /* CameraPickerView.swift */; };
+		FA0000000000000000000019 /* IdentificationPhotoTestFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000009 /* IdentificationPhotoTestFixture.swift */; };
+		FA0000000000000000000031 /* IdentificationPhotoPreparationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000021 /* IdentificationPhotoPreparationTests.swift */; };
+		FA0000000000000000000032 /* IdentificationPhotoViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000022 /* IdentificationPhotoViewModelTests.swift */; };
+		FA0000000000000000000033 /* CameraAccessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000023 /* CameraAccessTests.swift */; };
+		FB0000000000000000000011 /* ExternalAIConsent.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0000000000000000000001 /* ExternalAIConsent.swift */; };
+		FB0000000000000000000012 /* ExternalAIConsentRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0000000000000000000002 /* ExternalAIConsentRepository.swift */; };
+		FB0000000000000000000013 /* AuthorizeExternalAIOperationUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0000000000000000000003 /* AuthorizeExternalAIOperationUseCase.swift */; };
+		FB0000000000000000000014 /* UserDefaultsExternalAIConsentRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0000000000000000000004 /* UserDefaultsExternalAIConsentRepository.swift */; };
+		FB0000000000000000000015 /* ExternalAIConsentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0000000000000000000005 /* ExternalAIConsentView.swift */; };
+		FB0000000000000000000016 /* ExternalAIConsentTestFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0000000000000000000006 /* ExternalAIConsentTestFixture.swift */; };
+		FB0000000000000000000031 /* ExternalAIConsentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0000000000000000000021 /* ExternalAIConsentTests.swift */; };
+		FB0000000000000000000032 /* UserDefaultsExternalAIConsentRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0000000000000000000022 /* UserDefaultsExternalAIConsentRepositoryTests.swift */; };
+		FB0000000000000000000033 /* IdentificationConsentViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0000000000000000000023 /* IdentificationConsentViewModelTests.swift */; };
+		FC0000000000000000000011 /* IdentificationResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0000000000000000000001 /* IdentificationResult.swift */; };
+		FC0000000000000000000012 /* SpeciesIdentificationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0000000000000000000002 /* SpeciesIdentificationRepository.swift */; };
+		FC0000000000000000000013 /* IdentifyCandidatesUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0000000000000000000003 /* IdentifyCandidatesUseCase.swift */; };
+		FC0000000000000000000014 /* IdentificationAPIConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0000000000000000000004 /* IdentificationAPIConfiguration.swift */; };
+		FC0000000000000000000015 /* OpenAICompatibleSpeciesIdentificationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0000000000000000000005 /* OpenAICompatibleSpeciesIdentificationRepository.swift */; };
+		FC0000000000000000000016 /* IdentificationResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0000000000000000000006 /* IdentificationResultView.swift */; };
+		FC0000000000000000000017 /* IdentificationCandidatesTestFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0000000000000000000007 /* IdentificationCandidatesTestFixture.swift */; };
+		FC0000000000000000000031 /* IdentifyCandidatesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0000000000000000000021 /* IdentifyCandidatesTests.swift */; };
+		FC0000000000000000000032 /* OpenAICompatibleSpeciesIdentificationRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0000000000000000000022 /* OpenAICompatibleSpeciesIdentificationRepositoryTests.swift */; };
+		FD0000000000000000000011 /* ConfirmedDraftIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0000000000000000000001 /* ConfirmedDraftIdentity.swift */; };
+		FD0000000000000000000012 /* ConfirmSpeciesUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0000000000000000000002 /* ConfirmSpeciesUseCase.swift */; };
+		FD0000000000000000000013 /* PlantCreationStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0000000000000000000003 /* PlantCreationStatusView.swift */; };
+		FD0000000000000000000031 /* ConfirmSpeciesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0000000000000000000021 /* ConfirmSpeciesTests.swift */; };
+		FD0000000000000000000032 /* ConfirmSpeciesViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0000000000000000000022 /* ConfirmSpeciesViewModelTests.swift */; };
+		FE0000000000000000000011 /* ConfirmManualSpeciesUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0000000000000000000001 /* ConfirmManualSpeciesUseCase.swift */; };
+		FE0000000000000000000012 /* ManualSpeciesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0000000000000000000002 /* ManualSpeciesView.swift */; };
+		FE0000000000000000000013 /* ConfirmManualSpeciesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0000000000000000000003 /* ConfirmManualSpeciesTests.swift */; };
+		FE0000000000000000000014 /* ManualSpeciesViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0000000000000000000004 /* ManualSpeciesViewModelTests.swift */; };
+		FF0000000000000000000011 /* UpdatePlantUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000000000000000000001 /* UpdatePlantUseCase.swift */; };
+		FF0000000000000000000012 /* EditPlantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000000000000000000002 /* EditPlantView.swift */; };
+		FF0000000000000000000013 /* EditPlantViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000000000000000000003 /* EditPlantViewModel.swift */; };
+		FF0000000000000000000031 /* UpdatePlantTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000000000000000000021 /* UpdatePlantTests.swift */; };
+		FF0000000000000000000032 /* EditPlantViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000000000000000000022 /* EditPlantViewModelTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		AA0000000000000000000022 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000000000000000000040 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA0000000000000000000010;
+			remoteInfo = PlantCareAI;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		AA0000000000000000000001 /* PlantCareAIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantCareAIApp.swift; sourceTree = "<group>"; };
+		AA0000000000000000000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		AA0000000000000000000003 /* PlantCareAIUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantCareAIUITests.swift; sourceTree = "<group>"; };
+		AA0000000000000000000004 /* PlantCareAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PlantCareAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA0000000000000000000005 /* PlantCareAIUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PlantCareAIUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA0000000000000000000050 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AA0000000000000000000051 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		AA0000000000000000000060 /* PlantListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantListView.swift; sourceTree = "<group>"; };
+		AA0000000000000000000061 /* EmptyPlantView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyPlantView.swift; sourceTree = "<group>"; };
+		AA0000000000000000000062 /* PlantListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantListViewModel.swift; sourceTree = "<group>"; };
+		AA0000000000000000000063 /* Plant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Plant.swift; sourceTree = "<group>"; };
+		AA0000000000000000000064 /* PlantRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantRepository.swift; sourceTree = "<group>"; };
+		AA0000000000000000000065 /* LoadPlantsUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadPlantsUseCase.swift; sourceTree = "<group>"; };
+		AA0000000000000000000066 /* LocalPlantRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPlantRepository.swift; sourceTree = "<group>"; };
+		AB0000000000000000000090 /* CareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CareSheet.swift; sourceTree = "<group>"; };
+		AB0000000000000000000091 /* SavePlantUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavePlantUseCase.swift; sourceTree = "<group>"; };
+		AB0000000000000000000092 /* LoadInitialPlantPhotoUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadInitialPlantPhotoUseCase.swift; sourceTree = "<group>"; };
+		AB0000000000000000000093 /* PersistedPlant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedPlant.swift; sourceTree = "<group>"; };
+		AB0000000000000000000094 /* StorageTestFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageTestFixture.swift; sourceTree = "<group>"; };
+		AB1400000000000000000001 /* SavedPlantPhotoAnalysis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPlantPhotoAnalysis.swift; sourceTree = "<group>"; };
+		AB1400000000000000000002 /* PlantPhotoAnalysisStoring.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhotoAnalysisStoring.swift; sourceTree = "<group>"; };
+		AB1400000000000000000003 /* KeepPlantPhotoAnalysisUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeepPlantPhotoAnalysisUseCase.swift; sourceTree = "<group>"; };
+		AB1400000000000000000004 /* PersistedPlantPhotoAnalysis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedPlantPhotoAnalysis.swift; sourceTree = "<group>"; };
+		AB1400000000000000000005 /* KeepAnalysisTestFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeepAnalysisTestFixture.swift; sourceTree = "<group>"; };
+		AB1400000000000000000021 /* KeepPlantPhotoAnalysisTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeepPlantPhotoAnalysisTests.swift; sourceTree = "<group>"; };
+		AB1400000000000000000022 /* LocalPlantPhotoAnalysisRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPlantPhotoAnalysisRepositoryTests.swift; sourceTree = "<group>"; };
+		AB1600000000000000000001 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		AB1600000000000000000004 /* LaunchBrandingResourcesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchBrandingResourcesTests.swift; sourceTree = "<group>"; };
+		AF1300000000000000000001 /* PlantPhotoAnalysis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhotoAnalysis.swift; sourceTree = "<group>"; };
+		AF1300000000000000000002 /* BuildPlantAnalysisContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildPlantAnalysisContext.swift; sourceTree = "<group>"; };
+		AF1300000000000000000003 /* PlantPhotoAnalysisRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhotoAnalysisRepository.swift; sourceTree = "<group>"; };
+		AF1300000000000000000004 /* AnalyzePlantPhotoUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyzePlantPhotoUseCase.swift; sourceTree = "<group>"; };
+		AF1300000000000000000005 /* OpenAICompatiblePlantPhotoAnalysisRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAICompatiblePlantPhotoAnalysisRepository.swift; sourceTree = "<group>"; };
+		AF1300000000000000000006 /* PlantPhotoAnalysisTestFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhotoAnalysisTestFixture.swift; sourceTree = "<group>"; };
+		AF1300000000000000000007 /* PlantPhotoAnalysisViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhotoAnalysisViewModel.swift; sourceTree = "<group>"; };
+		AF1300000000000000000008 /* PlantPhotoAnalysisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhotoAnalysisView.swift; sourceTree = "<group>"; };
+		AF1300000000000000000021 /* BuildPlantAnalysisContextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildPlantAnalysisContextTests.swift; sourceTree = "<group>"; };
+		AF1300000000000000000022 /* AnalyzePlantPhotoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyzePlantPhotoTests.swift; sourceTree = "<group>"; };
+		AF1300000000000000000023 /* PlantPhotoAnalysisViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhotoAnalysisViewModelTests.swift; sourceTree = "<group>"; };
+		AF1300000000000000000024 /* OpenAICompatiblePlantPhotoAnalysisRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAICompatiblePlantPhotoAnalysisRepositoryTests.swift; sourceTree = "<group>"; };
+		CA0000000000000000000001 /* PreparedPlantPhotoValidating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreparedPlantPhotoValidating.swift; sourceTree = "<group>"; };
+		CA0000000000000000000002 /* SaveConfirmedPlantUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveConfirmedPlantUseCase.swift; sourceTree = "<group>"; };
+		CA0000000000000000000003 /* LocalPreparedPlantPhotoValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPreparedPlantPhotoValidator.swift; sourceTree = "<group>"; };
+		CA0000000000000000000004 /* PlantCreationTestFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantCreationTestFixture.swift; sourceTree = "<group>"; };
+		CA0000000000000000000021 /* SaveConfirmedPlantTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveConfirmedPlantTests.swift; sourceTree = "<group>"; };
+		CA0000000000000000000022 /* PreparedPlantPhotoValidationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreparedPlantPhotoValidationTests.swift; sourceTree = "<group>"; };
+		CA0000000000000000000023 /* SavePlantViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavePlantViewModelTests.swift; sourceTree = "<group>"; };
+		CB0000000000000000000001 /* CareEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CareEvent.swift; sourceTree = "<group>"; };
+		CB0000000000000000000002 /* CareEventRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CareEventRepository.swift; sourceTree = "<group>"; };
+		CB0000000000000000000003 /* RegisterCareEventUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterCareEventUseCase.swift; sourceTree = "<group>"; };
+		CB0000000000000000000004 /* PersistedCareEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedCareEvent.swift; sourceTree = "<group>"; };
+		CB0000000000000000000005 /* RegisterCareViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterCareViewModel.swift; sourceTree = "<group>"; };
+		CB0000000000000000000006 /* RegisterCareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterCareView.swift; sourceTree = "<group>"; };
+		CB0000000000000000000007 /* PlantFormHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantFormHeader.swift; sourceTree = "<group>"; };
+		CB0000000000000000000008 /* CareEventTestFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CareEventTestFixture.swift; sourceTree = "<group>"; };
+		CB0000000000000000000021 /* RegisterCareEventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterCareEventTests.swift; sourceTree = "<group>"; };
+		CB0000000000000000000022 /* LocalCareEventRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalCareEventRepositoryTests.swift; sourceTree = "<group>"; };
+		CB0000000000000000000023 /* RegisterCareViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterCareViewModelTests.swift; sourceTree = "<group>"; };
+		CC0000000000000000000001 /* LocalPlantRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPlantRepositoryTests.swift; sourceTree = "<group>"; };
+		CC0000000000000000000004 /* PlantCareAITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = PlantCareAITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CE0000000000000000000001 /* CareSheetGenerationRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CareSheetGenerationRepository.swift; sourceTree = "<group>"; };
+		CE0000000000000000000002 /* GenerateCareSheetUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateCareSheetUseCase.swift; sourceTree = "<group>"; };
+		CE0000000000000000000003 /* OpenAICompatibleCareSheetGenerationRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAICompatibleCareSheetGenerationRepository.swift; sourceTree = "<group>"; };
+		CE0000000000000000000004 /* CareSheetGenerationTestFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CareSheetGenerationTestFixture.swift; sourceTree = "<group>"; };
+		CE0000000000000000000021 /* GenerateCareSheetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateCareSheetTests.swift; sourceTree = "<group>"; };
+		CE0000000000000000000022 /* GenerateCareSheetViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateCareSheetViewModelTests.swift; sourceTree = "<group>"; };
+		CE0000000000000000000023 /* OpenAICompatibleCareSheetGenerationRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAICompatibleCareSheetGenerationRepositoryTests.swift; sourceTree = "<group>"; };
+		DA0000000000000000000001 /* PhotoSelectionComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoSelectionComponents.swift; sourceTree = "<group>"; };
+		DB0000000000000000000001 /* PlantPhoto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhoto.swift; sourceTree = "<group>"; };
+		DB0000000000000000000002 /* PlantPhotoRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhotoRepository.swift; sourceTree = "<group>"; };
+		DB0000000000000000000003 /* AddPlantPhotoUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddPlantPhotoUseCase.swift; sourceTree = "<group>"; };
+		DB0000000000000000000004 /* LoadPlantPhotosUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadPlantPhotosUseCase.swift; sourceTree = "<group>"; };
+		DB0000000000000000000005 /* LoadPlantPhotoUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadPlantPhotoUseCase.swift; sourceTree = "<group>"; };
+		DB0000000000000000000006 /* PersistedPlantPhoto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedPlantPhoto.swift; sourceTree = "<group>"; };
+		DB0000000000000000000007 /* AddPlantPhotoViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddPlantPhotoViewModel.swift; sourceTree = "<group>"; };
+		DB0000000000000000000008 /* AddPlantPhotoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddPlantPhotoView.swift; sourceTree = "<group>"; };
+		DB0000000000000000000009 /* PlantPhotoPagerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhotoPagerViewModel.swift; sourceTree = "<group>"; };
+		DB000000000000000000000A /* PlantPhotoPagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhotoPagerView.swift; sourceTree = "<group>"; };
+		DB000000000000000000000B /* PlantPhotoTestFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhotoTestFixture.swift; sourceTree = "<group>"; };
+		DB0000000000000000000021 /* LocalPlantPhotoRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPlantPhotoRepositoryTests.swift; sourceTree = "<group>"; };
+		DB0000000000000000000022 /* AddPlantPhotoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddPlantPhotoTests.swift; sourceTree = "<group>"; };
+		DB0000000000000000000023 /* AddPlantPhotoViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddPlantPhotoViewModelTests.swift; sourceTree = "<group>"; };
+		DB0000000000000000000024 /* PlantPhotoPagerViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPhotoPagerViewModelTests.swift; sourceTree = "<group>"; };
+		DC0000000000000000000001 /* LoadLastWateringUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadLastWateringUseCase.swift; sourceTree = "<group>"; };
+		DC0000000000000000000002 /* LastWateringHintViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastWateringHintViewModel.swift; sourceTree = "<group>"; };
+		DC0000000000000000000003 /* LastWateringHintView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastWateringHintView.swift; sourceTree = "<group>"; };
+		DC0000000000000000000004 /* LastWateringDateFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastWateringDateFormatter.swift; sourceTree = "<group>"; };
+		DC0000000000000000000021 /* LoadLastWateringTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadLastWateringTests.swift; sourceTree = "<group>"; };
+		DC0000000000000000000022 /* LastWateringHintViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastWateringHintViewModelTests.swift; sourceTree = "<group>"; };
+		DC0000000000000000000023 /* LastWateringDateFormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastWateringDateFormatterTests.swift; sourceTree = "<group>"; };
+		DD0000000000000000000001 /* PlantCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantCardView.swift; sourceTree = "<group>"; };
+		DD0000000000000000000002 /* PlantCardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantCardViewModel.swift; sourceTree = "<group>"; };
+		DD0000000000000000000021 /* PlantCardViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantCardViewModelTests.swift; sourceTree = "<group>"; };
+		DD0000000000000000000022 /* PlantListViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantListViewModelTests.swift; sourceTree = "<group>"; };
+		DD1000000000000000000001 /* PlantTimelineEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantTimelineEntry.swift; sourceTree = "<group>"; };
+		DD1000000000000000000002 /* LoadPlantTimelineUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadPlantTimelineUseCase.swift; sourceTree = "<group>"; };
+		DD1000000000000000000003 /* PlantTimelineRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantTimelineRoute.swift; sourceTree = "<group>"; };
+		DD1000000000000000000004 /* PlantTimelineDateFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantTimelineDateFormatter.swift; sourceTree = "<group>"; };
+		DD1000000000000000000005 /* PlantTimelineViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantTimelineViewModel.swift; sourceTree = "<group>"; };
+		DD1000000000000000000006 /* PlantTimelinePhotoViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantTimelinePhotoViewModel.swift; sourceTree = "<group>"; };
+		DD1000000000000000000007 /* PlantTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantTimelineView.swift; sourceTree = "<group>"; };
+		DD1000000000000000000008 /* PlantTimelineTestFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantTimelineTestFixture.swift; sourceTree = "<group>"; };
+		DD1000000000000000000021 /* LoadPlantTimelineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadPlantTimelineTests.swift; sourceTree = "<group>"; };
+		DD1000000000000000000022 /* PlantTimelineDateFormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantTimelineDateFormatterTests.swift; sourceTree = "<group>"; };
+		DD1000000000000000000023 /* PlantTimelineViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantTimelineViewModelTests.swift; sourceTree = "<group>"; };
+		DD1000000000000000000024 /* PlantTimelinePhotoViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantTimelinePhotoViewModelTests.swift; sourceTree = "<group>"; };
+		DE1200000000000000000001 /* DeleteCareEventUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteCareEventUseCase.swift; sourceTree = "<group>"; };
+		DE1200000000000000000002 /* DeletePlantPhotoUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletePlantPhotoUseCase.swift; sourceTree = "<group>"; };
+		DE1200000000000000000021 /* DeleteCareEventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteCareEventTests.swift; sourceTree = "<group>"; };
+		DE1200000000000000000022 /* DeletePlantPhotoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletePlantPhotoTests.swift; sourceTree = "<group>"; };
+		DP1500000000000000000001 /* PlantDeletingRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantDeletingRepository.swift; sourceTree = "<group>"; };
+		DP1500000000000000000002 /* DeletePlantUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletePlantUseCase.swift; sourceTree = "<group>"; };
+		DP1500000000000000000003 /* DeletePlantTestFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletePlantTestFixture.swift; sourceTree = "<group>"; };
+		DP1500000000000000000021 /* DeletePlantTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletePlantTests.swift; sourceTree = "<group>"; };
+		EE0000000000000000000001 /* LoadPlantDetailUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadPlantDetailUseCase.swift; sourceTree = "<group>"; };
+		EE0000000000000000000002 /* PlantDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantDetailView.swift; sourceTree = "<group>"; };
+		EE0000000000000000000003 /* PlantDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantDetailViewModel.swift; sourceTree = "<group>"; };
+		EE0000000000000000000021 /* LoadPlantDetailTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadPlantDetailTests.swift; sourceTree = "<group>"; };
+		EE0000000000000000000022 /* PlantDetailViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantDetailViewModelTests.swift; sourceTree = "<group>"; };
+		FA0000000000000000000001 /* IdentificationPhoto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentificationPhoto.swift; sourceTree = "<group>"; };
+		FA0000000000000000000002 /* PrepareIdentificationPhotoUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrepareIdentificationPhotoUseCase.swift; sourceTree = "<group>"; };
+		FA0000000000000000000003 /* CameraAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraAccess.swift; sourceTree = "<group>"; };
+		FA0000000000000000000004 /* LocalIdentificationPhotoPreparer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalIdentificationPhotoPreparer.swift; sourceTree = "<group>"; };
+		FA0000000000000000000005 /* SystemCameraAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemCameraAccess.swift; sourceTree = "<group>"; };
+		FA0000000000000000000006 /* IdentificationPhotoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentificationPhotoView.swift; sourceTree = "<group>"; };
+		FA0000000000000000000007 /* IdentificationPhotoViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentificationPhotoViewModel.swift; sourceTree = "<group>"; };
+		FA0000000000000000000008 /* CameraPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPickerView.swift; sourceTree = "<group>"; };
+		FA0000000000000000000009 /* IdentificationPhotoTestFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentificationPhotoTestFixture.swift; sourceTree = "<group>"; };
+		FA0000000000000000000021 /* IdentificationPhotoPreparationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentificationPhotoPreparationTests.swift; sourceTree = "<group>"; };
+		FA0000000000000000000022 /* IdentificationPhotoViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentificationPhotoViewModelTests.swift; sourceTree = "<group>"; };
+		FA0000000000000000000023 /* CameraAccessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraAccessTests.swift; sourceTree = "<group>"; };
+		FB0000000000000000000001 /* ExternalAIConsent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalAIConsent.swift; sourceTree = "<group>"; };
+		FB0000000000000000000002 /* ExternalAIConsentRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalAIConsentRepository.swift; sourceTree = "<group>"; };
+		FB0000000000000000000003 /* AuthorizeExternalAIOperationUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorizeExternalAIOperationUseCase.swift; sourceTree = "<group>"; };
+		FB0000000000000000000004 /* UserDefaultsExternalAIConsentRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsExternalAIConsentRepository.swift; sourceTree = "<group>"; };
+		FB0000000000000000000005 /* ExternalAIConsentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalAIConsentView.swift; sourceTree = "<group>"; };
+		FB0000000000000000000006 /* ExternalAIConsentTestFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalAIConsentTestFixture.swift; sourceTree = "<group>"; };
+		FB0000000000000000000021 /* ExternalAIConsentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalAIConsentTests.swift; sourceTree = "<group>"; };
+		FB0000000000000000000022 /* UserDefaultsExternalAIConsentRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsExternalAIConsentRepositoryTests.swift; sourceTree = "<group>"; };
+		FB0000000000000000000023 /* IdentificationConsentViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentificationConsentViewModelTests.swift; sourceTree = "<group>"; };
+		FC0000000000000000000001 /* IdentificationResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentificationResult.swift; sourceTree = "<group>"; };
+		FC0000000000000000000002 /* SpeciesIdentificationRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeciesIdentificationRepository.swift; sourceTree = "<group>"; };
+		FC0000000000000000000003 /* IdentifyCandidatesUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyCandidatesUseCase.swift; sourceTree = "<group>"; };
+		FC0000000000000000000004 /* IdentificationAPIConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentificationAPIConfiguration.swift; sourceTree = "<group>"; };
+		FC0000000000000000000005 /* OpenAICompatibleSpeciesIdentificationRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAICompatibleSpeciesIdentificationRepository.swift; sourceTree = "<group>"; };
+		FC0000000000000000000006 /* IdentificationResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentificationResultView.swift; sourceTree = "<group>"; };
+		FC0000000000000000000007 /* IdentificationCandidatesTestFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentificationCandidatesTestFixture.swift; sourceTree = "<group>"; };
+		FC0000000000000000000021 /* IdentifyCandidatesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyCandidatesTests.swift; sourceTree = "<group>"; };
+		FC0000000000000000000022 /* OpenAICompatibleSpeciesIdentificationRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAICompatibleSpeciesIdentificationRepositoryTests.swift; sourceTree = "<group>"; };
+		FC0000000000000000000050 /* IdentificationSecrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = IdentificationSecrets.xcconfig; sourceTree = "<group>"; };
+		FD0000000000000000000001 /* ConfirmedDraftIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmedDraftIdentity.swift; sourceTree = "<group>"; };
+		FD0000000000000000000002 /* ConfirmSpeciesUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmSpeciesUseCase.swift; sourceTree = "<group>"; };
+		FD0000000000000000000003 /* PlantCreationStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantCreationStatusView.swift; sourceTree = "<group>"; };
+		FD0000000000000000000021 /* ConfirmSpeciesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmSpeciesTests.swift; sourceTree = "<group>"; };
+		FD0000000000000000000022 /* ConfirmSpeciesViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmSpeciesViewModelTests.swift; sourceTree = "<group>"; };
+		FE0000000000000000000001 /* ConfirmManualSpeciesUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmManualSpeciesUseCase.swift; sourceTree = "<group>"; };
+		FE0000000000000000000002 /* ManualSpeciesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualSpeciesView.swift; sourceTree = "<group>"; };
+		FE0000000000000000000003 /* ConfirmManualSpeciesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmManualSpeciesTests.swift; sourceTree = "<group>"; };
+		FE0000000000000000000004 /* ManualSpeciesViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualSpeciesViewModelTests.swift; sourceTree = "<group>"; };
+		FF0000000000000000000001 /* UpdatePlantUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdatePlantUseCase.swift; sourceTree = "<group>"; };
+		FF0000000000000000000002 /* EditPlantView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditPlantView.swift; sourceTree = "<group>"; };
+		FF0000000000000000000003 /* EditPlantViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditPlantViewModel.swift; sourceTree = "<group>"; };
+		FF0000000000000000000021 /* UpdatePlantTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdatePlantTests.swift; sourceTree = "<group>"; };
+		FF0000000000000000000022 /* EditPlantViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditPlantViewModelTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		AA0000000000000000000016 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA0000000000000000000017 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0036DA3F4E043DD60096306F /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				AB1400000000000000000004 /* PersistedPlantPhotoAnalysis.swift */,
+				AB1400000000000000000005 /* KeepAnalysisTestFixture.swift */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		0924555587FF90629C77F3B6 /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				FC0000000000000000000006 /* IdentificationResultView.swift */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		0DB5865FC26426AC084C0ECC /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				CB0000000000000000000005 /* RegisterCareViewModel.swift */,
+				CB0000000000000000000006 /* RegisterCareView.swift */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		1ABBEA8A0A04AD5FBCB63DEB /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				DE1200000000000000000001 /* DeleteCareEventUseCase.swift */,
+				CB0000000000000000000001 /* CareEvent.swift */,
+				CB0000000000000000000002 /* CareEventRepository.swift */,
+				CB0000000000000000000003 /* RegisterCareEventUseCase.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		2538BCC4A5FACF1D635B12DF /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				DE1200000000000000000002 /* DeletePlantPhotoUseCase.swift */,
+				DB0000000000000000000001 /* PlantPhoto.swift */,
+				DB0000000000000000000002 /* PlantPhotoRepository.swift */,
+				DB0000000000000000000003 /* AddPlantPhotoUseCase.swift */,
+				DB0000000000000000000004 /* LoadPlantPhotosUseCase.swift */,
+				DB0000000000000000000005 /* LoadPlantPhotoUseCase.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		273F7F1E3275EC1CC8E82D7F /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				AB1400000000000000000001 /* SavedPlantPhotoAnalysis.swift */,
+				AB1400000000000000000002 /* PlantPhotoAnalysisStoring.swift */,
+				AB1400000000000000000003 /* KeepPlantPhotoAnalysisUseCase.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		2D1121A556C8E9552F974FBD /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				CE0000000000000000000001 /* CareSheetGenerationRepository.swift */,
+				CE0000000000000000000002 /* GenerateCareSheetUseCase.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		2E64F6487F8C3F5F2E678904 /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				FE0000000000000000000002 /* ManualSpeciesView.swift */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		329FF227BFDF651CC98A453F /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				DB0000000000000000000007 /* AddPlantPhotoViewModel.swift */,
+				DB0000000000000000000008 /* AddPlantPhotoView.swift */,
+				DB0000000000000000000009 /* PlantPhotoPagerViewModel.swift */,
+				DB000000000000000000000A /* PlantPhotoPagerView.swift */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		34578A4E497C19B4D593EF49 /* ManualSpecies */ = {
+			isa = PBXGroup;
+			children = (
+				6E0473B6DCDB32F6A84E2477 /* Domain */,
+				2E64F6487F8C3F5F2E678904 /* Presentation */,
+			);
+			path = ManualSpecies;
+			sourceTree = "<group>";
+		};
+		3A7FCF77BF51EAD9165F8635 /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				CB0000000000000000000007 /* PlantFormHeader.swift */,
+				DA0000000000000000000001 /* PhotoSelectionComponents.swift */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		3F6E50583545305A9C1B45E4 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				FB0000000000000000000001 /* ExternalAIConsent.swift */,
+				FB0000000000000000000002 /* ExternalAIConsentRepository.swift */,
+				FB0000000000000000000003 /* AuthorizeExternalAIOperationUseCase.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		45AF605B3806E74FAEB4E8ED /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				CB0000000000000000000004 /* PersistedCareEvent.swift */,
+				CB0000000000000000000008 /* CareEventTestFixture.swift */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		499CF8C6A8C280ED2834844A /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				AF1300000000000000000005 /* OpenAICompatiblePlantPhotoAnalysisRepository.swift */,
+				AF1300000000000000000006 /* PlantPhotoAnalysisTestFixture.swift */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		52686D008757DFA4CC4C723D /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				FC0000000000000000000004 /* IdentificationAPIConfiguration.swift */,
+				FC0000000000000000000005 /* OpenAICompatibleSpeciesIdentificationRepository.swift */,
+				FC0000000000000000000007 /* IdentificationCandidatesTestFixture.swift */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		5756C52E38162E54D8A5C543 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				AF1300000000000000000001 /* PlantPhotoAnalysis.swift */,
+				AF1300000000000000000002 /* BuildPlantAnalysisContext.swift */,
+				AF1300000000000000000003 /* PlantPhotoAnalysisRepository.swift */,
+				AF1300000000000000000004 /* AnalyzePlantPhotoUseCase.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		5DB6F0A74291D8303F736BC9 /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				DD1000000000000000000003 /* PlantTimelineRoute.swift */,
+				DD1000000000000000000004 /* PlantTimelineDateFormatter.swift */,
+				DD1000000000000000000005 /* PlantTimelineViewModel.swift */,
+				DD1000000000000000000006 /* PlantTimelinePhotoViewModel.swift */,
+				DD1000000000000000000007 /* PlantTimelineView.swift */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		69BC1200FD486AE265FECC51 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				FB0000000000000000000004 /* UserDefaultsExternalAIConsentRepository.swift */,
+				FB0000000000000000000006 /* ExternalAIConsentTestFixture.swift */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		6E0473B6DCDB32F6A84E2477 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				FE0000000000000000000001 /* ConfirmManualSpeciesUseCase.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		8285E32CAF6C6C5C2BD71C64 /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				DC0000000000000000000002 /* LastWateringHintViewModel.swift */,
+				DC0000000000000000000003 /* LastWateringHintView.swift */,
+				DC0000000000000000000004 /* LastWateringDateFormatter.swift */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		8323F696CC699BCECD683B39 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				CA0000000000000000000001 /* PreparedPlantPhotoValidating.swift */,
+				CA0000000000000000000002 /* SaveConfirmedPlantUseCase.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		85DE4469B5500F1E716D8AB6 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				DD1000000000000000000008 /* PlantTimelineTestFixture.swift */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		8CD9997FAF4B9AAE120230CB /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				FD0000000000000000000001 /* ConfirmedDraftIdentity.swift */,
+				FD0000000000000000000002 /* ConfirmSpeciesUseCase.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		9922CD639A7CFE976915BFA7 /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				FD0000000000000000000003 /* PlantCreationStatusView.swift */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		9EEE346CDD1D3C8619E48C6A /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				DB0000000000000000000006 /* PersistedPlantPhoto.swift */,
+				DB000000000000000000000B /* PlantPhotoTestFixture.swift */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		9F0B2F49D0193D578A81A65F /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				FA0000000000000000000009 /* IdentificationPhotoTestFixture.swift */,
+				FA0000000000000000000004 /* LocalIdentificationPhotoPreparer.swift */,
+				FA0000000000000000000005 /* SystemCameraAccess.swift */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		A11000000000000000000001 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				FC0000000000000000000050 /* IdentificationSecrets.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000009 = {
+			isa = PBXGroup;
+			children = (
+				AA0000000000000000000011 /* PlantCareAI */,
+				A11000000000000000000001 /* Config */,
+				CC0000000000000000000003 /* PlantCareAITests */,
+				AA0000000000000000000012 /* PlantCareAIUITests */,
+				AA0000000000000000000013 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000011 /* PlantCareAI */ = {
+			isa = PBXGroup;
+			children = (
+				AA0000000000000000000080 /* Features */,
+				CB0000000000000000000041 /* Shared */,
+				AA0000000000000000000001 /* PlantCareAIApp.swift */,
+				AA0000000000000000000002 /* ContentView.swift */,
+				AA0000000000000000000050 /* Assets.xcassets */,
+				AA0000000000000000000051 /* Localizable.xcstrings */,
+				AB1600000000000000000003 /* Resources */,
+			);
+			path = PlantCareAI;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000012 /* PlantCareAIUITests */ = {
+			isa = PBXGroup;
+			children = (
+				AA0000000000000000000003 /* PlantCareAIUITests.swift */,
+			);
+			path = PlantCareAIUITests;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000013 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CC0000000000000000000004 /* PlantCareAITests.xctest */,
+				AA0000000000000000000004 /* PlantCareAI.app */,
+				AA0000000000000000000005 /* PlantCareAIUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000080 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				DP1500000000000000000040 /* DeletePlant */,
+				34578A4E497C19B4D593EF49 /* ManualSpecies */,
+				AB1400000000000000000040 /* KeepAnalysis */,
+				AF1300000000000000000040 /* AnalyzeCurrentPhoto */,
+				CB0000000000000000000040 /* CareEvents */,
+				DB0000000000000000000040 /* PlantPhotos */,
+				DD1000000000000000000040 /* PlantTimeline */,
+				DC0000000000000000000040 /* LastWateringHint */,
+				CA0000000000000000000040 /* SavePlant */,
+				CE0000000000000000000040 /* GenerateCareSheet */,
+				FD0000000000000000000040 /* ConfirmSpecies */,
+				FC0000000000000000000040 /* IdentifyCandidates */,
+				FB0000000000000000000040 /* ExternalAIConsent */,
+				FA0000000000000000000040 /* IdentificationPhoto */,
+				FF0000000000000000000040 /* EditPlant */,
+				EE0000000000000000000040 /* PlantDetail */,
+				AA0000000000000000000081 /* PlantList */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000081 /* PlantList */ = {
+			isa = PBXGroup;
+			children = (
+				AA0000000000000000000082 /* Presentation */,
+				AA0000000000000000000083 /* Domain */,
+				AA0000000000000000000084 /* Data */,
+			);
+			path = PlantList;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000082 /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				DD0000000000000000000001 /* PlantCardView.swift */,
+				DD0000000000000000000002 /* PlantCardViewModel.swift */,
+				AA0000000000000000000060 /* PlantListView.swift */,
+				AA0000000000000000000061 /* EmptyPlantView.swift */,
+				AA0000000000000000000062 /* PlantListViewModel.swift */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000083 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				AB0000000000000000000090 /* CareSheet.swift */,
+				AB0000000000000000000091 /* SavePlantUseCase.swift */,
+				AB0000000000000000000092 /* LoadInitialPlantPhotoUseCase.swift */,
+				AA0000000000000000000063 /* Plant.swift */,
+				AA0000000000000000000064 /* PlantRepository.swift */,
+				AA0000000000000000000065 /* LoadPlantsUseCase.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000084 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				AB0000000000000000000093 /* PersistedPlant.swift */,
+				AB0000000000000000000094 /* StorageTestFixture.swift */,
+				AA0000000000000000000066 /* LocalPlantRepository.swift */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		AB1400000000000000000040 /* KeepAnalysis */ = {
+			isa = PBXGroup;
+			children = (
+				273F7F1E3275EC1CC8E82D7F /* Domain */,
+				0036DA3F4E043DD60096306F /* Data */,
+			);
+			path = KeepAnalysis;
+			sourceTree = "<group>";
+		};
+		AB1600000000000000000003 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				AB1600000000000000000001 /* LaunchScreen.storyboard */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		AF1300000000000000000040 /* AnalyzeCurrentPhoto */ = {
+			isa = PBXGroup;
+			children = (
+				5756C52E38162E54D8A5C543 /* Domain */,
+				499CF8C6A8C280ED2834844A /* Data */,
+				EE69E1BB66A6F58B8F96D6D6 /* Presentation */,
+			);
+			path = AnalyzeCurrentPhoto;
+			sourceTree = "<group>";
+		};
+		B7E6F0FA2646FE2AB9A888BC /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				CE0000000000000000000003 /* OpenAICompatibleCareSheetGenerationRepository.swift */,
+				CE0000000000000000000004 /* CareSheetGenerationTestFixture.swift */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		BC617CC2A8A9992F3FBF4078 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				DD1000000000000000000001 /* PlantTimelineEntry.swift */,
+				DD1000000000000000000002 /* LoadPlantTimelineUseCase.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		BF14DAED02B6EB1332E6D8B5 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				FC0000000000000000000001 /* IdentificationResult.swift */,
+				FC0000000000000000000002 /* SpeciesIdentificationRepository.swift */,
+				FC0000000000000000000003 /* IdentifyCandidatesUseCase.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		CA0000000000000000000040 /* SavePlant */ = {
+			isa = PBXGroup;
+			children = (
+				8323F696CC699BCECD683B39 /* Domain */,
+				FCAC2D2AEB6C5290A20095A9 /* Data */,
+				9922CD639A7CFE976915BFA7 /* Presentation */,
+			);
+			path = SavePlant;
+			sourceTree = "<group>";
+		};
+		CB0000000000000000000040 /* CareEvents */ = {
+			isa = PBXGroup;
+			children = (
+				1ABBEA8A0A04AD5FBCB63DEB /* Domain */,
+				45AF605B3806E74FAEB4E8ED /* Data */,
+				0DB5865FC26426AC084C0ECC /* Presentation */,
+			);
+			path = CareEvents;
+			sourceTree = "<group>";
+		};
+		CB0000000000000000000041 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				3A7FCF77BF51EAD9165F8635 /* Presentation */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		CC0000000000000000000003 /* PlantCareAITests */ = {
+			isa = PBXGroup;
+			children = (
+				DP1500000000000000000021 /* DeletePlantTests.swift */,
+				AB1600000000000000000004 /* LaunchBrandingResourcesTests.swift */,
+				FE0000000000000000000003 /* ConfirmManualSpeciesTests.swift */,
+				FE0000000000000000000004 /* ManualSpeciesViewModelTests.swift */,
+				FD0000000000000000000021 /* ConfirmSpeciesTests.swift */,
+				FD0000000000000000000022 /* ConfirmSpeciesViewModelTests.swift */,
+				FC0000000000000000000021 /* IdentifyCandidatesTests.swift */,
+				FC0000000000000000000022 /* OpenAICompatibleSpeciesIdentificationRepositoryTests.swift */,
+				FB0000000000000000000021 /* ExternalAIConsentTests.swift */,
+				FB0000000000000000000022 /* UserDefaultsExternalAIConsentRepositoryTests.swift */,
+				FB0000000000000000000023 /* IdentificationConsentViewModelTests.swift */,
+				FA0000000000000000000021 /* IdentificationPhotoPreparationTests.swift */,
+				FA0000000000000000000022 /* IdentificationPhotoViewModelTests.swift */,
+				FA0000000000000000000023 /* CameraAccessTests.swift */,
+				FF0000000000000000000021 /* UpdatePlantTests.swift */,
+				FF0000000000000000000022 /* EditPlantViewModelTests.swift */,
+				EE0000000000000000000021 /* LoadPlantDetailTests.swift */,
+				EE0000000000000000000022 /* PlantDetailViewModelTests.swift */,
+				DD0000000000000000000021 /* PlantCardViewModelTests.swift */,
+				DD0000000000000000000022 /* PlantListViewModelTests.swift */,
+				CC0000000000000000000001 /* LocalPlantRepositoryTests.swift */,
+				AB1400000000000000000021 /* KeepPlantPhotoAnalysisTests.swift */,
+				AB1400000000000000000022 /* LocalPlantPhotoAnalysisRepositoryTests.swift */,
+				AF1300000000000000000021 /* BuildPlantAnalysisContextTests.swift */,
+				AF1300000000000000000022 /* AnalyzePlantPhotoTests.swift */,
+				AF1300000000000000000023 /* PlantPhotoAnalysisViewModelTests.swift */,
+				AF1300000000000000000024 /* OpenAICompatiblePlantPhotoAnalysisRepositoryTests.swift */,
+				DE1200000000000000000021 /* DeleteCareEventTests.swift */,
+				DE1200000000000000000022 /* DeletePlantPhotoTests.swift */,
+				DD1000000000000000000021 /* LoadPlantTimelineTests.swift */,
+				DD1000000000000000000022 /* PlantTimelineDateFormatterTests.swift */,
+				DD1000000000000000000023 /* PlantTimelineViewModelTests.swift */,
+				DD1000000000000000000024 /* PlantTimelinePhotoViewModelTests.swift */,
+				DB0000000000000000000021 /* LocalPlantPhotoRepositoryTests.swift */,
+				DB0000000000000000000022 /* AddPlantPhotoTests.swift */,
+				DB0000000000000000000023 /* AddPlantPhotoViewModelTests.swift */,
+				DB0000000000000000000024 /* PlantPhotoPagerViewModelTests.swift */,
+				DC0000000000000000000021 /* LoadLastWateringTests.swift */,
+				DC0000000000000000000022 /* LastWateringHintViewModelTests.swift */,
+				DC0000000000000000000023 /* LastWateringDateFormatterTests.swift */,
+				CB0000000000000000000021 /* RegisterCareEventTests.swift */,
+				CB0000000000000000000022 /* LocalCareEventRepositoryTests.swift */,
+				CB0000000000000000000023 /* RegisterCareViewModelTests.swift */,
+				CA0000000000000000000021 /* SaveConfirmedPlantTests.swift */,
+				CA0000000000000000000022 /* PreparedPlantPhotoValidationTests.swift */,
+				CA0000000000000000000023 /* SavePlantViewModelTests.swift */,
+				CE0000000000000000000021 /* GenerateCareSheetTests.swift */,
+				CE0000000000000000000022 /* GenerateCareSheetViewModelTests.swift */,
+				CE0000000000000000000023 /* OpenAICompatibleCareSheetGenerationRepositoryTests.swift */,
+			);
+			path = PlantCareAITests;
+			sourceTree = "<group>";
+		};
+		CE0000000000000000000040 /* GenerateCareSheet */ = {
+			isa = PBXGroup;
+			children = (
+				2D1121A556C8E9552F974FBD /* Domain */,
+				B7E6F0FA2646FE2AB9A888BC /* Data */,
+			);
+			path = GenerateCareSheet;
+			sourceTree = "<group>";
+		};
+		DB0000000000000000000040 /* PlantPhotos */ = {
+			isa = PBXGroup;
+			children = (
+				2538BCC4A5FACF1D635B12DF /* Domain */,
+				9EEE346CDD1D3C8619E48C6A /* Data */,
+				329FF227BFDF651CC98A453F /* Presentation */,
+			);
+			path = PlantPhotos;
+			sourceTree = "<group>";
+		};
+		DC0000000000000000000040 /* LastWateringHint */ = {
+			isa = PBXGroup;
+			children = (
+				EA2F4649685C2F152401E0F1 /* Domain */,
+				8285E32CAF6C6C5C2BD71C64 /* Presentation */,
+			);
+			path = LastWateringHint;
+			sourceTree = "<group>";
+		};
+		DD00B6103C156A260BF961FE /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				FA0000000000000000000001 /* IdentificationPhoto.swift */,
+				FA0000000000000000000002 /* PrepareIdentificationPhotoUseCase.swift */,
+				FA0000000000000000000003 /* CameraAccess.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		DD1000000000000000000040 /* PlantTimeline */ = {
+			isa = PBXGroup;
+			children = (
+				BC617CC2A8A9992F3FBF4078 /* Domain */,
+				5DB6F0A74291D8303F736BC9 /* Presentation */,
+				85DE4469B5500F1E716D8AB6 /* Data */,
+			);
+			path = PlantTimeline;
+			sourceTree = "<group>";
+		};
+		DP1500000000000000000040 /* DeletePlant */ = {
+			isa = PBXGroup;
+			children = (
+				DP1500000000000000000041 /* Domain */,
+				DP1500000000000000000042 /* Data */,
+			);
+			path = DeletePlant;
+			sourceTree = "<group>";
+		};
+		DP1500000000000000000041 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				DP1500000000000000000001 /* PlantDeletingRepository.swift */,
+				DP1500000000000000000002 /* DeletePlantUseCase.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		DP1500000000000000000042 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				DP1500000000000000000003 /* DeletePlantTestFixture.swift */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		EA2F4649685C2F152401E0F1 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				DC0000000000000000000001 /* LoadLastWateringUseCase.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		EADC6ED9DF147117403A9C5F /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				FB0000000000000000000005 /* ExternalAIConsentView.swift */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		EC1CDCE048B6CB21E26E4E35 /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				FA0000000000000000000006 /* IdentificationPhotoView.swift */,
+				FA0000000000000000000007 /* IdentificationPhotoViewModel.swift */,
+				FA0000000000000000000008 /* CameraPickerView.swift */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		EE0000000000000000000040 /* PlantDetail */ = {
+			isa = PBXGroup;
+			children = (
+				EE0000000000000000000041 /* Domain */,
+				EE0000000000000000000042 /* Presentation */,
+			);
+			path = PlantDetail;
+			sourceTree = "<group>";
+		};
+		EE0000000000000000000041 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				EE0000000000000000000001 /* LoadPlantDetailUseCase.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		EE0000000000000000000042 /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				EE0000000000000000000002 /* PlantDetailView.swift */,
+				EE0000000000000000000003 /* PlantDetailViewModel.swift */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		EE69E1BB66A6F58B8F96D6D6 /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				AF1300000000000000000007 /* PlantPhotoAnalysisViewModel.swift */,
+				AF1300000000000000000008 /* PlantPhotoAnalysisView.swift */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		FA0000000000000000000040 /* IdentificationPhoto */ = {
+			isa = PBXGroup;
+			children = (
+				9F0B2F49D0193D578A81A65F /* Data */,
+				DD00B6103C156A260BF961FE /* Domain */,
+				EC1CDCE048B6CB21E26E4E35 /* Presentation */,
+			);
+			path = IdentificationPhoto;
+			sourceTree = "<group>";
+		};
+		FB0000000000000000000040 /* ExternalAIConsent */ = {
+			isa = PBXGroup;
+			children = (
+				3F6E50583545305A9C1B45E4 /* Domain */,
+				69BC1200FD486AE265FECC51 /* Data */,
+				EADC6ED9DF147117403A9C5F /* Presentation */,
+			);
+			path = ExternalAIConsent;
+			sourceTree = "<group>";
+		};
+		FC0000000000000000000040 /* IdentifyCandidates */ = {
+			isa = PBXGroup;
+			children = (
+				BF14DAED02B6EB1332E6D8B5 /* Domain */,
+				52686D008757DFA4CC4C723D /* Data */,
+				0924555587FF90629C77F3B6 /* Presentation */,
+			);
+			path = IdentifyCandidates;
+			sourceTree = "<group>";
+		};
+		FCAC2D2AEB6C5290A20095A9 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				CA0000000000000000000003 /* LocalPreparedPlantPhotoValidator.swift */,
+				CA0000000000000000000004 /* PlantCreationTestFixture.swift */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		FD0000000000000000000040 /* ConfirmSpecies */ = {
+			isa = PBXGroup;
+			children = (
+				8CD9997FAF4B9AAE120230CB /* Domain */,
+			);
+			path = ConfirmSpecies;
+			sourceTree = "<group>";
+		};
+		FF0000000000000000000040 /* EditPlant */ = {
+			isa = PBXGroup;
+			children = (
+				FF0000000000000000000041 /* Domain */,
+				FF0000000000000000000042 /* Presentation */,
+			);
+			path = EditPlant;
+			sourceTree = "<group>";
+		};
+		FF0000000000000000000041 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				FF0000000000000000000001 /* UpdatePlantUseCase.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		FF0000000000000000000042 /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				FF0000000000000000000002 /* EditPlantView.swift */,
+				FF0000000000000000000003 /* EditPlantViewModel.swift */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		AA0000000000000000000010 /* PlantCareAI */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA0000000000000000000031 /* Build configuration list for PBXNativeTarget "PlantCareAI" */;
+			buildPhases = (
+				AA0000000000000000000014 /* Sources */,
+				AA0000000000000000000016 /* Frameworks */,
+				AA0000000000000000000018 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PlantCareAI;
+			productName = PlantCareAI;
+			productReference = AA0000000000000000000004 /* PlantCareAI.app */;
+			productType = "com.apple.product-type.application";
+		};
+		AA0000000000000000000020 /* PlantCareAIUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA0000000000000000000032 /* Build configuration list for PBXNativeTarget "PlantCareAIUITests" */;
+			buildPhases = (
+				AA0000000000000000000015 /* Sources */,
+				AA0000000000000000000017 /* Frameworks */,
+				AA0000000000000000000019 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AA0000000000000000000021 /* PBXTargetDependency */,
+			);
+			name = PlantCareAIUITests;
+			productName = PlantCareAIUITests;
+			productReference = AA0000000000000000000005 /* PlantCareAIUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		CC0000000000000000000006 /* PlantCareAITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CC0000000000000000000007 /* Build configuration list for PBXNativeTarget "PlantCareAITests" */;
+			buildPhases = (
+				CC0000000000000000000005 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AA0000000000000000000021 /* PBXTargetDependency */,
+			);
+			name = PlantCareAITests;
+			productName = PlantCareAITests;
+			productReference = CC0000000000000000000004 /* PlantCareAITests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		AA0000000000000000000040 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 2620;
+				TargetAttributes = {
+					AA0000000000000000000010 = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					AA0000000000000000000020 = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = AA0000000000000000000010;
+					};
+				};
+			};
+			buildConfigurationList = AA0000000000000000000030 /* Build configuration list for PBXProject "PlantCareAI" */;
+			compatibilityVersion = "Xcode 16.0";
+			developmentRegion = es;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				es,
+				Base,
+			);
+			mainGroup = AA0000000000000000000009;
+			productRefGroup = AA0000000000000000000013 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				CC0000000000000000000006 /* PlantCareAITests */,
+				AA0000000000000000000010 /* PlantCareAI */,
+				AA0000000000000000000020 /* PlantCareAIUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AA0000000000000000000018 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA0000000000000000000052 /* Assets.xcassets in Resources */,
+				AA0000000000000000000053 /* Localizable.xcstrings in Resources */,
+				AB1600000000000000000002 /* LaunchScreen.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA0000000000000000000019 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AA0000000000000000000014 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DP1500000000000000000011 /* PlantDeletingRepository.swift in Sources */,
+				DP1500000000000000000012 /* DeletePlantUseCase.swift in Sources */,
+				DP1500000000000000000013 /* DeletePlantTestFixture.swift in Sources */,
+				AB1400000000000000000015 /* KeepAnalysisTestFixture.swift in Sources */,
+				AB1400000000000000000011 /* SavedPlantPhotoAnalysis.swift in Sources */,
+				AB1400000000000000000012 /* PlantPhotoAnalysisStoring.swift in Sources */,
+				AB1400000000000000000013 /* KeepPlantPhotoAnalysisUseCase.swift in Sources */,
+				AB1400000000000000000014 /* PersistedPlantPhotoAnalysis.swift in Sources */,
+				AF1300000000000000000011 /* PlantPhotoAnalysis.swift in Sources */,
+				AF1300000000000000000012 /* BuildPlantAnalysisContext.swift in Sources */,
+				AF1300000000000000000013 /* PlantPhotoAnalysisRepository.swift in Sources */,
+				AF1300000000000000000014 /* AnalyzePlantPhotoUseCase.swift in Sources */,
+				AF1300000000000000000015 /* OpenAICompatiblePlantPhotoAnalysisRepository.swift in Sources */,
+				AF1300000000000000000016 /* PlantPhotoAnalysisTestFixture.swift in Sources */,
+				AF1300000000000000000017 /* PlantPhotoAnalysisViewModel.swift in Sources */,
+				AF1300000000000000000018 /* PlantPhotoAnalysisView.swift in Sources */,
+				DD1000000000000000000011 /* PlantTimelineEntry.swift in Sources */,
+				DD1000000000000000000012 /* LoadPlantTimelineUseCase.swift in Sources */,
+				DD1000000000000000000013 /* PlantTimelineRoute.swift in Sources */,
+				DD1000000000000000000014 /* PlantTimelineDateFormatter.swift in Sources */,
+				DD1000000000000000000015 /* PlantTimelineViewModel.swift in Sources */,
+				DD1000000000000000000016 /* PlantTimelinePhotoViewModel.swift in Sources */,
+				DD1000000000000000000017 /* PlantTimelineView.swift in Sources */,
+				DD1000000000000000000018 /* PlantTimelineTestFixture.swift in Sources */,
+				DE1200000000000000000011 /* DeleteCareEventUseCase.swift in Sources */,
+				DE1200000000000000000012 /* DeletePlantPhotoUseCase.swift in Sources */,
+				DA0000000000000000000002 /* PhotoSelectionComponents.swift in Sources */,
+				DB000000000000000000001B /* PlantPhotoTestFixture.swift in Sources */,
+				DB0000000000000000000011 /* PlantPhoto.swift in Sources */,
+				DB0000000000000000000012 /* PlantPhotoRepository.swift in Sources */,
+				DB0000000000000000000013 /* AddPlantPhotoUseCase.swift in Sources */,
+				DB0000000000000000000014 /* LoadPlantPhotosUseCase.swift in Sources */,
+				DB0000000000000000000015 /* LoadPlantPhotoUseCase.swift in Sources */,
+				DB0000000000000000000016 /* PersistedPlantPhoto.swift in Sources */,
+				DB0000000000000000000017 /* AddPlantPhotoViewModel.swift in Sources */,
+				DB0000000000000000000018 /* AddPlantPhotoView.swift in Sources */,
+				DB0000000000000000000019 /* PlantPhotoPagerViewModel.swift in Sources */,
+				DB000000000000000000001A /* PlantPhotoPagerView.swift in Sources */,
+				DC0000000000000000000011 /* LoadLastWateringUseCase.swift in Sources */,
+				DC0000000000000000000012 /* LastWateringHintViewModel.swift in Sources */,
+				DC0000000000000000000013 /* LastWateringHintView.swift in Sources */,
+				DC0000000000000000000014 /* LastWateringDateFormatter.swift in Sources */,
+				CB0000000000000000000018 /* CareEventTestFixture.swift in Sources */,
+				CB0000000000000000000011 /* CareEvent.swift in Sources */,
+				CB0000000000000000000012 /* CareEventRepository.swift in Sources */,
+				CB0000000000000000000013 /* RegisterCareEventUseCase.swift in Sources */,
+				CB0000000000000000000014 /* PersistedCareEvent.swift in Sources */,
+				CB0000000000000000000015 /* RegisterCareViewModel.swift in Sources */,
+				CB0000000000000000000016 /* RegisterCareView.swift in Sources */,
+				CB0000000000000000000017 /* PlantFormHeader.swift in Sources */,
+				CA0000000000000000000014 /* PlantCreationTestFixture.swift in Sources */,
+				CA0000000000000000000011 /* PreparedPlantPhotoValidating.swift in Sources */,
+				CA0000000000000000000012 /* SaveConfirmedPlantUseCase.swift in Sources */,
+				CA0000000000000000000013 /* LocalPreparedPlantPhotoValidator.swift in Sources */,
+				CE0000000000000000000011 /* CareSheetGenerationRepository.swift in Sources */,
+				CE0000000000000000000012 /* GenerateCareSheetUseCase.swift in Sources */,
+				CE0000000000000000000013 /* OpenAICompatibleCareSheetGenerationRepository.swift in Sources */,
+				CE0000000000000000000014 /* CareSheetGenerationTestFixture.swift in Sources */,
+				FE0000000000000000000011 /* ConfirmManualSpeciesUseCase.swift in Sources */,
+				FE0000000000000000000012 /* ManualSpeciesView.swift in Sources */,
+				FD0000000000000000000011 /* ConfirmedDraftIdentity.swift in Sources */,
+				FD0000000000000000000012 /* ConfirmSpeciesUseCase.swift in Sources */,
+				FD0000000000000000000013 /* PlantCreationStatusView.swift in Sources */,
+				FC0000000000000000000011 /* IdentificationResult.swift in Sources */,
+				FC0000000000000000000012 /* SpeciesIdentificationRepository.swift in Sources */,
+				FC0000000000000000000013 /* IdentifyCandidatesUseCase.swift in Sources */,
+				FC0000000000000000000014 /* IdentificationAPIConfiguration.swift in Sources */,
+				FC0000000000000000000015 /* OpenAICompatibleSpeciesIdentificationRepository.swift in Sources */,
+				FC0000000000000000000016 /* IdentificationResultView.swift in Sources */,
+				FC0000000000000000000017 /* IdentificationCandidatesTestFixture.swift in Sources */,
+				FB0000000000000000000011 /* ExternalAIConsent.swift in Sources */,
+				FB0000000000000000000012 /* ExternalAIConsentRepository.swift in Sources */,
+				FB0000000000000000000013 /* AuthorizeExternalAIOperationUseCase.swift in Sources */,
+				FB0000000000000000000014 /* UserDefaultsExternalAIConsentRepository.swift in Sources */,
+				FB0000000000000000000015 /* ExternalAIConsentView.swift in Sources */,
+				FB0000000000000000000016 /* ExternalAIConsentTestFixture.swift in Sources */,
+				FA0000000000000000000019 /* IdentificationPhotoTestFixture.swift in Sources */,
+				FA0000000000000000000011 /* IdentificationPhoto.swift in Sources */,
+				FA0000000000000000000012 /* PrepareIdentificationPhotoUseCase.swift in Sources */,
+				FA0000000000000000000013 /* CameraAccess.swift in Sources */,
+				FA0000000000000000000014 /* LocalIdentificationPhotoPreparer.swift in Sources */,
+				FA0000000000000000000015 /* SystemCameraAccess.swift in Sources */,
+				FA0000000000000000000016 /* IdentificationPhotoView.swift in Sources */,
+				FA0000000000000000000017 /* IdentificationPhotoViewModel.swift in Sources */,
+				FA0000000000000000000018 /* CameraPickerView.swift in Sources */,
+				FF0000000000000000000011 /* UpdatePlantUseCase.swift in Sources */,
+				FF0000000000000000000012 /* EditPlantView.swift in Sources */,
+				FF0000000000000000000013 /* EditPlantViewModel.swift in Sources */,
+				EE0000000000000000000011 /* LoadPlantDetailUseCase.swift in Sources */,
+				EE0000000000000000000012 /* PlantDetailView.swift in Sources */,
+				EE0000000000000000000013 /* PlantDetailViewModel.swift in Sources */,
+				DD0000000000000000000011 /* PlantCardView.swift in Sources */,
+				DD0000000000000000000012 /* PlantCardViewModel.swift in Sources */,
+				AC0000000000000000000090 /* CareSheet.swift in Sources */,
+				AC0000000000000000000091 /* SavePlantUseCase.swift in Sources */,
+				AC0000000000000000000092 /* LoadInitialPlantPhotoUseCase.swift in Sources */,
+				AC0000000000000000000093 /* PersistedPlant.swift in Sources */,
+				AC0000000000000000000094 /* StorageTestFixture.swift in Sources */,
+				AA0000000000000000000006 /* PlantCareAIApp.swift in Sources */,
+				AA0000000000000000000007 /* ContentView.swift in Sources */,
+				AA0000000000000000000070 /* PlantListView.swift in Sources */,
+				AA0000000000000000000071 /* EmptyPlantView.swift in Sources */,
+				AA0000000000000000000072 /* PlantListViewModel.swift in Sources */,
+				AA0000000000000000000073 /* Plant.swift in Sources */,
+				AA0000000000000000000074 /* PlantRepository.swift in Sources */,
+				AA0000000000000000000075 /* LoadPlantsUseCase.swift in Sources */,
+				AA0000000000000000000076 /* LocalPlantRepository.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA0000000000000000000015 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA0000000000000000000008 /* PlantCareAIUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CC0000000000000000000005 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AB1600000000000000000005 /* LaunchBrandingResourcesTests.swift in Sources */,
+				DP1500000000000000000031 /* DeletePlantTests.swift in Sources */,
+				AB1400000000000000000031 /* KeepPlantPhotoAnalysisTests.swift in Sources */,
+				AB1400000000000000000032 /* LocalPlantPhotoAnalysisRepositoryTests.swift in Sources */,
+				AF1300000000000000000031 /* BuildPlantAnalysisContextTests.swift in Sources */,
+				AF1300000000000000000032 /* AnalyzePlantPhotoTests.swift in Sources */,
+				AF1300000000000000000033 /* PlantPhotoAnalysisViewModelTests.swift in Sources */,
+				AF1300000000000000000034 /* OpenAICompatiblePlantPhotoAnalysisRepositoryTests.swift in Sources */,
+				DD1000000000000000000031 /* LoadPlantTimelineTests.swift in Sources */,
+				DD1000000000000000000032 /* PlantTimelineDateFormatterTests.swift in Sources */,
+				DD1000000000000000000033 /* PlantTimelineViewModelTests.swift in Sources */,
+				DD1000000000000000000034 /* PlantTimelinePhotoViewModelTests.swift in Sources */,
+				DE1200000000000000000031 /* DeleteCareEventTests.swift in Sources */,
+				DE1200000000000000000032 /* DeletePlantPhotoTests.swift in Sources */,
+				DB0000000000000000000032 /* AddPlantPhotoTests.swift in Sources */,
+				DB0000000000000000000033 /* AddPlantPhotoViewModelTests.swift in Sources */,
+				DB0000000000000000000034 /* PlantPhotoPagerViewModelTests.swift in Sources */,
+				DB0000000000000000000031 /* LocalPlantPhotoRepositoryTests.swift in Sources */,
+				DC0000000000000000000031 /* LoadLastWateringTests.swift in Sources */,
+				DC0000000000000000000032 /* LastWateringHintViewModelTests.swift in Sources */,
+				DC0000000000000000000033 /* LastWateringDateFormatterTests.swift in Sources */,
+				CB0000000000000000000031 /* RegisterCareEventTests.swift in Sources */,
+				CB0000000000000000000032 /* LocalCareEventRepositoryTests.swift in Sources */,
+				CB0000000000000000000033 /* RegisterCareViewModelTests.swift in Sources */,
+				CA0000000000000000000031 /* SaveConfirmedPlantTests.swift in Sources */,
+				CA0000000000000000000032 /* PreparedPlantPhotoValidationTests.swift in Sources */,
+				CA0000000000000000000033 /* SavePlantViewModelTests.swift in Sources */,
+				CE0000000000000000000031 /* GenerateCareSheetTests.swift in Sources */,
+				CE0000000000000000000032 /* GenerateCareSheetViewModelTests.swift in Sources */,
+				CE0000000000000000000033 /* OpenAICompatibleCareSheetGenerationRepositoryTests.swift in Sources */,
+				FE0000000000000000000013 /* ConfirmManualSpeciesTests.swift in Sources */,
+				FE0000000000000000000014 /* ManualSpeciesViewModelTests.swift in Sources */,
+				FD0000000000000000000031 /* ConfirmSpeciesTests.swift in Sources */,
+				FD0000000000000000000032 /* ConfirmSpeciesViewModelTests.swift in Sources */,
+				FC0000000000000000000031 /* IdentifyCandidatesTests.swift in Sources */,
+				FC0000000000000000000032 /* OpenAICompatibleSpeciesIdentificationRepositoryTests.swift in Sources */,
+				FB0000000000000000000031 /* ExternalAIConsentTests.swift in Sources */,
+				FB0000000000000000000032 /* UserDefaultsExternalAIConsentRepositoryTests.swift in Sources */,
+				FB0000000000000000000033 /* IdentificationConsentViewModelTests.swift in Sources */,
+				FA0000000000000000000031 /* IdentificationPhotoPreparationTests.swift in Sources */,
+				FA0000000000000000000032 /* IdentificationPhotoViewModelTests.swift in Sources */,
+				FA0000000000000000000033 /* CameraAccessTests.swift in Sources */,
+				FF0000000000000000000031 /* UpdatePlantTests.swift in Sources */,
+				FF0000000000000000000032 /* EditPlantViewModelTests.swift in Sources */,
+				EE0000000000000000000031 /* LoadPlantDetailTests.swift in Sources */,
+				EE0000000000000000000032 /* PlantDetailViewModelTests.swift in Sources */,
+				DD0000000000000000000031 /* PlantCardViewModelTests.swift in Sources */,
+				DD0000000000000000000032 /* PlantListViewModelTests.swift in Sources */,
+				CC0000000000000000000002 /* LocalPlantRepositoryTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		AA0000000000000000000021 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AA0000000000000000000010 /* PlantCareAI */;
+			targetProxy = AA0000000000000000000022 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		AA0000000000000000000041 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				ENABLE_TESTABILITY = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		AA0000000000000000000042 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		AA0000000000000000000043 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = FC0000000000000000000050 /* IdentificationSecrets.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGNING_ALLOWED = NO;
+				"CODE_SIGNING_ALLOWED[sdk=iphonesimulator*]" = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphonesimulator*]" = "-";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Config/IdentificationDebugInfo.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "PlantCare AI";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Usamos la cámara para que puedas tomar una foto de tu planta antes de identificarla.";
+				INFOPLIST_KEY_PlantCareAIAPIHostPath = "$(API_HOST_PATH)";
+				INFOPLIST_KEY_PlantCareAIAPIKey = "$(API_KEY)";
+				INFOPLIST_KEY_PlantCareAIAPIScheme = "$(API_SCHEME)";
+				INFOPLIST_KEY_PlantCareAIModel = "$(API_MODEL)";
+				INFOPLIST_KEY_PlantCareAITimeoutSeconds = "$(API_TIMEOUT_SECONDS)";
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.plantcareai.prototype;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		AA0000000000000000000044 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGNING_ALLOWED = NO;
+				"CODE_SIGNING_ALLOWED[sdk=iphonesimulator*]" = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphonesimulator*]" = "-";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "PlantCare AI";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Usamos la cámara para que puedas tomar una foto de tu planta antes de identificarla.";
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.plantcareai.prototype;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		AA0000000000000000000045 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.plantcareai.prototype.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = PlantCareAI;
+			};
+			name = Debug;
+		};
+		AA0000000000000000000046 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.plantcareai.prototype.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = PlantCareAI;
+			};
+			name = Release;
+		};
+		CC0000000000000000000008 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGNING_ALLOWED = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = org.plantcareai.prototype.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PlantCareAI.app/PlantCareAI";
+			};
+			name = Debug;
+		};
+		CC0000000000000000000009 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGNING_ALLOWED = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = org.plantcareai.prototype.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PlantCareAI.app/PlantCareAI";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		AA0000000000000000000030 /* Build configuration list for PBXProject "PlantCareAI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0000000000000000000041 /* Debug */,
+				AA0000000000000000000042 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA0000000000000000000031 /* Build configuration list for PBXNativeTarget "PlantCareAI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0000000000000000000043 /* Debug */,
+				AA0000000000000000000044 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA0000000000000000000032 /* Build configuration list for PBXNativeTarget "PlantCareAIUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0000000000000000000045 /* Debug */,
+				AA0000000000000000000046 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CC0000000000000000000007 /* Build configuration list for PBXNativeTarget "PlantCareAITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CC0000000000000000000008 /* Debug */,
+				CC0000000000000000000009 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = AA0000000000000000000040 /* Project object */;
 }

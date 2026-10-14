@@ -1,5 +1,13 @@
 # Restricciones operativas
 
+- MUST: la app iPhone admite únicamente Portrait y fuerza `UIUserInterfaceStyle=Light`
+  en Info.plist Debug/Release por petición expresa del usuario (app-launch-branding).
+  No introducir modo noche ni orientación horizontal en features posteriores.
+- Los grupos Xcode deben resolver a carpetas físicas del repositorio con rutas
+  relativas a sus padres; evitar grupos virtuales duplicados y referencias
+  SOURCE_ROOT que oculten la jerarquía real. Motivo: reparación PBX previa y
+  corrección explícita de DeletePlant/tests en app-launch-branding.
+
 - MUST: eliminar planta completa por snapshot Plant vigente y cascada de todos sus hijos actuales en un único save metadata,
   con rollback pre-save/cleanup JPEG propio best-effort posterior. Única excepción a protección inicial de historial;
   no encadenar deletes ni tratar notFound/conflict como éxito. Motivo: ADR015, evitar memoria parcial.
@@ -25,7 +33,7 @@
 - MUST: mantener el host despierto y la tapa del portátil abierta durante XCUITest local. `caffeinate -dius ./init.sh` evita suspensión por inactividad, pero no garantiza evitar `Clamshell Sleep` al cerrar la tapa en batería. Motivo: se comprobaron pausas de 903–904 s en `pmset` coincidentes con timeouts de eventos/capturas del simulador; no interpretar una ejecución interrumpida por suspensión como evidencia funcional.
 
 - El target iPhone tiene despliegue mínimo iOS 17.0; cambios posteriores deben conservar compatibilidad o documentar explícitamente el cambio. Motivo: configuración de compilación reproducible del bootstrap.
-- La compilación de simulador usa `CODE_SIGNING_ALLOWED=NO`; si se prepara una demo en dispositivo real se necesitará configurar firma fuera del repositorio. Motivo: el gate local no exige equipo ni credenciales.
+- La app usa firma **ad hoc solo en iphonesimulator**: `CODE_SIGNING_ALLOWED[sdk=iphonesimulator*]=YES` y `CODE_SIGN_IDENTITY[sdk=iphonesimulator*]="-"`, en Debug/Release. El valor general `NO` y los targets de tests se conservan por ahora; dispositivo físico exige configuración futura de cuenta/equipo/provisioning/certificado, sin incorporarlos automáticamente. Motivo: SplashBoard exige sello de recursos para LaunchScreen; la firma local de simulador no necesita cuenta ni credenciales. Autorización posterior app-launch-branding sucede la política antigua de simulador sin firma.
 - MUST: cuando se incorpore la API externa, su credencial y configuración sensible deben proporcionarse localmente por quien prepara la demo y mantenerse fuera de control de versiones; comprobar que cualquier archivo local elegido esté realmente ignorado antes de usarlo. Motivo: `.gitignore` ya cubre `*.env`, `*.local.xcconfig` y `Secrets.xcconfig`, pero no garantiza cobertura de otros nombres ni elimina archivos ya versionados.
 - MUST NOT: incluir claves o secretos en fuentes, proyecto Xcode, configuración versionada, ejemplos con valores reales ni registros de pruebas. El mecanismo aprobado posteriormente es `Config/IdentificationSecrets.xcconfig` ignorado exclusivamente Debug→Info.plist (ADR 004); solo la plantilla `.example` se versiona. La credencial es extraíble y el prototipo sin backend no ofrece custodia apta para distribución pública.
 - MUST: preparar el fichero real obligatorio Debug copiando su plantilla pública con clave vacía antes del gate si no existe; jamás sobrescribir un fichero existente ni inspeccionar/imprimir sus secretos. Debug falla al faltar; Release no referencia esa config ni el plist puente Debug. Motivo: configuración única explícita autorizada por usuario, sin defaults/include opcional que oculten una preparación incompleta.

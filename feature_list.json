@@ -22,6 +22,26 @@
     "notes": "Preparación de recursos según DESIGN.md sin implementar todavía el estado vacío ni añadir imágenes decorativas sin uso."
   },
   {
+    "id": "app-launch-branding",
+    "area": "diseno-ios",
+    "title": "Establecer icono y LaunchScreen de PlantCare AI",
+    "user_visible_behavior": "La app muestra un icono botánico en iOS y un LaunchScreen nativo inspirado en el HTML aportado, seguido de Mis plantas sin retrasos artificiales.",
+    "depends_on": ["ios-bootstrap", "design-resources"],
+    "status": "accepted",
+    "spec": "docs/specs/app-launch-branding.md",
+    "verification": ["Comprobar recursos de icono y LaunchScreen en Debug y Release; inspeccionar icono instalado y arranque frío en un iPhone Simulator estándar; comprobar llegada al listado con tests focalizados y gate final del validator."],
+    "evidence": [
+      "2026-10-13 implementer: AppIcon PNG1024 opaco, storyboard y artwork locales; builds iniciales Debug/Release SUCCEEDED. Focal inicial6/6=2unitrecursos+4UI Passed sin skips/fallos, focused.xcresult. Preview UIKit realmente abierta/correcta, no captura sistema. Icono SpringBoard y llegada a colección verificados con vídeo/PNG. Fuente512 ampliada aprobada por usuario; no detalle adicional ni URL runtime.",
+      "2026-10-13 ampliación autorizada Portrait/Light y reparación grupos: todos69grupos/161refs físicos existentes únicos sin symlinks y membership previo intacto. Ambos Info.plist Debug/Release confirman solo UIInterfaceOrientationPortrait y UIUserInterfaceStyleLight; focal final4/4=2recursos+empty1+storedrelaunch1 Passed,0fail/skips en portrait-light-focused.xcresult; Releasefinal BUILD SUCCEEDED.189inputs finales,188byteexactos;PBX externo Xcode reserializado+metadata/firmaManualvacía/cleanuphuérfano, AST contrastado exacto sin code-sign permitido nuevo. Evidencia/comandos bajo DerivedData/evidence/app-launch-branding; docs/handoffs/app-launch-branding.md.",
+      "BLOCK visual histórico: SplashBoard rechazaba nib unsigned Security-67056; diagnóstico adhoc aislado funcionó y usuario rechazó inicialmente cambiar firma. Historia conservada; sucede autorización posterior de excepción SDK. No full gate/validator independiente ejecutado en aquella ronda.",
+      "2026-10-13 autorización posterior, implementer PASSING: solo cuatro settings app Debug/Release SDKiphonesimulator (allowedYES/identity-) agregados, generalNO/test/device intactos. Debug TEST BUILD SUCCEEDED y Release BUILD SUCCEEDED; codesign --verify --strict válidos ambos, Signatureadhoc/Teamnotset/SealedResourcesv2. Bundle Debug normal instalado y vídeo real simulator-signing-cold-launch.mp4/contactsheet/frame11 abiertos: LaunchScreen correcto/transición sin negro, sin refirma manual/demora. Focal actual4/4=2recursos+2UIarranque Passed,0fail/skips/expectedFailures en simulator-signing-focused.xcresult;189inputs públicos finales exactos. Consulta Releaseiphoneos signingAllowedNO/identityAppleDevelopmentdefault/sinteamprofile; no cuenta/provisioning futuros configurados. Portrait/Light/seal ambos bundles y Release sin puente privado verificados. Handoff/docs actualizados, gate completo pendiente exclusivamente validator independiente; passing NO accepted."
+    ],
+    "validator_evidence": [
+      "2026-10-14 validator independiente ACCEPT V3, docs/validations/app-launch-branding.md: único gateV3 completo exit0/TEST BUILD y ambas TEST EXECUTE SUCCEEDED,390/390Passed=296unit+92UI+2Photos,0failed/skipped/expectedFailures. TEST_WORKERS1 como mitigación autorizada, default5/suite/harness intactos; V1/V2FAILED preservados, causa profunda/estabilidad5clones no acreditadas. Bundles DerivedData/TestResults/20261014-000939-58441/{parallel,gallery}.xcresult;189inputs públicos exactos antes/después SHA2564688d1504b0064a5c80b464ada1a054c4253b8aea4a46ed6b7c2638dab69830f. Recursos/firmaSDKonly/visualreal/PortraitLight/grupos físicos/258localizations/arquitectura/seguridad/docs conformes. Parent corrobora exit/summaries390/manifests, persiste accepted sin nuevos tests. Cuenta/provisioning/devicefísico fuera scope; publicación commit/push/PRmain autorizada, sin merge."
+    ],
+    "notes": "Aceptada independientemente en V3: icono/LaunchScreen real/PortraitLight/grupos físicos; firma adhoc SOLO app iphonesimulator DebugRelease, bloqueos/rechazo previos históricos. Gate completo390Passed bajo mitigaciónworker1, default5 conservado sin garantía de estabilidad universal. Device mantiene firma desactivada hasta configurar cuenta/equipo/certificado/profile futuros; guía docs/testing-ui.md. Worktree feature/app-launch-branding/spec original intacta; commit/push/PRmain autorizados, sin merge ni APIreal."
+  },
+  {
     "id": "empty-collection",
     "area": "coleccion",
     "title": "Mostrar Mis plantas vacía",

@@ -1,5 +1,38 @@
 # Suite UI: cobertura y coste
 
+## Icono y LaunchScreen
+
+`app-launch-branding` no añade estado/temporizadores ni altera los tests de la app.
+XCTest de colección/fallback/relaunch verifica llegada a Mis plantas; no observa
+por sí solo el LaunchScreen del sistema, que termina antes de que la app esté lista.
+Inspección focal: AppIcon opaco1024, ambos Info.plist con `UILaunchStoryboardName`
+y `CFBundleIcons`, storyboard compilado y artwork en Assets.car, icono instalado
+en SpringBoard y vídeo de arranque frío del simulador estándar a texto normal.
+Extraer frames para inspección sin ralentizar producto; distinguir captura real
+de preview del storyboard si iOS muestra el launch demasiado brevemente.
+No borrar datos de usuario ni resetear simuladores para invalidar cachés.
+Comandos y resultados realmente ejecutados: `docs/handoffs/app-launch-branding.md`.
+
+`LaunchBrandingResourcesTests` (target unitario) comprueba plist de icono,
+storyboard, Portrait/Light y carga/layout de labels/artwork; attachment denominado
+preview explícitamente. No sustituye la captura del sistema. Con
+`CODE_SIGNING_ALLOWED=NO`, SplashBoard iOS26.2 rechazaba el nib Security-67056,
+aunque el storyboard cargase dentro de UIKit. Tras diagnóstico/rechazo histórico,
+usuario autoriza override ad hoc SOLO app/iphonesimulator Debug y Release.
+Build normal genera el sello, sin ejecutar codesign manual desde init.sh.
+Comprobar `codesign --verify --strict <app>` y firma ad hoc, además de observar
+el launch real; no atribuir vídeo firmado diagnóstico a una build nueva.
+
+### Firma futura de dispositivo
+
+Los overrides de identidad `"-"` y signing YES están condicionados a
+`iphonesimulator*`: no se aplican a un iPhone físico. Al incorporar cuenta Apple,
+habrá que habilitar firma para `iphoneos`, seleccionar el equipo y configurar
+firma automática o certificado/profile manual en Signing & Capabilities. Para
+tests en dispositivo, configurar también los targets de tests; no se prepara
+ahora una cuenta/perfil ficticio ni se almacena un certificado en el repositorio.
+Esa provisión no necesita cambiar la excepción ad hoc del simulador.
+
 `DeletePlantUITests` cubre pie tras leyenda/texto largo, alerta nativa/cancel/selección, cascada y relaunch sin reseed,
 B íntegra mediante verifier real de cuatro entidades/JPEG, última→vacío, rollback/retry/×/Cancelar/reconfirmar,
 busy/back/gesto y JPEG faltante/fallback inglés. Flags opt-in Debug Simulator `--delete-plant-fixture normal|failOnce|failAlways|busy`
