@@ -1,5 +1,99 @@
 import XCTest
 
+final class OneTurnQuestionUITests: PlantCareAIUITestCase {
+    private func launch(_ app: XCUIApplication, id: String, mode: String = "success", seed: Bool = true) {
+        app.launchArguments = ["--storage-test-id", id, "--consent-test-id", id, "--question-fixture", mode,
+            "--timeline-fixture", "mixed", "-AppleLanguages", "(es)"] + (seed ? ["--storage-seed"] : ["--storage-verify", "--photo-analysis-verify", "--discard-analysis-verify"])
+        app.launch(); XCTAssertTrue(app.buttons["plantCard-\(plantID(1))"].waitForExistence(timeout: 10))
+    }
+    private func open(_ app: XCUIApplication, index: Int = 1, fromCollection: Bool = true) {
+        if fromCollection { app.buttons["plantCard-\(plantID(index))"].tap() }
+        let action = app.buttons["detailQuestion-\(plantID(index))"]; XCTAssertTrue(action.waitForExistence(timeout: 5)); reveal(action, in: app); action.tap()
+        XCTAssertTrue(app.textViews["questionInput"].waitForExistence(timeout: 5)); XCTAssertFalse(app.buttons["questionSend"].isEnabled)
+        XCTAssertEqual(app.textViews["questionInput"].value as? String, "")
+    }
+    private func input(_ text: String, app: XCUIApplication) {
+        let field = app.textViews["questionInput"]
+        for _ in 0..<8 where !field.isHittable { app.swipeDown() }
+        field.tap()
+        let old = field.value as? String ?? ""
+        if !old.isEmpty {
+            field.tap(withNumberOfTaps: 3, numberOfTouches: 1)
+            let copy = app.descendants(matching: .any).matching(NSPredicate(format: "label == 'Copiar' OR label == 'Copy'")).firstMatch
+            XCTAssertTrue(copy.waitForExistence(timeout: 3))
+            field.typeText(XCUIKeyboardKey.delete.rawValue)
+            XCTAssertEqual(field.value as? String, "")
+        }
+        field.typeText(text); XCTAssertEqual(field.value as? String, text)
+        app.buttons["Listo"].tap()
+    }
+    private func send(_ app: XCUIApplication, accepting: Bool = false) {
+        let button = app.buttons["questionSend"]; reveal(button, in: app); button.tap()
+        if accepting {
+            let accept = app.buttons["acceptExternalAIConsent"]; XCTAssertTrue(accept.waitForExistence(timeout: 5)); reveal(accept, in: app); accept.tap()
+        }
+    }
+    private func close(_ app: XCUIApplication) {
+        app.buttons["questionClose"].tap(); XCTAssertTrue(app.textViews["questionInput"].waitForNonExistence(timeout: 5))
+    }
+    func testIndependentReplacementEditNoRequestExistingConsentBothPlantsAndRelaunchExactDisk() {
+        let app = XCUIApplication(), id = isolatedID(); launch(app, id: id); open(app)
+        capture("question-empty", app: app); input("Primera pregunta", app: app); send(app, accepting: true)
+        let answer = app.staticTexts["questionAnswer"]; XCTAssertTrue(answer.waitForExistence(timeout: 8)); XCTAssertTrue(answer.label.contains("Ubicación: Ventana"))
+        input("Segunda pregunta", app: app)
+        XCTAssertEqual(app.staticTexts["questionAnsweredPrompt"].label, "Primera pregunta"); XCTAssertTrue(answer.label.contains("Primera pregunta"))
+        send(app); XCTAssertTrue(answer.waitForExistence(timeout: 8)); XCTAssertTrue(answer.label.contains("Segunda pregunta")); XCTAssertFalse(answer.label.contains("Primera pregunta"))
+        XCTAssertFalse(app.buttons["acceptExternalAIConsent"].exists); capture("question-replaced-answer", app: app); close(app)
+        open(app, fromCollection: false); input("Tercera pregunta", app: app); send(app)
+        XCTAssertTrue(answer.waitForExistence(timeout: 8)); XCTAssertFalse(app.buttons["acceptExternalAIConsent"].exists); close(app)
+        back(app); open(app, index: 2); input("Planta B", app: app); send(app)
+        XCTAssertTrue(answer.waitForExistence(timeout: 8)); XCTAssertTrue(answer.label.contains("sin ubicación")); XCTAssertFalse(answer.label.contains("Ventana")); close(app)
+        app.terminate(); launch(app, id: id, seed: false); open(app)
+        XCTAssertFalse(app.staticTexts["questionAnswer"].exists); close(app)
+    }
+    func testRejectConsentCancelBusyAndReopenNoAutomaticRequest() {
+        let app = XCUIApplication(), id = isolatedID(); launch(app, id: id, mode: "slow"); open(app)
+        input("Pregunta conservada", app: app); send(app)
+        XCTAssertTrue(app.buttons["cancelExternalAIConsent"].waitForExistence(timeout: 5)); app.buttons["cancelExternalAIConsent"].tap()
+        XCTAssertTrue(app.staticTexts["questionError"].waitForExistence(timeout: 5)); XCTAssertEqual(app.textViews["questionInput"].value as? String, "Pregunta conservada")
+        send(app, accepting: true); XCTAssertTrue(app.buttons["questionCancelRequest"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.textViews["questionInput"].isEnabled); capture("question-busy", app: app)
+        app.buttons["questionCancelRequest"].tap(); XCTAssertTrue(app.textViews["questionInput"].isEnabled); XCTAssertFalse(app.staticTexts["questionAnswer"].exists)
+        close(app); open(app, fromCollection: false); XCTAssertFalse(app.staticTexts["questionAnswer"].exists); close(app)
+        app.terminate(); launch(app, id: id, seed: false); open(app); close(app)
+    }
+    func testOfflineExplicitRetryAndLongScrollableAnswer() {
+        let app = XCUIApplication(), id = isolatedID(); launch(app, id: id, mode: "retry"); open(app)
+        input("Consulta offline", app: app); send(app, accepting: true)
+        XCTAssertTrue(app.staticTexts["questionError"].waitForExistence(timeout: 8)); capture("question-network-error", app: app)
+        XCTAssertEqual(app.textViews["questionInput"].value as? String, "Consulta offline"); send(app)
+        XCTAssertTrue(app.staticTexts["questionAnswer"].waitForExistence(timeout: 8)); close(app)
+        app.terminate(); launch(app, id: id, mode: "long", seed: false); open(app); input("Texto largo", app: app); send(app)
+        let answer = app.staticTexts["questionAnswer"]; XCTAssertTrue(answer.waitForExistence(timeout: 8)); XCTAssertGreaterThan(answer.label.count, 3000)
+        let footer = app.staticTexts["questionDisclaimer"]
+        for _ in 0..<16 where !footer.isHittable { app.swipeUp() }
+        XCTAssertTrue(footer.isHittable); capture("question-long-answer-end", app: app); close(app)
+    }
+    func testMissingInitialJPEGSelectedPagerBusyCloseAndGestureReopenEmpty() {
+        let app = XCUIApplication(), id = isolatedID()
+        app.launchArguments = ["--storage-test-id", id, "--consent-test-id", id, "--question-fixture", "slow", "--timeline-fixture", "mixed", "--storage-seed", "--storage-photo-missing", "-AppleLanguages", "(es)"]
+        app.launch(); XCTAssertTrue(app.buttons["plantCard-\(plantID(1))"].waitForExistence(timeout: 10)); app.buttons["plantCard-\(plantID(1))"].tap()
+        let next = app.buttons["plantPhotoNext-\(plantID(1))"]; XCTAssertTrue(next.waitForExistence(timeout: 5)); next.tap()
+        let selected = app.staticTexts["plantPhotoDate-\(plantID(1))"].label
+        open(app, fromCollection: false); input("Sin imagen inicial", app: app); send(app, accepting: true)
+        XCTAssertTrue(app.buttons["questionCancelRequest"].waitForExistence(timeout: 5)); close(app)
+        XCTAssertEqual(app.staticTexts["plantPhotoDate-\(plantID(1))"].label, selected)
+        open(app, fromCollection: false); input("Otra consulta", app: app); send(app)
+        XCTAssertTrue(app.buttons["questionCancelRequest"].waitForExistence(timeout: 5))
+        let bar = app.navigationBars["Pregunta sobre tu planta"]
+        bar.coordinate(withNormalizedOffset: CGVector(dx: 0.85, dy: 0.5)).press(forDuration: 0.1,
+            thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.85, dy: 0.95)))
+        XCTAssertTrue(app.textViews["questionInput"].waitForNonExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["plantPhotoDate-\(plantID(1))"].label, selected)
+        open(app, fromCollection: false); XCTAssertFalse(app.staticTexts["questionAnswer"].exists); close(app)
+    }
+}
+
 // XCTest schedules classes independently. Shared helpers contain no test methods.
 class PlantCareAIUITestCase: XCTestCase {
     private var storageIDs: [String] = []
@@ -3270,7 +3364,22 @@ final class LocalizationUITests: PlantCareAIUITestCase {
         XCTAssertTrue(app.navigationBars["Detalle de planta"].waitForExistence(timeout: 10))
         assertDetail(1, app: app)
         let register = app.buttons["detailRegisterCare-\(plantID(1))"]
-        reveal(register, in: app); register.tap()
+        // assertDetail deliberately finishes at the disclaimer, below this action.
+        // Scroll back within content; swipeUp here moves farther away from care.
+        let detailBar = app.navigationBars["Detalle de planta"]
+        let before = register.frame
+        capture("localization-detail-before-care-navigation", app: app)
+        for _ in 0..<8 where !register.isHittable || register.frame.midY <= detailBar.frame.maxY {
+            app.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.4))
+                .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.75)))
+        }
+        let geometry = XCTAttachment(string: "Care before: \(before); after: \(register.frame); navigation: \(detailBar.frame); viewport: \(app.frame)")
+        geometry.name = "localization-care-navigation-frames"; geometry.lifetime = .keepAlways; add(geometry)
+        XCTAssertTrue(register.isHittable)
+        XCTAssertGreaterThan(register.frame.midY, detailBar.frame.maxY)
+        XCTAssertLessThan(register.frame.midY, app.frame.maxY - 34)
+        capture("localization-care-visible-center", app: app)
+        register.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
         XCTAssertTrue(app.navigationBars["Registrar cuidado"].waitForExistence(timeout: 5))
         for (kind, label) in [("watering", "Riego"), ("fertilizing", "Abonado"), ("pruning", "Poda"), ("repotting", "Trasplante"), ("other", "Otro")] {
             XCTAssertEqual(app.buttons["careKind-\(kind)"].label, label)

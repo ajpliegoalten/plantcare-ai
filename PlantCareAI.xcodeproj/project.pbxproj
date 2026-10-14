@@ -7,6 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+        F01700000000000000000011 = {isa = PBXBuildFile; fileRef = F01700000000000000000001; };
+        F01700000000000000000012 = {isa = PBXBuildFile; fileRef = F01700000000000000000002; };
+        F01700000000000000000013 = {isa = PBXBuildFile; fileRef = F01700000000000000000003; };
+        F01700000000000000000014 = {isa = PBXBuildFile; fileRef = F01700000000000000000004; };
+        F01700000000000000000015 = {isa = PBXBuildFile; fileRef = F01700000000000000000005; };
+        F01700000000000000000016 = {isa = PBXBuildFile; fileRef = F01700000000000000000006; };
+        F01700000000000000000017 = {isa = PBXBuildFile; fileRef = F01700000000000000000007; };
+        F01700000000000000000018 = {isa = PBXBuildFile; fileRef = F01700000000000000000008; };
+        F01700000000000000000031 = {isa = PBXBuildFile; fileRef = F01700000000000000000021; };
+        F01700000000000000000032 = {isa = PBXBuildFile; fileRef = F01700000000000000000022; };
+        F01700000000000000000033 = {isa = PBXBuildFile; fileRef = F01700000000000000000023; };
+        F01700000000000000000034 = {isa = PBXBuildFile; fileRef = F01700000000000000000024; };
 		AA0000000000000000000006 /* PlantCareAIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000001 /* PlantCareAIApp.swift */; };
 		AA0000000000000000000007 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000002 /* ContentView.swift */; };
 		AA0000000000000000000008 /* PlantCareAIUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000003 /* PlantCareAIUITests.swift */; };
@@ -180,6 +192,18 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+        F01700000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Domain/PlantQuestion.swift; sourceTree = "<group>"; };
+        F01700000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Domain/BuildPlantQuestionContext.swift; sourceTree = "<group>"; };
+        F01700000000000000000003 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Domain/PlantQuestionRepository.swift; sourceTree = "<group>"; };
+        F01700000000000000000004 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Domain/AskPlantQuestionUseCase.swift; sourceTree = "<group>"; };
+        F01700000000000000000005 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Data/OpenAICompatiblePlantQuestionRepository.swift; sourceTree = "<group>"; };
+        F01700000000000000000006 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Data/PlantQuestionTestFixture.swift; sourceTree = "<group>"; };
+        F01700000000000000000007 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Presentation/PlantQuestionViewModel.swift; sourceTree = "<group>"; };
+        F01700000000000000000008 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Presentation/PlantQuestionView.swift; sourceTree = "<group>"; };
+        F01700000000000000000021 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildPlantQuestionContextTests.swift; sourceTree = "<group>"; };
+        F01700000000000000000022 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskPlantQuestionTests.swift; sourceTree = "<group>"; };
+        F01700000000000000000023 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantQuestionViewModelTests.swift; sourceTree = "<group>"; };
+        F01700000000000000000024 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAICompatiblePlantQuestionRepositoryTests.swift; sourceTree = "<group>"; };
 		AA0000000000000000000001 /* PlantCareAIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantCareAIApp.swift; sourceTree = "<group>"; };
 		AA0000000000000000000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		AA0000000000000000000003 /* PlantCareAIUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantCareAIUITests.swift; sourceTree = "<group>"; };
@@ -364,6 +388,12 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+        F01700000000000000000040 = {
+            isa = PBXGroup;
+            children = (F01700000000000000000001, F01700000000000000000002, F01700000000000000000003, F01700000000000000000004, F01700000000000000000005, F01700000000000000000006, F01700000000000000000007, F01700000000000000000008);
+            path = Features/OneTurnQuestion;
+            sourceTree = "<group>";
+        };
 		0036DA3F4E043DD60096306F /* Data */ = {
 			isa = PBXGroup;
 			children = (
@@ -634,6 +664,7 @@
 			isa = PBXGroup;
 			children = (
 				AA0000000000000000000080 /* Features */,
+                F01700000000000000000040 /* OneTurnQuestion */,
 				CB0000000000000000000041 /* Shared */,
 				AA0000000000000000000001 /* PlantCareAIApp.swift */,
 				AA0000000000000000000002 /* ContentView.swift */,
@@ -818,6 +849,10 @@
 			isa = PBXGroup;
 			children = (
 				DP1500000000000000000021 /* DeletePlantTests.swift */,
+                F01700000000000000000021,
+                F01700000000000000000022,
+                F01700000000000000000023,
+                F01700000000000000000024,
 				AB1600000000000000000004 /* LaunchBrandingResourcesTests.swift */,
 				FE0000000000000000000003 /* ConfirmManualSpeciesTests.swift */,
 				FE0000000000000000000004 /* ManualSpeciesViewModelTests.swift */,
@@ -1195,6 +1230,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+                F01700000000000000000011,
+                F01700000000000000000012,
+                F01700000000000000000013,
+                F01700000000000000000014,
+                F01700000000000000000015,
+                F01700000000000000000016,
+                F01700000000000000000017,
+                F01700000000000000000018,
 				DP1500000000000000000011 /* PlantDeletingRepository.swift in Sources */,
 				DP1500000000000000000012 /* DeletePlantUseCase.swift in Sources */,
 				DP1500000000000000000013 /* DeletePlantTestFixture.swift in Sources */,
@@ -1317,6 +1360,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+                F01700000000000000000031,
+                F01700000000000000000032,
+                F01700000000000000000033,
+                F01700000000000000000034,
 				AB1600000000000000000005 /* LaunchBrandingResourcesTests.swift in Sources */,
 				DP1500000000000000000031 /* DeletePlantTests.swift in Sources */,
 				AB1400000000000000000031 /* KeepPlantPhotoAnalysisTests.swift in Sources */,

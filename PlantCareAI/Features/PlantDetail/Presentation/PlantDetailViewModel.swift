@@ -27,6 +27,16 @@ final class PlantDetailViewModel: ObservableObject {
     var makePhotoPager: ((Plant) -> PlantPhotoPagerViewModel)?
     private var photoSession: UUID?
     var makeAnalysis: ((UUID, PlantPhotoIdentity) -> PlantPhotoAnalysisViewModel?)?
+    var makeQuestion: ((Plant, UIImage?) -> PlantQuestionViewModel?)?
+    private weak var activeQuestion: PlantQuestionViewModel?
+
+    func questionEditor() -> PlantQuestionViewModel? {
+        guard canAct, !hasPresentedEditor, case .loaded(let plant) = state,
+              activeQuestion == nil || activeQuestion?.closed == true else { return nil }
+        let modal = makeQuestion?(plant, formPhoto)
+        activeQuestion = modal
+        return modal
+    }
     enum DeletionState { case idle, confirming, deleting, failed, deleted }
     @Published private(set) var deletionState: DeletionState = .idle
     @Published var showingDeletionConfirmation = false
@@ -79,6 +89,7 @@ final class PlantDetailViewModel: ObservableObject {
     func invalidateDeletedPlant() {
         guard deletionState != .deleted else { return }
         deletionState = .deleted; deletionTarget = nil; deletionError = nil
+        activeQuestion?.close()
         showingDeletionConfirmation = false
         metadataGeneration += 1; photoGeneration += 1; metadataPending = false
         careSession = nil; photoSession = nil; careConfirmation = nil; photoConfirmation = nil
@@ -223,6 +234,7 @@ final class PlantDetailViewModel: ObservableObject {
     func cancelLoading(preservingPhotoSelection: Bool = false) {
         guard deletionState != .deleting, deletionState != .deleted else { return }
         abandonDeletion()
+        if !preservingPhotoSelection { activeQuestion?.close() }
         photoPager?.disappear(preservingSelection: preservingPhotoSelection)
         photoConfirmation = nil
         photoSession = nil

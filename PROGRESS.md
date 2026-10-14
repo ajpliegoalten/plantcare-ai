@@ -1,5 +1,26 @@
 # Progreso de PlantCare AI
 
+## 2026-10-14 — one-turn-question: ACCEPT independiente, commit local autorizado
+
+- Validator `openai/gpt-6.1-sol` emite **accept** tras reparación R1; apéndice en `docs/validations/one-turn-question.md`, reporte/fallo original preservados. Único nuevo gate `caffeinate -dius ./init.sh` exit0, build y ambas fases Passed, **414/414 =316 unit +96 UI paralelas +2 PhotosPicker seriales**, cero failed/skipped/expectedFailures.
+- Bundles `DerivedData/TestResults/20261014-115236-11620/{parallel,gallery}.xcresult`;203 inputs finales exactos antes/después SHA256`8fd1a5f5f683f227d83cc17ee663a9cc53798f228d8a4931e743fd20c34bd85f`. Orquestador corrobora exit0, summaries412+2 y spec SHA256`e2d724163e0875effed312dc55f9a6823c908b2453c3a2ce31e6f0a5e137f75a`; sin pruebas duplicadas por rol/estado/docs.
+- Persistido accepted por aceptación independiente, no autoverificación. Preguntas sucesivas independientes/mismo campo/respuesta sustituida, sin chat/persistencia/fotos enviadas; consentimiento vigente reutilizado sin aviso nuevo. Arquitectura/seguridad/docs/visual y R1 conformes, sin debilitar assertions. API real no autorizada ni acreditada; aceptación explícitamente limitada a comportamiento offline instrumental.
+- Usuario autoriza commit LOCAL de feature, incluida spec byte-intacta/implementación/tests/docs/informe; rama/worktree originales desde main6ea7256, issue52. Sin push/PR/merge ni nueva feature. Comando/manual en `docs/testing-one-turn-question.md`; entrega Git se registra por hash en respuesta final.
+
+## 2026-10-14 — one-turn-question: decisiones del usuario incorporadas
+
+- Confirmados acceso después de Ver historial/antes de ficha, cabecera foto-nombre-especie con hoja fallback y contexto propio textual sin fotos.
+- Corregido P3: mismo campo admite preguntas sucesivas independientes y cada respuesta sustituye a la anterior; ninguna consulta previa se envía ni se guarda. No es chat multitur y no exige cerrar/reabrir para preguntar otra vez.
+- Corregido P4: reutilizar aceptación de IA vigente, sin v6/notice-6 ni nuevo aviso por esta feature. Sin aceptación o cambio de destino/modelo siguen las reglas existentes; haber rechazado un aviso no autoriza envío.
+- Spec/nota de feature actualizadas únicamente. Límites técnicos y exigencia de prueba API real siguen propuestas/pendientes, sin autorización de envío real. Estado not_started, sin implementación/pruebas/validación ejecutable ni commit/push/PR/merge. Siguiente: revisión documental o petición explícita del siguiente rol.
+
+## 2026-10-14 — one-turn-question: planificación, revisión pendiente
+
+- Feature-flow un solo paso planner `openai/gpt-6.1-sol`: borrador `docs/specs/one-turn-question.md`, rama `feature/one-turn-question`, worktree exclusivo `plantcare-ai-worktrees/one-turn-question`, base main `6ea72560c393367bc2135216d879e99c8fe57726`. Dependencias keep-analysis/discard-analysis/recover-ai-failure `accepted` comprobadas en base local/remota.
+- Acceso desde detalle y modal según Editar/Registrar cuidado y DESIGN: identidad, pregunta multilínea, petición y respuesta en misma pantalla, consulta efímera sin chat/persistencia. Pendientes P1–P4: posición/foto-hoja, contexto actual/límites, cancelación/reintento/un turno, consentimiento v6/contrato/evidencia real.
+- Planner consultó fuentes/docs/skills y PNG de marca no pertinente para modal; sin adjuntos de modal visibles. Edición del planner denegada; orquestador persiste su contrato. Solo spec y notas documentales; status `not_started`, sin evidencia de pruebas añadida.
+- Sin implementación/build/tests/init/simulador/API, validación ejecutable, stage/commit/push/PR/merge ni escrituras GitHub. Siguiente exclusivamente revisión del usuario; no iniciar otro rol.
+
 ## 2026-10-14 — recover-ai-failure: publicación entregada
 
 - Commit `afd1b02` (`docs: complete recover-ai-failure`), push normal de `feature/recover-ai-failure` con upstream a origin y PR **#51** hacia `main`: https://github.com/ajpliegoalten/plantcare-ai/pull/51.
@@ -1648,3 +1669,73 @@ Usuario aprueba INTEGRALMENTE `docs/specs/delete-care-event.md` SHA256 `f1c2930c
 -179inputs públicos exactos antes/después manifestbde9f9c34bbb0ff31efbf297b9ffd66125a209211294bfd6ff4dfdeab8150f0b; override público únicoSWIFT_EMIT_LOC_STRINGS=NO efectivo/initintacto/catalog sin drift.104focales97unit7UI IDporID originales corroborados, cuatro PNGfinales realmente abiertos y Release2 existente audit nm/strings/plist no rebuild, históricosFAILED intactos. Auditvalidatorruta inicial errónea FileNotFound corregida por comando original sin pruebas/producto nuevo. Staticdiff/plutil/JSONunique245previas13nuevas/PBXrefsparentphase/Domainpuro pasan.
 - Preflight sincompetidores/rootBooted selectorinit/log/ambosbundles00BBB7EC-8DF7-400C-A08A-9D3C8818D886 iPhone17ProiOS26.2/23C54 Xcode26.2/17C52 macOS26.5.1/25F80 lightconsultada/normaldefaulthandoff(default sin mediciónAX)/5workerscapturas0. ProMaxajeno/settings/matrices intactos; configsoloexistenciaignore/noprivatecontents/API. Sin procesosxcodebuild/xctest/XCTRunneralcierre ni failuremarkers actuales, no garantíauniversal. Validator solo informe/PROGRESS/evidenciaignorados, no producto/tests/harness/spec/feature_list/accepted/stage/commit/GitHub/subagentes.
 - Orquestador siguiente accepted+commit LOCAL autorizado incluyendo spec íntegra/informe, sin pushPRmerge ni gate duplicado por docsstatusrol. Smokepropuesto no nuevoagentmanual; cleanupbest-effort/O(n)/singlewriter/borradoseguroremotobackupshardware límites explícitos, matrices ampliadas fuera habitual/noejecutadas/noblockers automáticos.
+# one-turn-question — aprobación posterior (2026-10-14)
+
+Usuario aprueba íntegramente `docs/specs/one-turn-question.md`, SHA256 `e2d724163e0875effed312dc55f9a6823c908b2453c3a2ce31e6f0a5e137f75a`, byte-inmutable. Esta aprobación sucede sus frases históricas de borrador/no autorización. Implementer autorizado para implementación y verificación focal offline; sin API real, staging, commit ni gate completo. Validator independiente coordina el gate final. Consultas sucesivas independientes, mismo campo editable, respuesta sustituida, consentimiento vigente sin v6/notice-6.
+
+## Implementer — passing focal (no accepted)
+
+### R1 tras validator REVISE — reparación focal lista para gate nuevo (2026-10-14)
+
+Gate validator original FAILED65 411/412Passed, Localization fallida tras assertDetail; Photos serial NO
+ejecutada. Informe `docs/validations/one-turn-question.md` SHA256eeeac3dca52d520bb4955cfb0a446a1e2390555b413c0d6d0e8df6a43a2f2f52
+y bundle20261014-111954-3324/parallel.xcresult byte-preservados. Hipótesis confirmada con actividades/3frames de
+grabación original: cuidado bajo barra/encima viewport,8swipeUp alejan. Snapshot original solo root/vacío,
+no frame numérico inventado; focal confirma before(36,47,330,52),center73<barBottom116; aftery503.6667 visible.
+SOLO caller Localization en archivo UI cambia: reverse contentdrag bounded8/hittable+visiblecenter/tapcenter.
+Helpercompartido/assertDetail/6camposfallback/5kinds/Save disabled/cancel intactos;202otrosinputs exactos,
+reconstruir bloque anterior reproduce SHA del archivo UI original. Sin producto/spec/PBX/catálogo/config cambios.
+
+BuildDebugR1 exit0 +1/1 selector fallido Passed exit0 cero failures/skips, único test nuevo focal (no init/retries).
+Evidencia `DerivedData/evidence/one-turn-question/repair-R1/{build,focused}.{log,exit}`,focused.xcresult,
+commands/summary/manifest,5PNG realmente abiertos (3originales+2focales) y geometría TXT.203inputsR1 SHA256
+8fd1a5f5f683f227d83cc17ee663a9cc53798f228d8a4931e743fd20c34bd85f exactos tras test; spec e2d724…intacta.
+Mismo root00BBB7EC normal/Light/serial/caffeinate sincompetidores; preflightShutdown→boot dirigido solo root,
+sinreset/otros simuladores/API/secreto/staging/commit/publicación/accepted. Release/producto unchanged, no build
+Release nuevo necesario ni ejecutado. Handoff actualizado mapa impacto/caller/comandos/fallo preservado.
+
+**Siguiente exclusivo:** validator nuevo gate completo una vez por cambio UIinput, paralelo+Photos serial
+ambos requeridos. Offline instrumental limitado admitido por validator tras R1+gate, sin otros blockers;
+no inferir autorización API real ni aceptación actual. passing focal reparado NO accepted.
+
+Módulo OneTurnQuestion Clean/MVVM read-only: contexto UUID actual/20cuidados90días/5definitivos/nota500,
+pregunta2000/JSON16KiB/answer6000, sin JPEG/nombre personalizado/IDs generados/consultas anteriores/writers.
+Cada intención relee/revalida Plant y atraviesa autorización vigente; mismo campo editable/reemplazo/pregunta
+origen, cancelación/terminal/generaciones/lease drenado, reintento explícito, header snapshot/pager preservado.
+App/List/Detail factory y sheet, notice operación opt-in sin copy previo/versionado cambiado; ADR016 y docs.
+
+55 IDs distintos finales Passed=49unit/integración+6UI,20unit+4UI nuevos/31regresiones. Ledger ID→bundle
+`DerivedData/evidence/one-turn-question/selected-final-results.json` (unit2 43,focal1 2,focal2 6,focal3 4);
+comandos exactos/exits/logs/xcresults/mapa impacto/reuso/fallos/visuales en `docs/handoffs/one-turn-question.md`
+y commands.json. Disco real cuatro entidades/JPEG/definitivos de ambas plantas exactos y reopen; UI nueva
+sucesivo/rechazo/cancel/red/retry/relaunch/JPEG faltante/pager/cierre/gesto/longfooter +header/consent análisis.
+Fallos preservados: build1 escaping closuretest; unit1 FAILED65 cero funcionales SpringBoard Busy/rootShutdown,
+boot dirigido solo00BBB7EC sinreset; unit2FAILED43/44 fixtureemoji agota presupuesto; focal1FAILED3/4 helper
+cursor dejaba pregunta previa. Correcciones test-only focales fuertes sin retries; selectorUI inexistente focal2
+no contado, clasecorrecta focal3passed. No fuenteproducto reparada especulativamente ni assertions debilitadas.
+
+Debug2–6/Release1 builds exit0; audit Release fixture/flag nuevos+5keys Debug ausentes. Static PBX443isaIDs
+únicos/plutil/JSONunique/29keys nuevas anteriores exactas/Domain sinframeworks/writersJPEG/diff pasan.
+203inputs finales SHA25662220cdd0338ce3e2773262d8193265823155f51691912909f0166e5b1bdf07c exactos trasRelease;
+spec aprobada intacta.8PNG efectivamente abiertos, longfooter real final (no fingir fin de captura parcial).
+Xcode26.2/17C52 macOS26.5.1/25F80 iPhone17Pro iOS26.2/23C54 root00BBB7EC normal/Light serial/caffeinate,
+sincompetidores/otros simuladores tocados/procesos propios pendientes. Config solo plantilla pública vacía propia
+si ausente, sin secretos/APIreal/matrices/staging/commit/publicación. Calidad remota no acreditada.
+
+**Siguiente exclusivo:** validator independiente revisa y ejecuta único `caffeinate -dius ./init.sh` final
+ambas fases. Gate NO ejecutado por implementer, passing NO accepted. Parent decide aceptación instrumental
+offline vs futura prueba real autorizada y persiste accepted solo tras verdict independiente.
+
+## 2026-10-14 — one-turn-question validator independiente: REVISE
+
+- Informe `docs/validations/one-turn-question.md`; revisión spec/capas/security/docs y24tests nuevos sin otro hallazgo bloqueante. Spec SHA256e2d72416… byte-intacta. Offline instrumental adecuado como alcance limitado tras reparar R1/gate; API real no autorizada ni certificada, no blocker adicional ni autorización implícita.
+- ÚNICO `caffeinate -dius ./init.sh` sin override/default5/capturas0: build Passed, paralela FAILED exit65 **411/412=316unit+95UI Passed,1UI Failed**, zero skips/expectedFailures. `LocalizationUITests/testEnglishPreferenceFallsBackToSpanishInsteadOfKeys()` falla reveal de Registrar cuidado tras assertDetail/pie;8swipeUp no alcanzan acción. Hipótesis concreta: target arriba del viewport y helper unidireccional se aleja; no defecto de traducción/infraestructura confirmado. Photos serial NO ejecutada por set-e; sin aceptación parcial. Bundle `DerivedData/TestResults/20261014-111954-3324/parallel.xcresult`; evidencia/log/exit/summary/tree/activities `DerivedData/evidence/one-turn-question/validator/`,11:19:53–11:40:22+0200.
+- 203inputs exactos antes/después manifesto62220cdd…;55IDs focales originales corroborados y todos cubiertos Passed en gate,24nuevos20unit+4UI Passed. Cuatro PNG realmente abiertos reusados vacío/reemplazo/busy/longfooter; Release existente nm/strings/plist sin fixtureflag/5keys, sin rebuild/focalextra/segundogate/retries. Static diff/plutil/JSON pasan. Xcode26.2/17C52 macOS26.5.1/25F80 root00BBB7EC iPhone17ProiOS26.2/23C54 Lightconsultada/normalhandoff sinsettings/matrices/competidores/procesos pendientes/API/privatecontents.
+- R1High repairbrief caller/helper dirección/frame scroll conservando todas assertions, primero selector fallido y callers afectados si helper compartido. Validator no repara producto/tests; parent reenviar implementer. Cambio test ejecutable exige nuevo gate final ambasfases tras focal reparado, originalFAILED preservado. Estado passing intacto; no accepted/staging/commit/push/PR/merge.
+
+## 2026-10-14 — one-turn-question validator R1 definitivo: ACCEPT
+
+- Apéndice `docs/validations/one-turn-question.md` verdict accept, prefijo revise/fallo original intacto; R1 cerrado. Solo caller Localization navegación reversa/centro visible cambia, helpers/assertions/producto/spec intactos. Corroborado focused original1/1Passed exit0 sin rerun; frames center73 bajo navbar116→529.667 dentro874, tresPNG existentes realmente abiertos (originalframe30/before/after), boxPreguntar visualmente despuéshistorial/antesficha.
+- ÚNICO gate NUEVO tras cambio ejecutabletest justificado `caffeinate -dius ./init.sh` sinoverride/default5/capturas0 **exit0 BUILD y ambas TEST EXECUTE SUCCEEDED,414/414=316unit+96UIparallel+2Photosserial**, cero failures/skips/expectedFailures.412IDs únicos+2disjuntos; Localization/55focalIDs/24nuevos cubiertos Passed. Bundles `DerivedData/TestResults/20261014-115236-11620/{parallel,gallery}.xcresult`; evidencia `DerivedData/evidence/one-turn-question/validator-R1/`,11:52:35–12:14:37+0200, notificación original/eventos vnode sinpolling/retries/focalextra.
+-203inputs públicos exactosantes/después manifestoSHA2568fd1a5f5f683f227d83cc17ee663a9cc53798f228d8a4931e743fd20c34bd85f; soloUItestdelta frente62220cdd…; specSHA256e2d724163e0875effed312dc55f9a6823c908b2453c3a2ce31e6f0a5e137f75a byteintacta. Staticdiff/PBX pasan; Release previo audit aplicableproducto intacto/no rebuild. MismoXcode26.2/17C52 macOS26.5.1/25F80 root00BBB7EC iPhone17ProiOS26.2/23C54 Lightconsultada/normalhandoff sinsettings/matrices/API/privatecontents/competidores/procesosalcierre.
+- Sin findings bloqueantes/capas/security/docs/harness. Aceptación explícitamente offline instrumental limitada; no certifica proveedor remoto/calidad/retención/auth/coste ni autorizaAPIreal. Parent persistir accepted+commitLOCAL autorizado, sinpushPRmerge ni nuevo gate por docs/statusrol. Validator no producto/testfix/specedit/feature_list/status/stage/commit/publicación; originalgateFAILED y antecedentes conservados.

@@ -137,6 +137,41 @@ struct PlantCareAIApp: App {
         }
         #endif
         let analysisGate = PlantPhotoAnalysisOperationGate()
+        let questionGate = PlantQuestionOperationGate()
+        #if DEBUG && targetEnvironment(simulator)
+        var questionFixture: PlantQuestionTestFixture?
+        if let position = arguments.firstIndex(of: "--question-fixture"), arguments.indices.contains(position + 1),
+           let storagePosition = arguments.firstIndex(of: "--storage-test-id"), arguments.indices.contains(storagePosition + 1), UUID(uuidString: arguments[storagePosition + 1]) != nil,
+           let consentPosition = arguments.firstIndex(of: "--consent-test-id"), arguments.indices.contains(consentPosition + 1), UUID(uuidString: arguments[consentPosition + 1]) != nil {
+            questionFixture = PlantQuestionTestFixture(mode: arguments[position + 1])
+        }
+        #endif
+        viewModel.makeQuestion = { plant, image in
+            let original = IdentificationAPIConfiguration.localDemo()
+            var configuration = original
+            var provider: (any PlantQuestionRepository)? = configuration.map { snapshot in
+                OpenAICompatiblePlantQuestionRepository(configuration: snapshot, configurationIsCurrent: { snapshot == IdentificationAPIConfiguration.localDemo() })
+            }
+            #if DEBUG && targetEnvironment(simulator)
+            if let fixture = questionFixture {
+                configuration = try! IdentificationAPIConfiguration(baseURL: "https://question.invalid/v1", model: "question-fixture", key: nil)
+                provider = fixture
+            }
+            #endif
+            let useCase = provider.map { AskPlantQuestion(detail: LoadPlantDetail(repository: repository), care: repository, analyses: repository, repository: $0, gate: questionGate) }
+            let modal = PlantQuestionViewModel(plant: plant, image: image, ask: useCase,
+                authorize: .init(repository: consentRepository, scope: configuration?.scope ?? ExternalAIConsent(recipient: "unconfigured-question", noticeVersion: 5)),
+                destination: configuration?.notice, configurationIsCurrent: {
+                    #if DEBUG && targetEnvironment(simulator)
+                    if questionFixture != nil { return true }
+                    #endif
+                    return original == IdentificationAPIConfiguration.localDemo()
+                })
+            #if DEBUG && targetEnvironment(simulator)
+            if let fixture = questionFixture { modal.invocationCount = { fixture.invocations } }
+            #endif
+            return modal
+        }
         let analysisPresentation = PlantPhotoAnalysisPresentationGate()
         #if DEBUG && targetEnvironment(simulator)
         var analysisFixture: PlantPhotoAnalysisTestFixture?

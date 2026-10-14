@@ -210,3 +210,17 @@ Refinamiento de layout en delete-care-event: VStack construye solo vistas ligera
 - `PlantCareAI/Assets.xcassets`: ocho colores semánticos sRGB de `DESIGN.md`, sin imágenes. Las fotos de ejemplares proceden del repositorio local por UUID; la preview efímera muestra únicamente la selección/captura del usuario.
 - `PlantCareAI/Localizable.xcstrings`: solo claves usadas por la pantalla actual, textos españoles con fallback español; las claves obsoletas de bootstrap se retiraron.
 - `./init.sh` elige un modelo/runtime de iPhone Simulator, compila una vez (`build-for-testing`) y ejecuta unitarias/UI con 5 workers aislados de XCTest; el PhotosPicker real corre aparte, serial, en el simulador sembrado. Ambas fases reutilizan los productos (`test-without-building`) y generan sus propios xcresult; el gate solo pasa si ambas pasan. No sustituye a la inspección visual focalizada. Cobertura/consolidaciones en `docs/testing-ui.md`. Artefactos locales en `DerivedData/` ignorado. No hay cuentas ni backend; la API OpenAI-compatible usa base HTTPS/modelo configurables y clave opcional, únicamente habilitable con configuración local Debug privada y consentimiento v5 del destino/modelo reales. Las menciones v4 en los apartados anteriores describen el alcance histórico de identificación/cuidados, sucedido por ADR013 sin ampliar sus payloads.
+# OneTurnQuestion (ADR016, 2026-10-14)
+
+`Features/OneTurnQuestion`: Presentation (`PlantQuestionView/PlantQuestionViewModel`) → Domain
+(`AskPlantQuestionUseCase`, `BuildPlantQuestionContext`, repository/answer/prepared contracts) → Data
+(`OpenAICompatiblePlantQuestionRepository`). App compone el mismo actor local como Plant/Care/SavedAnalysis
+reader obligatorio; no writer, IO de imágenes, migración ni cache de consultas. List transmite factory
+`(Plant, UIImage?)`; Detail guarda solo referencia débil al modal y cierra al terminal/abandono.
+El header usa snapshot inicial, incluso con JPEG fallido; apertura no hace IO ni HTTP.
+El contexto actual usa tipos textuales Foundation de AnalyzeCurrentPhoto, no su cutoff/foto/use case.
+Cada intención relee contexto por UUID y revalida Plant antes del POST y de publicar. Lease por UUID/requestID
+se mantiene hasta drenar provider cancelado; generación Presentation rechaza continuaciones tardías.
+Todas las solicitudes cruzan AuthorizeExternalAIOperation con el scope canónico vigente de la misma
+configuración; no nuevo versionado ni invalidación de aceptaciones. Notice existente añade únicamente
+copy de operación opt-in para preguntas, sin alterar callers anteriores.

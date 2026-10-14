@@ -7,6 +7,7 @@ struct PlantDetailView: View {
     @State private var careEditor: RegisterCareViewModel?
     @State private var photoEditor: AddPlantPhotoViewModel?
     @State private var analysisEditor: PlantPhotoAnalysisViewModel?
+    @State private var questionEditor: PlantQuestionViewModel?
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     private let isCoveredByHistory: () -> Bool
 
@@ -44,6 +45,18 @@ struct PlantDetailView: View {
                     }
                     careRegistration
                     history(plant)
+                    if viewModel.makeQuestion != nil {
+                        Button { questionEditor = viewModel.questionEditor() } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: "questionmark.bubble").foregroundStyle(Color("Primary"))
+                                    .frame(width: 44, height: 44).background(Color("SurfaceMuted"), in: RoundedRectangle(cornerRadius: 12)).accessibilityHidden(true)
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("question.open").font(.headline)
+                                    Text("question.subtitle").font(.subheadline).foregroundStyle(Color("TextSecondary"))
+                                }.frame(maxWidth: .infinity, alignment: .leading)
+                            }.padding(16).frame(maxWidth: .infinity, minHeight: 44).background(Color("Surface"), in: RoundedRectangle(cornerRadius: 16))
+                        }.buttonStyle(.plain).accessibilityIdentifier("detailQuestion-\(plant.id)")
+                    }
                     careSheet(plant.careSheet)
                     if viewModel.deletePlant != nil {
                         Button(role: .destructive) { viewModel.requestDeletion() } label: {
@@ -99,7 +112,8 @@ struct PlantDetailView: View {
         .sheet(item: $careEditor) { RegisterCareView(viewModel: $0) }
         .sheet(item: $photoEditor) { AddPlantPhotoView(viewModel: $0, headerPhoto: viewModel.formPhoto, onFinished: { photoEditor = nil }) }
         .sheet(item: $analysisEditor, onDismiss: { analysisEditor?.close() }) { PlantPhotoAnalysisView(viewModel: $0) }
-        .onChange(of: editor != nil || careEditor != nil || photoEditor != nil || analysisEditor != nil) { _, presented in
+        .sheet(item: $questionEditor) { PlantQuestionView(viewModel: $0) }
+        .onChange(of: editor != nil || careEditor != nil || photoEditor != nil || analysisEditor != nil || questionEditor != nil) { _, presented in
             viewModel.hasPresentedEditor = presented
         }
         .onChange(of: viewModel.photoConfirmation) { _, confirmed in
@@ -109,7 +123,7 @@ struct PlantDetailView: View {
         .onDisappear {
             // A presented sheet (or its camera cover) is not navigation away
             // from this plant: keep its session and confirmed page alive.
-            if photoEditor == nil && editor == nil && careEditor == nil && analysisEditor == nil {
+            if photoEditor == nil && editor == nil && careEditor == nil && analysisEditor == nil && questionEditor == nil {
                 viewModel.cancelLoading(preservingPhotoSelection: isCoveredByHistory())
             }
         }
