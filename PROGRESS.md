@@ -1,5 +1,10 @@
 # Progreso de PlantCare AI
 
+## 2026-10-14 — recover-ai-failure: publicación entregada
+
+- Commit `afd1b02` (`docs: complete recover-ai-failure`), push normal de `feature/recover-ai-failure` con upstream a origin y PR **#51** hacia `main`: https://github.com/ajpliegoalten/plantcare-ai/pull/51.
+- Spec/informe/aceptación documental entregados; sin cambios de producto/tests, ejecuciones iOS, merge ni auto-merge. Esta anotación sucede publicación pendiente de la sección anterior, sin alterar evidencia.
+
 ## 2026-10-14 — recover-ai-failure: ACCEPT documental, publicación autorizada
 
 - Validator independiente `openai/gpt-6.1-sol` emite **accept**, `docs/validations/recover-ai-failure.md`: C1–C6 respaldados por comportamiento/tests y aceptaciones previas, cobertura offline combinada aprobada por usuario. Sin laguna de producto demostrada, implementación ni pruebas adicionales.
