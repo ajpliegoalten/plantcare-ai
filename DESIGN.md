@@ -148,3 +148,13 @@ El soporte de accesibilidad y diseño adaptable descrito aquí se conserva. Su v
 Botones primarios claramente distinguibles, tarjetas suaves, fotografías con recorte predecible y cronología legible. Estados vacío, sin historial, analizando, baja confianza, error recuperable y sin conexión deben explicar la siguiente acción. Evitar que el color sea la única señal de confianza o estado; dar texto claro, contraste comprobado (también para texto sobre verde), soporte para Dynamic Type y VoiceOver, objetivos táctiles de al menos 44 × 44 pt y permisos de cámara/galería comprensibles. Las microetiquetas de 11 px y los botones de 36 px del HTML no son objetivos de accesibilidad. Confirmar eliminaciones y avisar del envío externo de datos antes del primer uso de IA.
 
 Evitar degradados llamativos, estética futurista de IA, exceso de verde, aspecto infantil, dashboards empresariales, densidad excesiva o apariencia de web adaptada. No usar porcentajes de confianza sin base calibrada ni estética de diagnóstico médico.
+# Pregunta contextual — delta aprobado 2026-10-14 (ADR016)
+
+Box Preguntar a la IA/questionmark.bubble/Una consulta sobre esta planta tras Ver historial y antes de ficha.
+Sheet blanca Pregunta sobre tu planta, 0.95/grabber/radio24, margen20/spacing16; PlantFormHeader56 de inicial
+snapshot o hoja. Campo multilínea blanco/radio12 dentro inset16, mínimo110; Listo solo quita teclado.
+CTA cápsula52 verde/blanco activo y SurfaceMuted/TextSecondary disabled. Espera centrada y Cancelar solicitud,
+cierre/gesto siempre disponibles. Respuesta de IA debajo, texto literal íntegro desplazable y pregunta origen
+identificada. Mismo campo editable tras éxito, respuesta sustituida al iniciar otro envío válido; sin burbujas,
+chat, timestamps, Guardar ni aviso adicional con consentimiento vigente. Leyenda aclara orientación/no guardado
+local, envío textual sin fotos y límite de cancelación externa; no promete retención remota.

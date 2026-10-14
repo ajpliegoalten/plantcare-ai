@@ -26,6 +26,7 @@ final class PlantListViewModel: ObservableObject {
     var makePhotoPager: ((Plant) -> PlantPhotoPagerViewModel)?
     var makeTimeline: ((UUID) -> PlantTimelineViewModel)?
     var makeAnalysis: ((UUID, PlantPhotoIdentity) -> PlantPhotoAnalysisViewModel?)?
+    var makeQuestion: ((Plant, UIImage?) -> PlantQuestionViewModel?)?
     private var details: [UUID: WeakDetail] = [:]
     private final class WeakDetail {
         weak var value: PlantDetailViewModel?
@@ -99,6 +100,7 @@ final class PlantListViewModel: ObservableObject {
         detail.makeAddPhoto = makeAddPhoto
         detail.makePhotoPager = makePhotoPager
         detail.makeAnalysis = makeAnalysis
+        detail.makeQuestion = makeQuestion
         detail.deletePlant = deletePlant
         detail.onDeleted = { [weak self] plant in self?.applyDeletedPlant(plant) }
         details[id] = WeakDetail(detail)

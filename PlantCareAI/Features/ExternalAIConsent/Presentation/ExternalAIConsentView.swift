@@ -4,6 +4,7 @@ struct ExternalAIConsentView: View {
     var usesRealRecipient = false
     var destination: ExternalAIDestinationNotice?
     var analyzingPhoto = false
+    var questioningPlant = false
     let accept: () -> Void
     let cancel: () -> Void
 
@@ -13,6 +14,7 @@ struct ExternalAIConsentView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     Text(usesRealRecipient ? "analysis.consentBody" : "externalAIConsent.body").accessibilityIdentifier("externalAIConsentBody")
                     if analyzingPhoto { Text("analysis.consentOperation").font(.callout) }
+                    if questioningPlant { Text("question.consentOperation").font(.callout) }
                     if usesRealRecipient, let destination {
                         Text("identifyCandidates.destination").font(.headline)
                         Text(verbatim: destination.destination)

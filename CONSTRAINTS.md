@@ -42,3 +42,11 @@
 - MUST: al despachar una escritura de alta bloquear cierre/cancelación/cambios hasta resolverla y reconocer todo commit exitoso; reintento local conserva snapshot/UUID/fecha y no vuelve a invocar IA. Motivo: evitar plantas creadas ocultamente, duplicados por reintento y costes/envíos adicionales (ADR 007).
 - MUST NOT: imprimir respuestas crudas, payloads, headers o credenciales para depurar, tampoco en Debug. Motivo: el print temporal de respuesta añadido por usuario en el adaptador podía registrar contenido sensible y fue retirado justificadamente; diagnóstico debe ser sanitizado, no logs externos crudos.
 - MUST NOT: compartir productos Debug, logs/settings/xcresult o DerivedData de una build con clave de demo; Release no incluye configuración sensible ni fixtures. Motivo: la exclusión Git del archivo local no protege la credencial empaquetada.
+# Consultas contextuales independientes (ADR016)
+
+- OneTurnQuestion MUST enviar solo pregunta humana y contexto textual propio generado; MUST NOT leer/enviar JPEG,
+  UUID interno o nombre personalizado en contexto generado, ni consultas/respuestas anteriores. El texto humano
+  puede contener datos personales y no debe presentarse como anonimizado.
+- Pregunta/respuesta MUST NOT persistirse, añadirse al historial ni alimentar contexto posterior; editar el campo
+  no envía y la respuesta visible debe seguir identificada con su pregunta original hasta un nuevo envío válido.
+  Motivo: consulta independiente efímera, no conversación ni conocimiento botánico confirmado.
