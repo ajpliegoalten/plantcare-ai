@@ -1,5 +1,25 @@
 # Progreso de PlantCare AI
 
+## 2026-10-14 — README y grupos Xcode: aceptación del usuario y publicación autorizada
+
+- Usuario solicita marcar accepted, commit, push y PR; dispensa validator para estos cambios sin código. `readme-documentation` pasa a `accepted` por aceptación explícita del usuario como excepción a la política habitual, sin revisión independiente atribuida. `one-turn-question` conserva aceptación histórica; su reorganización PBX queda aceptada por el usuario sin gate nuevo.
+- Entrega autorizada en rama `feature/readme-documentation` hacia `main`, repositorio `ajpliegoalten/plantcare-ai`: Readme.md, project.pbxproj, feature_list.json y PROGRESS.md. Sin merge/auto-merge, tests/build/init/IA ni secretos. Modificaciones ajenas de `PlantCareAI/Localizable.xcstrings` excluidas y preservadas.
+- Verificación estática y equivalencia de rutas ya registradas; publicación pendiente de resultados Git/GitHub.
+
+## 2026-10-14 — one-turn-question: grupos Xcode ajustados a carpetas reales
+
+- Petición de corregir el aparente enlace `Features/OneTurnQuestion`. Inspección confirma carpeta/fuentes reales, sin symlinks de filesystem; el grupo PBX estaba directamente bajo PlantCareAI con ruta compuesta y archivos con prefijos de capa.
+- `PlantCareAI.xcodeproj/project.pbxproj` coloca OneTurnQuestion dentro de Features, ruta relativa `OneTurnQuestion`, subgrupos físicos Domain/Data/Presentation y ocho referencias por nombre. Sin mover fuentes ni modificar lógica, targets o configuración.
+- Ejecutados `plutil -lint`, `git diff --check` y contraste semántico JSON contra snapshot público previo: exactamente 11 objetos reorganizados/3 grupos añadidos, todas las rutas efectivas idénticas, referencias únicas, directorios/fuentes existentes sin symlinks y membership/build phases/targets/configuraciones intactos.
+- No build/tests/init/simulador por equivalencia de entradas ejecutables demostrada; no nueva aceptación ni gate atribuido al PBX modificado. Evidencia histórica intacta, cambios previos de README preservados. Sin commit/push/PR; siguiente revisar organización en el navegador de Xcode.
+
+## 2026-10-14 — readme-documentation: README creado, autoverificación documental
+
+- Nueva feature `readme-documentation` y `Readme.md`: propósito de la app, capacidades disponibles por ejemplar, almacenamiento local, privacidad/límites, apertura en Xcode y configuración segura de `Config/IdentificationSecrets.xcconfig`.
+- Guía basada en plantilla pública: copia solo si no existe, cinco campos, base HTTPS sin endpoint final, clave opcional, timeout 10–120 s, recompilar Debug, Release sin configuración y advertencia de clave extraíble. Enlaza verificador interactivo y documentación existente; ningún secreto leído/modificado ni fichero privado creado.
+- Comprobaciones ejecutadas: script Python inline sobre JSON/IDs/dependencias/enlaces locales/ejemplo exacto/regla ignore y `git diff --check`, correctos. Primera comprobación falló al detectar que otra sesión había aceptado `one-turn-question` durante la tarea; diagnóstico confirmó el estado nuevo, README actualizado con preguntas independientes y comprobación final superada. Cambios ajenos preservados.
+- Solo documentación y seguimiento; no cambios ejecutables ni tests iOS/build/init/API real, commit/push/PR. Estado `passing` por autoverificación documental, no aceptación independiente. Siguiente: revisión independiente documental; riesgo residual de desactualización futura del README, sin cambio de dominio.
+
 ## 2026-10-14 — one-turn-question: ACCEPT independiente, commit local autorizado
 
 - Validator `openai/gpt-6.1-sol` emite **accept** tras reparación R1; apéndice en `docs/validations/one-turn-question.md`, reporte/fallo original preservados. Único nuevo gate `caffeinate -dius ./init.sh` exit0, build y ambas fases Passed, **414/414 =316 unit +96 UI paralelas +2 PhotosPicker seriales**, cero failed/skipped/expectedFailures.

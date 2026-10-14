@@ -192,14 +192,14 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-        F01700000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Domain/PlantQuestion.swift; sourceTree = "<group>"; };
-        F01700000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Domain/BuildPlantQuestionContext.swift; sourceTree = "<group>"; };
-        F01700000000000000000003 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Domain/PlantQuestionRepository.swift; sourceTree = "<group>"; };
-        F01700000000000000000004 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Domain/AskPlantQuestionUseCase.swift; sourceTree = "<group>"; };
-        F01700000000000000000005 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Data/OpenAICompatiblePlantQuestionRepository.swift; sourceTree = "<group>"; };
-        F01700000000000000000006 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Data/PlantQuestionTestFixture.swift; sourceTree = "<group>"; };
-        F01700000000000000000007 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Presentation/PlantQuestionViewModel.swift; sourceTree = "<group>"; };
-        F01700000000000000000008 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Presentation/PlantQuestionView.swift; sourceTree = "<group>"; };
+        F01700000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantQuestion.swift; sourceTree = "<group>"; };
+        F01700000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildPlantQuestionContext.swift; sourceTree = "<group>"; };
+        F01700000000000000000003 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantQuestionRepository.swift; sourceTree = "<group>"; };
+        F01700000000000000000004 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskPlantQuestionUseCase.swift; sourceTree = "<group>"; };
+        F01700000000000000000005 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAICompatiblePlantQuestionRepository.swift; sourceTree = "<group>"; };
+        F01700000000000000000006 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantQuestionTestFixture.swift; sourceTree = "<group>"; };
+        F01700000000000000000007 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantQuestionViewModel.swift; sourceTree = "<group>"; };
+        F01700000000000000000008 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantQuestionView.swift; sourceTree = "<group>"; };
         F01700000000000000000021 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildPlantQuestionContextTests.swift; sourceTree = "<group>"; };
         F01700000000000000000022 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskPlantQuestionTests.swift; sourceTree = "<group>"; };
         F01700000000000000000023 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantQuestionViewModelTests.swift; sourceTree = "<group>"; };
@@ -388,12 +388,45 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-        F01700000000000000000040 = {
-            isa = PBXGroup;
-            children = (F01700000000000000000001, F01700000000000000000002, F01700000000000000000003, F01700000000000000000004, F01700000000000000000005, F01700000000000000000006, F01700000000000000000007, F01700000000000000000008);
-            path = Features/OneTurnQuestion;
-            sourceTree = "<group>";
-        };
+		F01700000000000000000040 /* OneTurnQuestion */ = {
+			isa = PBXGroup;
+			children = (
+				F01700000000000000000041 /* Domain */,
+				F01700000000000000000042 /* Data */,
+				F01700000000000000000043 /* Presentation */,
+			);
+			path = OneTurnQuestion;
+			sourceTree = "<group>";
+		};
+		F01700000000000000000041 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				F01700000000000000000001 /* PlantQuestion.swift */,
+				F01700000000000000000002 /* BuildPlantQuestionContext.swift */,
+				F01700000000000000000003 /* PlantQuestionRepository.swift */,
+				F01700000000000000000004 /* AskPlantQuestionUseCase.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		F01700000000000000000042 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				F01700000000000000000005 /* OpenAICompatiblePlantQuestionRepository.swift */,
+				F01700000000000000000006 /* PlantQuestionTestFixture.swift */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		F01700000000000000000043 /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				F01700000000000000000007 /* PlantQuestionViewModel.swift */,
+				F01700000000000000000008 /* PlantQuestionView.swift */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
 		0036DA3F4E043DD60096306F /* Data */ = {
 			isa = PBXGroup;
 			children = (
@@ -664,7 +697,6 @@
 			isa = PBXGroup;
 			children = (
 				AA0000000000000000000080 /* Features */,
-                F01700000000000000000040 /* OneTurnQuestion */,
 				CB0000000000000000000041 /* Shared */,
 				AA0000000000000000000001 /* PlantCareAIApp.swift */,
 				AA0000000000000000000002 /* ContentView.swift */,
@@ -696,6 +728,7 @@
 		AA0000000000000000000080 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				F01700000000000000000040 /* OneTurnQuestion */,
 				DP1500000000000000000040 /* DeletePlant */,
 				34578A4E497C19B4D593EF49 /* ManualSpecies */,
 				AB1400000000000000000040 /* KeepAnalysis */,
